@@ -24,18 +24,22 @@
 package org.tap4j.plugin;
 
 import hudson.AbortException;
+import hudson.Extension;
 import hudson.Launcher;
 import hudson.Util;
 import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
-import hudson.tasks.junit.TestDataPublisher;
-import hudson.tasks.junit.TestResult;
-import hudson.tasks.junit.TestResultAction.Data;
+import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.BuildStepMonitor;
+import hudson.tasks.Notifier;
+import hudson.tasks.Publisher;
 
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.types.FileSet;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -47,81 +51,107 @@ import org.tap4j.parser.Tap13YamlParser;
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
-public class TapPublisher extends TestDataPublisher
+@SuppressWarnings("unchecked")
+public class TapPublisher extends Notifier
 {
 	private final String testResults;
 
 	private final Tap13YamlParser parser = new Tap13YamlParser();
 
 	@DataBoundConstructor
-	public TapPublisher(String testResults)
+	public TapPublisher( String testResults )
 	{
 		this.testResults = testResults;
 	}
-
-	public static class DescriptorImpl extends Descriptor<TestDataPublisher>
+	
+	/**
+	 * @return the testResults
+	 */
+	public String getTestResults()
 	{
-
+		return testResults;
+	}
+	
+	/* (non-Javadoc)
+	 * @see hudson.tasks.BuildStepCompatibilityLayer#perform(hudson.model.AbstractBuild, hudson.Launcher, hudson.model.BuildListener)
+	 */
+	@Override
+	public boolean perform( AbstractBuild<?, ?> build, Launcher launcher,
+			BuildListener listener ) throws InterruptedException, IOException
+	{
+		if ( StringUtils.isBlank( testResults ) )
+		{
+			listener.getLogger().println("Empty TAP test results.");
+		}
+		else
+		{
+			File baseDir = null;
+			String[] fileNames = null;
+			
+			try
+			{
+				baseDir = new File( build.getWorkspace().getRemote() );
+				final FileSet fs = Util.createFileSet(baseDir, testResults );
+				final DirectoryScanner ds = fs.getDirectoryScanner();
+				
+				fileNames = ds.getIncludedFiles();
+			}
+			catch (Exception e) 
+			{
+				e.printStackTrace( listener.fatalError(e.getMessage()) );				
+				throw new AbortException(e.getMessage());
+			}
+			
+			for ( String fileName : fileNames )
+			{
+				try
+				{
+					@SuppressWarnings("unused")
+					TestSet testSet = parser.parseFile( new File( baseDir, fileName ) );
+				}
+				catch ( ParserException pe )
+				{
+					pe.printStackTrace( listener.getLogger() );
+				}
+			}
+			
+		}
+		
+		return true;
+	}
+	
+	/* (non-Javadoc)
+	 * @see hudson.tasks.BuildStep#getRequiredMonitorService()
+	 */
+	public BuildStepMonitor getRequiredMonitorService()
+	{
+		return BuildStepMonitor.BUILD;
+	}
+	
+	@Extension
+	public static class DescriptorImpl extends BuildStepDescriptor<Publisher>
+	{
 		public DescriptorImpl()
 		{
-			super(TapPublisher.class);
+			super( TapPublisher.class );
 			load();
 		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see hudson.model.Descriptor#getDisplayName()
-		 */
+		
 		@Override
 		public String getDisplayName()
 		{
 			return "Publish TAP Results";
 		}
 
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * hudson.tasks.junit.TestDataPublisher#getTestData(hudson.model.AbstractBuild
-	 * , hudson.Launcher, hudson.model.BuildListener,
-	 * hudson.tasks.junit.TestResult)
-	 */
-	@Override
-	public Data getTestData( AbstractBuild<?, ?> build, Launcher launcher,
-			BuildListener listener, TestResult testResult ) throws IOException,
-			InterruptedException
-	{
-		File baseDir = null;
-		String[] fileNames = null;
-
-		try
+		/* (non-Javadoc)
+		 * @see hudson.tasks.BuildStepDescriptor#isApplicable(java.lang.Class)
+		 */
+		@Override
+		public boolean isApplicable( @SuppressWarnings("rawtypes") Class<? extends AbstractProject> jobType )
 		{
-			baseDir = new File(build.getWorkspace().getRemote());
-			final FileSet fs = Util.createFileSet(baseDir, testResults);
-			final DirectoryScanner ds = fs.getDirectoryScanner();
-
-			fileNames = ds.getIncludedFiles();
-		} catch (Exception e)
-		{
-			e.printStackTrace(listener.fatalError(e.getMessage()));
-			throw new AbortException(e.getMessage());
+			return true;
 		}
-
-		for (String fileName : fileNames)
-		{
-			try
-			{
-				TestSet testSet = parser.parseFile(new File(baseDir, fileName));
-			} catch (ParserException pe)
-			{
-				pe.printStackTrace(listener.getLogger());
-			}
-		}
-
-		return null;
+		
 	}
 
 }
