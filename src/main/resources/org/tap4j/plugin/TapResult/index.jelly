@@ -1,0 +1,54 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler"
+	xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+	xmlns:f="/lib/form" xmlns:i="jelly:fmt">
+	<l:layout norefresh="true">
+		<st:include it="${it.owner}" page="sidepanel.jelly" />
+		<l:main-panel>
+			
+			<style type="text/css">
+			.green { background-color: green; }
+			.red { background-color: red; }
+			</style>
+			
+			<h1>TAP Test Results</h1>
+			
+			<j:choose>
+				<j:when test="${it.isEmptyTestSet()}">
+					Empty test set.
+				</j:when>
+				<j:otherwise>
+					
+					<j:forEach var="map" items="${it.testSets}">
+						
+						<h3>${map.fileName}</h3>
+						
+						<table border="1" width="100%">
+						
+							<j:forEach var="testResult" items="${map.testSet.testResults}">
+								
+								<j:choose>
+									<j:when test="${testResult.status.toString() == 'ok'}">
+										<j:set var="cssClass" value="green" />
+									</j:when>
+									<j:otherwise>
+										<j:set var="cssClass" value="red" />
+									</j:otherwise>
+								</j:choose>
+							
+								<tr>
+									<td class="${cssClass}">${testResult.testNumber}</td>
+									<td class="${cssClass}">${testResult.description}</td>
+								</tr>
+							
+							</j:forEach>
+						
+						</table>
+						
+					</j:forEach>
+
+				</j:otherwise>
+			</j:choose>
+			
+		</l:main-panel>
+	</l:layout>
+</j:jelly>
