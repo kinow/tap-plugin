@@ -27,10 +27,10 @@ import hudson.AbortException;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.Util;
+import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Descriptor;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
@@ -38,6 +38,9 @@ import hudson.tasks.Publisher;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.tools.ant.DirectoryScanner;
@@ -46,6 +49,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.tap4j.model.TestSet;
 import org.tap4j.parser.ParserException;
 import org.tap4j.parser.Tap13YamlParser;
+import org.tap4j.plugin.model.TestSetMap;
 
 /**
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
@@ -73,20 +77,50 @@ public class TapPublisher extends Notifier
 	}
 	
 	/* (non-Javadoc)
+	 * @see hudson.tasks.BuildStepCompatibilityLayer#getProjectAction(hudson.model.AbstractProject)
+	 */
+	@Override
+	public Action getProjectAction( AbstractProject<?, ?> project )
+	{
+		return new TapProjectAction( project );
+	}
+	
+	/* (non-Javadoc)
 	 * @see hudson.tasks.BuildStepCompatibilityLayer#perform(hudson.model.AbstractBuild, hudson.Launcher, hudson.model.BuildListener)
 	 */
 	@Override
 	public boolean perform( AbstractBuild<?, ?> build, Launcher launcher,
 			BuildListener listener ) throws InterruptedException, IOException
 	{
+		
+		TapResult tapResult = null;
+		TapBuildAction buildAction = null;
+		
 		if ( StringUtils.isBlank( testResults ) )
 		{
+			listener.getLogger().println();
 			listener.getLogger().println("Empty TAP test results.");
+			listener.getLogger().println();
+			
+			List<TestSetMap> testSets = Collections.emptyList();
+			tapResult = new TapResult(build, testSets);
+			buildAction = new TapBuildAction( build, tapResult );
+			build.addAction( buildAction );
 		}
 		else
 		{
+			
+			List<TestSetMap> testSets = new LinkedList<TestSetMap>();
+			tapResult = new TapResult(build, testSets);
+			buildAction = new TapBuildAction( build, tapResult );
+			build.addAction( buildAction );
+			
 			File baseDir = null;
 			String[] fileNames = null;
+			
+			listener.getLogger().println();
+			listener.getLogger().println("Looking for TAP test results in " + this.testResults + ".");
+			listener.getLogger().println();
 			
 			try
 			{
@@ -95,6 +129,11 @@ public class TapPublisher extends Notifier
 				final DirectoryScanner ds = fs.getDirectoryScanner();
 				
 				fileNames = ds.getIncludedFiles();
+				
+				// TBD: what about null?Check getIncludedFiles() javadocs...
+				listener.getLogger().println();
+				listener.getLogger().println("Found ["+fileNames.length+"] TAP test result(s).");
+				listener.getLogger().println();
 			}
 			catch (Exception e) 
 			{
@@ -106,8 +145,15 @@ public class TapPublisher extends Notifier
 			{
 				try
 				{
-					@SuppressWarnings("unused")
-					TestSet testSet = parser.parseFile( new File( baseDir, fileName ) );
+					File tapFile = new File( baseDir, fileName );
+					
+					listener.getLogger().println();
+					listener.getLogger().println("Parsing TAP test result ["+tapFile+"].");
+					listener.getLogger().println();
+					
+					final TestSet testSet = parser.parseFile( tapFile );
+					TestSetMap map = new TestSetMap( tapFile.getAbsolutePath(), testSet );
+					testSets.add( map );
 				}
 				catch ( ParserException pe )
 				{

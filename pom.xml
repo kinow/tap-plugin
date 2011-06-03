@@ -7,7 +7,7 @@
   </parent>
 
   <groupId>org.tap4j</groupId>
-  <artifactId>tap-plugin</artifactId>
+  <artifactId>tap</artifactId>
   <name>TAP Plugin</name>
   <version>0.1-SNAPSHOT</version>
   <packaging>hpi</packaging>
