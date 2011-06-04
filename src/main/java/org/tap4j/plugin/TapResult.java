@@ -27,8 +27,10 @@ import hudson.model.AbstractBuild;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import org.tap4j.plugin.model.TestSetMap;
+import org.tap4j.plugin.util.DiagnosticUtil;
 
 /**
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
@@ -63,6 +65,11 @@ implements Serializable
 	public boolean isEmptyTestSet()
 	{
 		return this.testSets.size() <= 0;
+	}
+	
+	public String createDiagnosticTable( Map<String, Object> diagnostic )
+	{
+		return DiagnosticUtil.createDiagnosticTable( diagnostic );
 	}
 
 }

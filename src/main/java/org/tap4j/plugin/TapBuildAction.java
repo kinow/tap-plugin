@@ -40,7 +40,7 @@ implements Action, Serializable, StaplerProxy
 
 	private static final long serialVersionUID = 9152314570733265691L;
 	
-	public static final String URL_NAME = "tapResult";
+	public static final String URL_NAME = "tapResults";
 	public static final String ICON_NAME = "/plugin/tap/icons/tap-24.png";
 	public static final String DISPLAY_NAME = "TAP";
 	

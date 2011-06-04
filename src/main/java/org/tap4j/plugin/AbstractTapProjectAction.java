@@ -33,7 +33,7 @@ public class AbstractTapProjectAction
 implements Action
 {
 
-	public static final String URL_NAME = "tapResult";
+	public static final String URL_NAME = "tapResults";
 	public static final String ICON_NAME = "/plugin/tap/icons/tap-24.png";
 	
 	/* (non-Javadoc)

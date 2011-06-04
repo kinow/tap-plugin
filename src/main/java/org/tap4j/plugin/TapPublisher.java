@@ -60,8 +60,6 @@ public class TapPublisher extends Notifier
 {
 	private final String testResults;
 
-	private final Tap13YamlParser parser = new Tap13YamlParser();
-
 	@DataBoundConstructor
 	public TapPublisher( String testResults )
 	{
@@ -119,7 +117,9 @@ public class TapPublisher extends Notifier
 			String[] fileNames = null;
 			
 			listener.getLogger().println();
-			listener.getLogger().println("Looking for TAP test results in " + this.testResults + ".");
+			
+			listener.getLogger().println("Looking for TAP test results that match the pattern [" + this.testResults + "].");
+			
 			listener.getLogger().println();
 			
 			try
@@ -131,8 +131,8 @@ public class TapPublisher extends Notifier
 				fileNames = ds.getIncludedFiles();
 				
 				// TBD: what about null?Check getIncludedFiles() javadocs...
-				listener.getLogger().println();
 				listener.getLogger().println("Found ["+fileNames.length+"] TAP test result(s).");
+				
 				listener.getLogger().println();
 			}
 			catch (Exception e) 
@@ -147,11 +147,11 @@ public class TapPublisher extends Notifier
 				{
 					File tapFile = new File( baseDir, fileName );
 					
-					listener.getLogger().println();
 					listener.getLogger().println("Parsing TAP test result ["+tapFile+"].");
+					
 					listener.getLogger().println();
 					
-					final TestSet testSet = parser.parseFile( tapFile );
+					final TestSet testSet = new Tap13YamlParser().parseFile( tapFile );
 					TestSetMap map = new TestSetMap( tapFile.getAbsolutePath(), testSet );
 					testSets.add( map );
 				}

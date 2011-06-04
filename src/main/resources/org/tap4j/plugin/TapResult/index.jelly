@@ -6,8 +6,37 @@
 		<l:main-panel>
 			
 			<style type="text/css">
-			.green { background-color: green; }
-			.red { background-color: red; }
+			.green { background-color: #97f477; }
+			.red { background-color: #f88676; }
+			.yellow { background-color: #e1fb7b; }
+			
+			.tap
+			{
+			border: 0px solid;
+			border-collapse:collapse;
+			}
+			
+			.tap th
+			{
+			border: 1px solid #999;
+			}
+			
+			.tap td
+			{
+			border: 1px solid #999;
+			}
+			
+			.tap td.yaml
+			{
+			text-align: right;
+			border: 1px solid #fff;
+			}
+			
+			.tap th 
+			{
+			background-color: #eee;
+			color: #666;
+			}
 			</style>
 			
 			<h1>TAP Test Results</h1>
@@ -20,9 +49,16 @@
 					
 					<j:forEach var="map" items="${it.testSets}">
 						
-						<h3>${map.fileName}</h3>
+						<p>${map.fileName}</p>
 						
-						<table border="1" width="100%">
+						<table class="tap" width="100%">
+						
+							<tr>
+								<th></th>
+								<th>Test Number</th>
+								<th>Description</th>
+								<th>Directive</th>
+							</tr>
 						
 							<j:forEach var="testResult" items="${map.testSet.testResults}">
 								
@@ -34,15 +70,48 @@
 										<j:set var="cssClass" value="red" />
 									</j:otherwise>
 								</j:choose>
+								
+								<j:choose>
+									<j:when test="${testResult.directive != null}">
+										<j:set var="directive" value="testResult.directive.toString()" />
+									</j:when>
+								</j:choose>
+								
+								<!-- TAP Test Result information -->
 							
-								<tr>
-									<td class="${cssClass}">${testResult.testNumber}</td>
-									<td class="${cssClass}">${testResult.description}</td>
+								<tr class="${cssClass}">
+									<td width="5%"></td>
+									<td width="10%">${testResult.testNumber}</td>
+									<td width="50%">${testResult.description}</td>
+									<td width="25%">${testResult.directive}</td>
 								</tr>
-							
+								
+								<!-- YAML Diagnostics -->
+								
+								<j:if test="${testResult.diagnostic != null and testResult.diagnostic.size() > 0 }">
+								
+									${it.createDiagnosticTable( testResult.diagnostic )}
+									
+									<!-- tr>
+									<td class="yaml" colspan="4">
+										<table width="98%" style="border-collapse: collapse; display: box; border: 0px solid; margin: 4px auto; padding: 0px;">
+											<j:forEach items="${testResult.diagnostic}" var="yamlEntry">
+												<tr>
+													<td>${yamlEntry.key}</td>
+													<td>${yamlEntry.value}</td>
+												</tr>
+											</j:forEach>
+										</table>
+									</td>
+									</tr -->
+								
+								</j:if>
+								
 							</j:forEach>
 						
 						</table>
+						
+						<br />
 						
 					</j:forEach>
 
