@@ -9,6 +9,8 @@
 			.green { background-color: #97f477; }
 			.red { background-color: #f88676; }
 			.yellow { background-color: #e1fb7b; }
+			.center { text-align: center; }
+			.underline { text-decoration: underline; }
 			
 			.tap
 			{
@@ -19,11 +21,15 @@
 			.tap th
 			{
 			border: 1px solid #999;
+			padding: 2px 4px;
+			background-color: #eee;
+            color: #000;
 			}
 			
 			.tap td
 			{
 			border: 1px solid #999;
+			padding: 2px 4px;
 			}
 			
 			.tap td.yaml
@@ -32,11 +38,6 @@
 			border: 1px solid #fff;
 			}
 			
-			.tap th 
-			{
-			background-color: #eee;
-			color: #666;
-			}
 			</style>
 			
 			<h1>TAP Test Results</h1>
@@ -49,13 +50,13 @@
 					
 					<j:forEach var="map" items="${it.testSets}">
 						
-						<p>${map.fileName}</p>
+						<p>File: <span class="underline">${map.fileName}</span></p>
 						
 						<table class="tap" width="100%">
 						
 							<tr>
-								<th></th>
-								<th>Test Number</th>
+								<th> </th>
+								<th>Number</th>
 								<th>Description</th>
 								<th>Directive</th>
 							</tr>
@@ -79,10 +80,10 @@
 								
 								<!-- TAP Test Result information -->
 							
-								<tr class="${cssClass}">
-									<td width="5%"></td>
-									<td width="10%">${testResult.testNumber}</td>
-									<td width="50%">${testResult.description}</td>
+								<tr>
+									<td class="${cssClass}" width="5%"></td>
+									<td width="5%" class="center">${testResult.testNumber}</td>
+									<td width="65%">${testResult.description}</td>
 									<td width="25%">${testResult.directive}</td>
 								</tr>
 								
