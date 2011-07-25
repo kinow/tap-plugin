@@ -1,0 +1,24 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
+	xmlns:i="jelly:fmt" xmlns:tap="/org/tap4j/plugin/tags">
+
+	<j:choose>
+		<j:when test="${attrs.status != null}">
+			<j:set var="status" value="${attrs.status}" />
+
+			<j:choose>
+				<j:when test="${status.toString() == 'ok'}">
+					<td class="green" width="5%"> </td>
+				</j:when>
+				<j:otherwise>
+					<td class="red" width="5%"> </td>
+				</j:otherwise>
+			</j:choose>
+		</j:when>
+		<j:otherwise>
+			<td width="5%">
+			</td>
+		</j:otherwise>
+	</j:choose>
+
+</j:jelly>

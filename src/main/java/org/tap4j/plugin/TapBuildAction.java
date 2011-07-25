@@ -45,6 +45,7 @@ implements Action, Serializable, StaplerProxy
 	public static final String DISPLAY_NAME = "TAP";
 	
 	private AbstractBuild<?, ?> build;
+	
 	private TapResult result;
 
 	public TapBuildAction( AbstractBuild<?, ?> build, TapResult result )

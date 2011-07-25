@@ -1,0 +1,39 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
+	xmlns:i="jelly:fmt" xmlns:tap="/org/tap4j/plugin/tags">
+
+	<j:if 
+		test="${attrs.diagnostic != null and attrs.diagnostic.size() > 0 }">
+
+		<j:set var="diagnostic" value="${attrs.diagnostic}" />
+        
+        ${ it.createDiagnosticTable( diagnostic ) }
+        
+        <!--tr>
+            <table width="100%" class="yaml">
+            <j:forEach items="${diagnostic}" var="entry">
+	            <tr>
+	                <td width="5%" class="hidden"> </td>
+	                <td width="15%" colspan="">${entry.key}</td>
+	                <j:set var="value" value="${entry.value}" />
+	                <j:choose>
+	                   <j:when test="${ it.isMap(value) }">
+	                       <tap:yaml diagnostic="" />
+	                   </j:when>
+	                   <j:otherwise>
+	                       <td width="80%">${entry.value}</td>
+	                   </j:otherwise>
+	                </j:choose>
+	            </tr>
+            </j:forEach>
+            </table>
+        </tr-->
+		
+
+		<!-- tr> <td class="yaml" colspan="4"> <table width="98%" style="border-collapse: 
+			collapse; display: box; border: 0px solid; margin: 4px auto; padding: 0px;"> 
+			<j:forEach items="${testResult.diagnostic}" var="yamlEntry"> <tr> <td>${yamlEntry.key}</td> 
+			<td>${yamlEntry.value}</td> </tr> </j:forEach> </table> </td> </tr -->
+	</j:if>
+
+</j:jelly>

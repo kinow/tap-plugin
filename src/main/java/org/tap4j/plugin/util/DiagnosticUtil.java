@@ -34,7 +34,7 @@ public class DiagnosticUtil
 {
 
 	private static final String INNER_TABLE_HEADER = 
-		"<tr>\n<td class=\"yaml\" colspan=\"4\">\n<table width=\"98%\" style=\"border-collapse: collapse; display: box; border: 0px solid; margin: 4px auto; padding: 0px;\">";
+		"<tr>\n<td colspan='4' class='yaml'>\n<table width=\"100%\" class=\"yaml\">";
 	
 	private static final String INNER_TABLE_FOOTER = 
 		"</table>\n</td>\n</tr>";
@@ -49,30 +49,33 @@ public class DiagnosticUtil
 		
 		StringBuilder sb = new StringBuilder();
 		
-		sb.append( INNER_TABLE_HEADER );
-		
-		createDiagnosticTableRecursively( diagnostic, sb );
-		
-		sb.append( INNER_TABLE_FOOTER );
+		createDiagnosticTableRecursively( diagnostic, sb, 1 );
 		
 		return sb.toString();
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static void createDiagnosticTableRecursively( Map<String, Object> diagnostic, StringBuilder sb )
+	public static void createDiagnosticTableRecursively( Map<String, Object> diagnostic, StringBuilder sb, int depth )
 	{
+		
+		sb.append( INNER_TABLE_HEADER );
+		
 		for (Entry<String, Object> entry : diagnostic.entrySet() )
 		{
 			String key = entry.getKey();
 			Object value = entry.getValue();
+			sb.append("<tr>");
 			
-			sb.append( "<tr>" );
-			sb.append( "<td>"+key+"</td>" );
+			for( int i =0 ; i < depth ; ++i )
+			{
+				sb.append( "<td width='5%' class='hidden'> </td>" );
+			}
+			sb.append( "<td width='10%'>"+key+"</td>" );
 			if ( value instanceof java.util.Map )
 			{
-				sb.append( "<td><table width=\"98%\" style=\"border-collapse: collapse; display: box; border: 0px solid; margin: 4px auto; padding: 0px;\">" );
-				createDiagnosticTableRecursively ( (java.util.Map)value, sb );
-				sb.append( "</table></td>" );
+				sb.append( "<td> </td>" );
+				depth += 1;
+				createDiagnosticTableRecursively ( (java.util.Map)value, sb, depth);
 			}
 			else
 			{
@@ -80,6 +83,8 @@ public class DiagnosticUtil
 			}
 			sb.append( "</tr>" );			
 		}
+		
+		sb.append( INNER_TABLE_FOOTER );
 	}
 	
 }

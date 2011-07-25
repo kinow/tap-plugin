@@ -56,7 +56,8 @@ import org.tap4j.plugin.model.TestSetMap;
  * @since 1.0
  */
 @SuppressWarnings("unchecked")
-public class TapPublisher extends Notifier
+public class TapPublisher 
+extends Notifier
 {
 	private final String testResults;
 
@@ -152,7 +153,8 @@ public class TapPublisher extends Notifier
 					listener.getLogger().println();
 					
 					final TestSet testSet = new Tap13YamlParser().parseFile( tapFile );
-					TestSetMap map = new TestSetMap( tapFile.getAbsolutePath(), testSet );
+					
+					final TestSetMap map = new TestSetMap( tapFile.getAbsolutePath(), testSet );
 					testSets.add( map );
 				}
 				catch ( ParserException pe )

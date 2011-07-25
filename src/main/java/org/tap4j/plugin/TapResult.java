@@ -29,8 +29,13 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import org.tap4j.model.Directive;
+import org.tap4j.model.TestResult;
+import org.tap4j.model.TestSet;
 import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.plugin.util.DiagnosticUtil;
+import org.tap4j.util.DirectiveValues;
+import org.tap4j.util.StatusValues;
 
 /**
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
@@ -41,35 +46,104 @@ implements Serializable
 {
 
 	private static final long serialVersionUID = 4343399327336076951L;
-	
-	private AbstractBuild<?, ?> build;
 
+	private AbstractBuild<?, ?> build;
 	private List<TestSetMap> testSets;
-	
-	public TapResult( AbstractBuild<?, ?> build, List<TestSetMap> testSets )
+	private int failed = 0;
+	private int passed = 0;
+	private int skipped = 0;
+
+	public TapResult(AbstractBuild<?, ?> build, List<TestSetMap> testSets)
 	{
 		this.build = build;
 		this.testSets = testSets;
 	}
-	
+
+	public void updateStats()
+	{
+		for (TestSetMap testSet : testSets)
+		{
+			TestSet realTestSet = testSet.getTestSet();
+			List<TestResult> testResults = realTestSet.getTestResults();
+			for (TestResult testResult : testResults)
+			{
+				if (isSkipped(testResult))
+				{
+					skipped += 1;
+				} 
+				else if (isFailure(testResult))
+				{
+					failed += 1;
+				}
+				else
+				{
+					passed += 1;
+				}
+			}
+		}
+	}
+
 	public AbstractBuild<?, ?> getOwner()
 	{
 		return this.build;
 	}
-	
+
 	public List<TestSetMap> getTestSets()
 	{
 		return this.testSets;
 	}
-	
+
 	public boolean isEmptyTestSet()
 	{
 		return this.testSets.size() <= 0;
 	}
-	
+
+	public int getFailed()
+	{
+		return this.failed;
+	}
+
+	public int getSkipped()
+	{
+		return this.skipped;
+	}
+
+	public int getPassed()
+	{
+		return this.passed;
+	}
+
+	private boolean isSkipped( TestResult testResult )
+	{
+		boolean r = false;
+		Directive directive = testResult.getDirective();
+		if (directive != null
+				&& directive.getDirectiveValue() == DirectiveValues.SKIP)
+		{
+			r = true;
+		}
+		return r;
+	}
+
+	private boolean isFailure( TestResult testResult )
+	{
+		boolean r = false;
+		Directive directive = testResult.getDirective();
+		StatusValues status = testResult.getStatus();
+		if (directive != null
+				&& directive.getDirectiveValue() == DirectiveValues.SKIP)
+		{
+			r = true;
+		} else if (status != null && status == StatusValues.NOT_OK)
+		{
+			r = true;
+		}
+		return r;
+	}
+
 	public String createDiagnosticTable( Map<String, Object> diagnostic )
 	{
-		return DiagnosticUtil.createDiagnosticTable( diagnostic );
+		return DiagnosticUtil.createDiagnosticTable(diagnostic);
 	}
 
 }

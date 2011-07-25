@@ -1,0 +1,36 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
+	xmlns:i="jelly:fmt" xmlns:tap="/org/tap4j/plugin/tags">
+	<j:choose>
+		<j:when test="${attrs.directive != null}">
+			<j:set var="directive" value="${attrs.directive}" />
+
+			<j:choose>
+				<j:when test="${directive.getDirectiveValue() == 'TODO'}">
+					<td width="25%">
+					   <span class="red_text bold">#TODO </span>
+					   <j:if test="${directive.getReason() != null and directive.getReason().length() > 0}">
+					       ${directive.getReason()}
+					   </j:if>
+					</td>
+				</j:when>
+				<j:when test="${directive.getDirectiveValue() == 'SKIP'}">
+                    <td width="25%">
+                        <span class="yellow_text bold">#SKIP </span>
+                        <j:if test="${directive.getReason() != null and directive.getReason().length() > 0}">
+                           ${directive.getReason()}
+                       </j:if>
+                    </td>
+                </j:when>
+				<j:otherwise>
+					<td width="25%"> </td>
+				</j:otherwise>
+			</j:choose>
+		</j:when>
+		<j:otherwise>
+			<td width="25%"> </td>
+		</j:otherwise>
+	</j:choose>
+
+</j:jelly>
+                                    

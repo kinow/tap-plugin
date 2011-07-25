@@ -1,44 +1,15 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler"
-	xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
-	xmlns:f="/lib/form" xmlns:i="jelly:fmt">
-	<l:layout norefresh="true">
+<j:jelly 
+    xmlns:j="jelly:core" 
+    xmlns:st="jelly:stapler"
+	xmlns:d="jelly:define" 
+	xmlns:l="/lib/layout" 
+	xmlns:t="/lib/hudson"
+	xmlns:f="/lib/form" 
+	xmlns:i="jelly:fmt" 
+	xmlns:tap="/org/tap4j/plugin/tags">
+	<l:layout norefresh="true" css="/plugin/tap/css/tap.css">
 		<st:include it="${it.owner}" page="sidepanel.jelly" />
 		<l:main-panel>
-			
-			<style type="text/css">
-			.green { background-color: #97f477; }
-			.red { background-color: #f88676; }
-			.yellow { background-color: #e1fb7b; }
-			.center { text-align: center; }
-			.underline { text-decoration: underline; }
-			
-			.tap
-			{
-			border: 0px solid;
-			border-collapse:collapse;
-			}
-			
-			.tap th
-			{
-			border: 1px solid #999;
-			padding: 2px 4px;
-			background-color: #eee;
-            color: #000;
-			}
-			
-			.tap td
-			{
-			border: 1px solid #999;
-			padding: 2px 4px;
-			}
-			
-			.tap td.yaml
-			{
-			text-align: right;
-			border: 1px solid #fff;
-			}
-			
-			</style>
 			
 			<h1>TAP Test Results</h1>
 			
@@ -63,50 +34,16 @@
 						
 							<j:forEach var="testResult" items="${map.testSet.testResults}">
 								
-								<j:choose>
-									<j:when test="${testResult.status.toString() == 'ok'}">
-										<j:set var="cssClass" value="green" />
-									</j:when>
-									<j:otherwise>
-										<j:set var="cssClass" value="red" />
-									</j:otherwise>
-								</j:choose>
-								
-								<j:choose>
-									<j:when test="${testResult.directive != null}">
-										<j:set var="directive" value="testResult.directive.toString()" />
-									</j:when>
-								</j:choose>
-								
 								<!-- TAP Test Result information -->
-							
-								<tr>
-									<td class="${cssClass}" width="5%"></td>
+                                <tr>
+								    <tap:status status="${testResult.status}" />
 									<td width="5%" class="center">${testResult.testNumber}</td>
 									<td width="65%">${testResult.description}</td>
-									<td width="25%">${testResult.directive}</td>
+									<tap:directive directive="${testResult.directive}" />
 								</tr>
 								
 								<!-- YAML Diagnostics -->
-								
-								<j:if test="${testResult.diagnostic != null and testResult.diagnostic.size() > 0 }">
-								
-									${it.createDiagnosticTable( testResult.diagnostic )}
-									
-									<!-- tr>
-									<td class="yaml" colspan="4">
-										<table width="98%" style="border-collapse: collapse; display: box; border: 0px solid; margin: 4px auto; padding: 0px;">
-											<j:forEach items="${testResult.diagnostic}" var="yamlEntry">
-												<tr>
-													<td>${yamlEntry.key}</td>
-													<td>${yamlEntry.value}</td>
-												</tr>
-											</j:forEach>
-										</table>
-									</td>
-									</tr -->
-								
-								</j:if>
+								<tap:yaml diagnostic="${testResult.diagnostic}" />
 								
 							</j:forEach>
 						
