@@ -29,6 +29,7 @@ import hudson.Launcher;
 import hudson.Util;
 import hudson.model.Action;
 import hudson.model.BuildListener;
+import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
@@ -52,6 +53,8 @@ import org.tap4j.parser.Tap13YamlParser;
 import org.tap4j.plugin.model.TestSetMap;
 
 /**
+ * Publishes TAP results in Jenkins builds.
+ * 
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
@@ -101,15 +104,14 @@ extends Notifier
 			listener.getLogger().println("Empty TAP test results.");
 			listener.getLogger().println();
 			
-			List<TestSetMap> testSets = Collections.emptyList();
+			final List<TestSetMap> testSets = Collections.emptyList();
 			tapResult = new TapResult(build, testSets);
 			buildAction = new TapBuildAction( build, tapResult );
 			build.addAction( buildAction );
 		}
 		else
 		{
-			
-			List<TestSetMap> testSets = new LinkedList<TestSetMap>();
+			final List<TestSetMap> testSets = new LinkedList<TestSetMap>();
 			tapResult = new TapResult(build, testSets);
 			buildAction = new TapBuildAction( build, tapResult );
 			build.addAction( buildAction );
@@ -131,7 +133,6 @@ extends Notifier
 				
 				fileNames = ds.getIncludedFiles();
 				
-				// TBD: what about null?Check getIncludedFiles() javadocs...
 				listener.getLogger().println("Found ["+fileNames.length+"] TAP test result(s).");
 				
 				listener.getLogger().println();
@@ -146,7 +147,7 @@ extends Notifier
 			{
 				try
 				{
-					File tapFile = new File( baseDir, fileName );
+					final File tapFile = new File( baseDir, fileName );
 					
 					listener.getLogger().println("Parsing TAP test result ["+tapFile+"].");
 					
@@ -156,9 +157,12 @@ extends Notifier
 					
 					final TestSetMap map = new TestSetMap( tapFile.getAbsolutePath(), testSet );
 					testSets.add( map );
+					
+					build.setResult( Result.SUCCESS );
 				}
 				catch ( ParserException pe )
 				{
+					build.setResult( Result.UNSTABLE );
 					pe.printStackTrace( listener.getLogger() );
 				}
 			}

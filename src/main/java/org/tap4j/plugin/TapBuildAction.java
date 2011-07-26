@@ -31,6 +31,8 @@ import java.io.Serializable;
 import org.kohsuke.stapler.StaplerProxy;
 
 /**
+ * TAP Build action with TAP results.
+ * 
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */

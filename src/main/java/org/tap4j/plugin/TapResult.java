@@ -52,6 +52,7 @@ implements Serializable
 	private int failed = 0;
 	private int passed = 0;
 	private int skipped = 0;
+	private int total = 0;
 
 	public TapResult(AbstractBuild<?, ?> build, List<TestSetMap> testSets)
 	{
@@ -61,10 +62,19 @@ implements Serializable
 
 	public void updateStats()
 	{
+		
+		failed = 0;
+		passed = 0;
+		skipped = 0;
+		total = 0;
+		
 		for (TestSetMap testSet : testSets)
 		{
 			TestSet realTestSet = testSet.getTestSet();
 			List<TestResult> testResults = realTestSet.getTestResults();
+			
+			total += testResults.size();
+			
 			for (TestResult testResult : testResults)
 			{
 				if (isSkipped(testResult))
@@ -112,6 +122,11 @@ implements Serializable
 	{
 		return this.passed;
 	}
+	
+	public int getTotal()
+	{
+		return this.total;
+	}
 
 	private boolean isSkipped( TestResult testResult )
 	{
@@ -131,7 +146,7 @@ implements Serializable
 		Directive directive = testResult.getDirective();
 		StatusValues status = testResult.getStatus();
 		if (directive != null
-				&& directive.getDirectiveValue() == DirectiveValues.SKIP)
+				&& directive.getDirectiveValue() == DirectiveValues.TODO)
 		{
 			r = true;
 		} else if (status != null && status == StatusValues.NOT_OK)
@@ -141,6 +156,9 @@ implements Serializable
 		return r;
 	}
 
+	/**
+	 * Called from TapResult/index..jelly 
+	 */
 	public String createDiagnosticTable( Map<String, Object> diagnostic )
 	{
 		return DiagnosticUtil.createDiagnosticTable(diagnostic);

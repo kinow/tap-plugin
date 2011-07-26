@@ -18,6 +18,13 @@
 					Empty test set.
 				</j:when>
 				<j:otherwise>
+				    ${it.updateStats()}
+				    <table width='100%'>
+				        <tr>
+				            <td width='5%'>${it.testSets.size()} files</td>
+				            <td>${it.getTotal()} tests, ${it.passed} ok, ${it.failed} not ok, ${it.skipped} skipped.</td>
+				        </tr>
+				    </table>				
 					
 					<j:forEach var="map" items="${it.testSets}">
 						
@@ -36,7 +43,7 @@
 								
 								<!-- TAP Test Result information -->
                                 <tr>
-								    <tap:status status="${testResult.status}" />
+								    <tap:status testResult="${testResult}" />
 									<td width="5%" class="center">${testResult.testNumber}</td>
 									<td width="65%">${testResult.description}</td>
 									<tap:directive directive="${testResult.directive}" />

@@ -39,6 +39,8 @@ import org.kohsuke.stapler.StaplerResponse;
 import org.tap4j.plugin.util.GraphHelper;
 
 /**
+ * A TAP Project action, with a graph and a list of builds.
+ * 
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */

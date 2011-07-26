@@ -32,8 +32,10 @@ import org.tap4j.plugin.TapBuildAction;
 import org.tap4j.plugin.TapResult;
 
 /**
- * Helper class for trend graph generation
+ * Helper class for trend graph generation. 
  * 
+ * @author TestNG plug-in  
+ * @since 1.0
  */
 public class GraphHelper
 {
@@ -43,6 +45,7 @@ public class GraphHelper
 	 */
 	private GraphHelper()
 	{
+		super();
 	}
 
 	public static void redirectWhenGraphUnsupported( StaplerResponse rsp,

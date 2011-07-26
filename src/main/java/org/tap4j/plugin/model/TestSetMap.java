@@ -29,6 +29,9 @@ import org.tap4j.model.TestSet;
 
 
 /**
+ * A map for TestSet with the file name, as there is no file name in the 
+ * original TestSet class.
+ * 
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
@@ -38,8 +41,8 @@ implements Serializable
 
 	private static final long serialVersionUID = 7300386936718557088L;
 	
-	private String fileName;
-	private TestSet testSet;
+	private final String fileName;
+	private final TestSet testSet;
 	
 	public TestSetMap( String fileName, TestSet testSet )
 	{

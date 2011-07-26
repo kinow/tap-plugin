@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
+ * Used to create YAML view.
+ * 
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
@@ -49,7 +51,7 @@ public class DiagnosticUtil
 		
 		StringBuilder sb = new StringBuilder();
 		
-		createDiagnosticTableRecursively( diagnostic, sb, 1 );
+		createDiagnosticTableRecursively( diagnostic, sb, 1 ); // 1 is the first depth
 		
 		return sb.toString();
 	}

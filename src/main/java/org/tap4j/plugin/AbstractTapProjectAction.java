@@ -26,6 +26,8 @@ package org.tap4j.plugin;
 import hudson.model.Action;
 
 /**
+ * Base class for TAP Project action.
+ * 
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
