@@ -23,10 +23,8 @@
  */
 package org.tap4j.plugin;
 
-import hudson.AbortException;
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.Util;
 import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.Result;
@@ -37,19 +35,10 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.tools.ant.DirectoryScanner;
-import org.apache.tools.ant.types.FileSet;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.tap4j.model.TestSet;
-import org.tap4j.parser.ParserException;
-import org.tap4j.parser.Tap13YamlParser;
 import org.tap4j.plugin.model.TestSetMap;
 
 /**
@@ -63,6 +52,8 @@ public class TapPublisher
 extends Notifier
 {
 	private final String testResults;
+	
+	private TapRemoteCallable remoteCallable;
 
 	@DataBoundConstructor
 	public TapPublisher( String testResults )
@@ -98,76 +89,22 @@ extends Notifier
 		TapResult tapResult = null;
 		TapBuildAction buildAction = null;
 		
-		if ( StringUtils.isBlank( testResults ) )
+		remoteCallable = new TapRemoteCallable(testResults, listener);
+		
+		List<TestSetMap> testSets = build.getWorkspace().act( remoteCallable );
+		
+		if ( remoteCallable.hasParserErrors() )
 		{
-			listener.getLogger().println();
-			listener.getLogger().println("Empty TAP test results.");
-			listener.getLogger().println();
-			
-			final List<TestSetMap> testSets = Collections.emptyList();
-			tapResult = new TapResult(build, testSets);
-			buildAction = new TapBuildAction( build, tapResult );
-			build.addAction( buildAction );
+			build.setResult( Result.UNSTABLE );
 		}
 		else
 		{
-			final List<TestSetMap> testSets = new LinkedList<TestSetMap>();
-			tapResult = new TapResult(build, testSets);
-			buildAction = new TapBuildAction( build, tapResult );
-			build.addAction( buildAction );
-			
-			File baseDir = null;
-			String[] fileNames = null;
-			
-			listener.getLogger().println();
-			
-			listener.getLogger().println("Looking for TAP test results that match the pattern [" + this.testResults + "].");
-			
-			listener.getLogger().println();
-			
-			try
-			{
-				baseDir = new File( build.getWorkspace().getRemote() );
-				final FileSet fs = Util.createFileSet(baseDir, testResults );
-				final DirectoryScanner ds = fs.getDirectoryScanner();
-				
-				fileNames = ds.getIncludedFiles();
-				
-				listener.getLogger().println("Found ["+fileNames.length+"] TAP test result(s).");
-				
-				listener.getLogger().println();
-			}
-			catch (Exception e) 
-			{
-				e.printStackTrace( listener.fatalError(e.getMessage()) );				
-				throw new AbortException(e.getMessage());
-			}
-			
-			for ( String fileName : fileNames )
-			{
-				try
-				{
-					final File tapFile = new File( baseDir, fileName );
-					
-					listener.getLogger().println("Parsing TAP test result ["+tapFile+"].");
-					
-					listener.getLogger().println();
-					
-					final TestSet testSet = new Tap13YamlParser().parseFile( tapFile );
-					
-					final TestSetMap map = new TestSetMap( tapFile.getAbsolutePath(), testSet );
-					testSets.add( map );
-					
-					build.setResult( Result.SUCCESS );
-				}
-				catch ( ParserException pe )
-				{
-					build.setResult( Result.UNSTABLE );
-					pe.printStackTrace( listener.getLogger() );
-				}
-			}
-			
+			build.setResult( Result.SUCCESS );
 		}
+		
+		tapResult = new TapResult(build, testSets);
+		buildAction = new TapBuildAction( build, tapResult );
+		build.addAction( buildAction );
 		
 		return true;
 	}
