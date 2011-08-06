@@ -1,0 +1,34 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
+	xmlns:i="jelly:fmt" xmlns:tap="/org/tap4j/plugin/tags">
+
+    <j:choose>
+        <j:when test="${attrs.tapLine != null}">
+	        <j:set var="tapLine" value="${attrs.tapLine}" />
+	        
+	        <j:choose>
+                <j:when test="${it.isTestResult( tapLine )}">
+				    <tr>
+				        <tap:status testResult="${tapLine}" />
+				        <td width="5%" class="center">${tapLine.testNumber}</td>
+				        <td width="65%">${tapLine.description}</td>
+				        <tap:directive directive="${tapLine.directive}" />
+				    </tr>
+				    
+				    <!-- YAML Diagnostics -->
+                    <tap:yaml diagnostic="${tapLine.diagnostic}" />
+				</j:when>
+				<j:when  test="${it.isBailOut( tapLine )}">
+				    <tr>
+                        <td class="red center" width="5%"><img src="/plugin/tap/icons/exclamation.png" alt="Bail out! ${tapLine.reason}" title="Bail out! ${tapLine.reason}" /></td>
+                        <td width="5%" class="center"> </td>
+                        <td width="65%"><span class="red_text bold">Bail out! ${tapLine.reason}</span></td>
+                        <tap:directive directive="" />
+                    </tr>
+				</j:when>
+		    </j:choose>
+        </j:when>
+            <j:otherwise></j:otherwise>
+    </j:choose>
+
+</j:jelly>

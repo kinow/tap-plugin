@@ -29,6 +29,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import org.tap4j.model.BailOut;
 import org.tap4j.model.Directive;
 import org.tap4j.model.TestResult;
 import org.tap4j.model.TestSet;
@@ -52,6 +53,7 @@ implements Serializable
 	private int failed = 0;
 	private int passed = 0;
 	private int skipped = 0;
+	private int bailOuts = 0;
 	private int total = 0;
 
 	public TapResult(AbstractBuild<?, ?> build, List<TestSetMap> testSets)
@@ -66,6 +68,7 @@ implements Serializable
 		failed = 0;
 		passed = 0;
 		skipped = 0;
+		bailOuts = 0;
 		total = 0;
 		
 		for (TestSetMap testSet : testSets)
@@ -90,6 +93,8 @@ implements Serializable
 					passed += 1;
 				}
 			}
+			
+			this.bailOuts += realTestSet.getNumberOfBailOuts();
 		}
 	}
 
@@ -123,6 +128,11 @@ implements Serializable
 		return this.passed;
 	}
 	
+	public int getBailOuts()
+	{
+		return this.bailOuts;
+	}
+	
 	public int getTotal()
 	{
 		return this.total;
@@ -149,7 +159,8 @@ implements Serializable
 				&& directive.getDirectiveValue() == DirectiveValues.TODO)
 		{
 			r = true;
-		} else if (status != null && status == StatusValues.NOT_OK)
+		} 
+		else if (status != null && status == StatusValues.NOT_OK)
 		{
 			r = true;
 		}
@@ -162,6 +173,16 @@ implements Serializable
 	public String createDiagnosticTable( Map<String, Object> diagnostic )
 	{
 		return DiagnosticUtil.createDiagnosticTable(diagnostic);
+	}
+	
+	public boolean isTestResult( Object tapResult )
+	{
+		return (tapResult != null && tapResult instanceof TestResult);
+	}
+	
+	public boolean isBailOut( Object tapResult )
+	{
+		return (tapResult != null && tapResult instanceof BailOut);
 	}
 
 }
