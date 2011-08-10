@@ -53,8 +53,6 @@ extends Notifier
 {
 	private final String testResults;
 	
-	private TapRemoteCallable remoteCallable;
-
 	@DataBoundConstructor
 	public TapPublisher( String testResults )
 	{
@@ -89,9 +87,9 @@ extends Notifier
 		TapResult tapResult = null;
 		TapBuildAction buildAction = null;
 		
-		remoteCallable = new TapRemoteCallable(testResults, listener);
+		final TapRemoteCallable remoteCallable = new TapRemoteCallable(testResults, listener);
 		
-		List<TestSetMap> testSets = build.getWorkspace().act( remoteCallable );
+		final List<TestSetMap> testSets = build.getWorkspace().act( remoteCallable );
 		
 		if ( remoteCallable.hasParserErrors() )
 		{
