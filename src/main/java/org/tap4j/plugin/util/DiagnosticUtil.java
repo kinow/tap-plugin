@@ -25,6 +25,7 @@ package org.tap4j.plugin.util;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * Used to create YAML view.
@@ -35,6 +36,11 @@ import java.util.Map.Entry;
 public class DiagnosticUtil
 {
 
+	private enum RENDER_TYPE 
+	{
+		TEXT, IMAGE
+	};
+	
 	private static final String INNER_TABLE_HEADER = 
 		"<tr>\n<td colspan='4' class='yaml'>\n<table width=\"100%\" class=\"yaml\">";
 	
@@ -62,6 +68,8 @@ public class DiagnosticUtil
 		
 		sb.append( INNER_TABLE_HEADER );
 		
+		RENDER_TYPE renderType = getMapEntriesRenderType( diagnostic ); 
+		
 		for (Entry<String, Object> entry : diagnostic.entrySet() )
 		{
 			String key = entry.getKey();
@@ -72,21 +80,61 @@ public class DiagnosticUtil
 			{
 				sb.append( "<td width='5%' class='hidden'> </td>" );
 			}
-			sb.append( "<td width='10%'>"+key+"</td>" );
+			sb.append( "<td style=\"width: auto;\">"+key+"</td>" );
 			if ( value instanceof java.util.Map )
 			{
 				sb.append( "<td> </td>" );
-				depth += 1;
-				createDiagnosticTableRecursively ( (java.util.Map)value, sb, depth);
+				createDiagnosticTableRecursively ( (java.util.Map)value, sb, (depth+1));
 			}
 			else
 			{
-				sb.append( "<td>"+value+"</td>" );
+				sb.append( "<td>"+ getRenderedValue( key, value, renderType ) +"</td>" );
 			}
 			sb.append( "</tr>" );			
 		}
 		
 		sb.append( INNER_TABLE_FOOTER );
+	}
+
+	/**
+	 * @param diagnostic
+	 * @return
+	 */
+	private static RENDER_TYPE getMapEntriesRenderType(
+			Map<String, Object> diagnostic )
+	{
+		RENDER_TYPE renderType = RENDER_TYPE.TEXT;
+		final Set<String> keys = diagnostic.keySet();
+		if ( keys.contains("File-Type") && (keys.contains("File-Location") || keys.contains("File-Content") ))
+		{
+			renderType = RENDER_TYPE.IMAGE;
+		}
+		return renderType;
+	}
+	
+	/**
+	 * @param key
+	 * @param value 
+	 * @param renderType 
+	 * @return
+	 */
+	private static String getRenderedValue( String key, Object value, RENDER_TYPE renderType )
+	{
+		switch( renderType )
+		{
+		case IMAGE:
+			if( key.equals("File-Content") )
+			{
+				return "Base64 content suppressed!";
+			}
+			else
+			{
+				return value.toString();
+			}
+		default:
+		case TEXT:
+			return value.toString();
+		}
 	}
 	
 }
