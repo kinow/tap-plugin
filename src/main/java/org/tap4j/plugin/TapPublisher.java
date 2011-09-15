@@ -52,11 +52,13 @@ public class TapPublisher
 extends Notifier
 {
 	private final String testResults;
+	private final Boolean failedTestsMarkBuildAsFailure;
 	
 	@DataBoundConstructor
-	public TapPublisher( String testResults )
+	public TapPublisher( String testResults, Boolean failedTestsMarkBuildAsFailure )
 	{
 		this.testResults = testResults;
+		this.failedTestsMarkBuildAsFailure = failedTestsMarkBuildAsFailure;
 	}
 	
 	/**
@@ -65,6 +67,11 @@ extends Notifier
 	public String getTestResults()
 	{
 		return testResults;
+	}
+	
+	public Boolean getFailedTestsMarkBuildAsFailure()
+	{
+		return failedTestsMarkBuildAsFailure;
 	}
 	
 	/* (non-Javadoc)
@@ -84,6 +91,8 @@ extends Notifier
 			BuildListener listener ) throws InterruptedException, IOException
 	{
 		
+		build.setResult( Result.SUCCESS );
+		
 		TapResult tapResult = null;
 		TapBuildAction buildAction = null;
 		
@@ -95,9 +104,10 @@ extends Notifier
 		{
 			build.setResult( Result.UNSTABLE );
 		}
-		else
+		
+		if ( remoteCallable.hasFailedTests() && this.failedTestsMarkBuildAsFailure )
 		{
-			build.setResult( Result.SUCCESS );
+			build.setResult( Result.FAILURE );
 		}
 		
 		tapResult = new TapResult(build, testSets);

@@ -56,17 +56,24 @@ implements FileCallable<List<TestSetMap>>
 	private String testResults;
 	private BuildListener listener;
 	private boolean parserErrors;
+	private boolean hasFailedTests;
 	
 	public TapRemoteCallable( String testResults, BuildListener listener )
 	{
 		this.testResults = testResults;
 		this.listener = listener;
 		this.parserErrors = false;
+		this.hasFailedTests = false;
 	}
 	
 	public boolean hasParserErrors()
 	{
 		return this.parserErrors;
+	}
+	
+	public boolean hasFailedTests()
+	{
+		return this.hasFailedTests;
 	}
 	
 	private static final long serialVersionUID = 2177054820555042304L;
@@ -77,6 +84,9 @@ implements FileCallable<List<TestSetMap>>
 	public List<TestSetMap> invoke( File f, VirtualChannel channel ) 
 	throws IOException, InterruptedException
 	{
+		this.parserErrors = Boolean.FALSE;
+		this.hasFailedTests = Boolean.FALSE;
+		
 		List<TestSetMap> testSets = null;
 		
 		if ( StringUtils.isBlank( testResults ) )
@@ -127,6 +137,11 @@ implements FileCallable<List<TestSetMap>>
 					listener.getLogger().println();
 					
 					final TestSet testSet = new Tap13YamlParser().parseFile( tapFile );
+					
+					if ( testSet.containsNotOk() || testSet.containsBailOut() )
+					{
+						this.hasFailedTests = Boolean.TRUE;
+					}
 					
 					final TestSetMap map = new TestSetMap( tapFile.getAbsolutePath(), testSet );
 					testSets.add( map );

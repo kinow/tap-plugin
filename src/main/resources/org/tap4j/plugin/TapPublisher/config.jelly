@@ -3,4 +3,7 @@
   <f:entry title="Test results" field="testResults">
     <f:textbox />
   </f:entry>
+  <f:entry title="Failed tests mark build as failure">
+      <f:checkbox name="TapPublisher.failedTestsMarkBuildAsFailure" value="${instance.failedTestsMarkBuildAsFailure}" checked="${instance.failedTestsMarkBuildAsFailure}" />
+  </f:entry>
 </j:jelly>
