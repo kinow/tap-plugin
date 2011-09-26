@@ -58,7 +58,27 @@ extends Notifier
 	public TapPublisher( String testResults, Boolean failedTestsMarkBuildAsFailure )
 	{
 		this.testResults = testResults;
-		this.failedTestsMarkBuildAsFailure = failedTestsMarkBuildAsFailure;
+		if( failedTestsMarkBuildAsFailure == null ) 
+		{
+			this.failedTestsMarkBuildAsFailure = Boolean.FALSE;
+		}
+		else
+		{
+			this.failedTestsMarkBuildAsFailure = failedTestsMarkBuildAsFailure;
+		}
+		
+	}
+	
+	public Object readResolve() 
+	{
+		if (this.failedTestsMarkBuildAsFailure != null)
+		{
+			return this;
+		}
+		else
+		{
+			return new TapPublisher(this.testResults, Boolean.FALSE);
+		}
 	}
 	
 	/**
@@ -105,7 +125,7 @@ extends Notifier
 			build.setResult( Result.UNSTABLE );
 		}
 		
-		if ( remoteCallable.hasFailedTests() && this.failedTestsMarkBuildAsFailure )
+		if ( remoteCallable.hasFailedTests() && this.getFailedTestsMarkBuildAsFailure() )
 		{
 			build.setResult( Result.FAILURE );
 		}
