@@ -55,6 +55,33 @@
 				</j:otherwise>
 			</j:choose>
 			
+			<j:choose>
+                <j:when test="${it.hasParseErrors() == false}">
+                    No parse errors found.
+                </j:when>
+                <j:otherwise>
+                    
+                    <h3>Parse errors</h3>       
+                         
+                    <table class="tap" width="100%">
+                        
+                        <tr>
+                            <th>File name</th>
+                            <th>Cause</th>
+                        </tr>
+                        
+                        <j:forEach var="testSet" items="${it.parseErrorTestSets}">
+                        <tr>
+                            <td>${testSet.fileName}</td>
+                            <td>${testSet.cause}</td>
+                        </tr>
+                        </j:forEach>
+                        
+                     </table>
+
+                </j:otherwise>
+            </j:choose>
+			
 		</l:main-panel>
 	</l:layout>
 </j:jelly>

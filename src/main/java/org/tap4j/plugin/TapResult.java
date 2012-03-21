@@ -26,6 +26,7 @@ package org.tap4j.plugin;
 import hudson.model.AbstractBuild;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +34,7 @@ import org.tap4j.model.BailOut;
 import org.tap4j.model.Directive;
 import org.tap4j.model.TestResult;
 import org.tap4j.model.TestSet;
+import org.tap4j.plugin.model.ParseErrorTestSetMap;
 import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.plugin.util.DiagnosticUtil;
 import org.tap4j.util.DirectiveValues;
@@ -50,6 +52,7 @@ implements Serializable
 
 	private AbstractBuild<?, ?> build;
 	private List<TestSetMap> testSets;
+	private List<TestSetMap> parseErrorTestSets;
 	private int failed = 0;
 	private int passed = 0;
 	private int skipped = 0;
@@ -59,7 +62,36 @@ implements Serializable
 	public TapResult(AbstractBuild<?, ?> build, List<TestSetMap> testSets)
 	{
 		this.build = build;
-		this.testSets = testSets;
+		this.testSets = this.filterTestSet(testSets);
+		this.parseErrorTestSets = this.filterParseErrorTestSets(testSets);
+	}
+
+	/**
+	 * @param testSets Untiltered test sets
+	 * @return Test sets that failed to parse
+	 */
+	private List<TestSetMap> filterParseErrorTestSets(List<TestSetMap> testSets) {
+		final List<TestSetMap> filtered = new ArrayList<TestSetMap>();
+		for(TestSetMap testSet : testSets) {
+			if(testSet instanceof ParseErrorTestSetMap) {
+				filtered.add(testSet);
+			}
+		}
+		return filtered;
+	}
+
+	/**
+	 * @param testSets Unfiltered test sets
+	 * @return Test sets that didn't fail to parse
+	 */
+	private List<TestSetMap> filterTestSet(List<TestSetMap> testSets) {
+		final List<TestSetMap> filtered = new ArrayList<TestSetMap>();
+		for(TestSetMap testSet : testSets) {
+			if(testSet instanceof ParseErrorTestSetMap == false) {
+				filtered.add(testSet);
+			}
+		}
+		return filtered;
 	}
 
 	public void updateStats()
@@ -112,7 +144,19 @@ implements Serializable
 	{
 		return this.testSets.size() <= 0;
 	}
+	
+	/**
+	 * @return the parseErrorTestSets
+	 */
+	public List<TestSetMap> getParseErrorTestSets() {
+		return parseErrorTestSets;
+	}
 
+	public boolean hasParseErrors()
+	{
+		return this.parseErrorTestSets.size() > 0;
+	}
+	
 	public int getFailed()
 	{
 		return this.failed;

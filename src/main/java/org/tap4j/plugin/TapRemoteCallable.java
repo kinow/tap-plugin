@@ -41,6 +41,7 @@ import org.apache.tools.ant.types.FileSet;
 import org.tap4j.model.TestSet;
 import org.tap4j.parser.ParserException;
 import org.tap4j.parser.Tap13YamlParser;
+import org.tap4j.plugin.model.ParseErrorTestSetMap;
 import org.tap4j.plugin.model.TestSetMap;
 
 /**
@@ -148,6 +149,8 @@ implements FileCallable<List<TestSetMap>>
 				}
 				catch ( ParserException pe )
 				{
+					testSets.add(new ParseErrorTestSetMap(fileName, pe));
+					
 					this.parserErrors = true;
 					pe.printStackTrace( listener.getLogger() );
 				}

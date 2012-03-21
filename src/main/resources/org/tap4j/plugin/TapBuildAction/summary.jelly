@@ -5,7 +5,8 @@
 	xmlns:f="/lib/form"
     xmlns:i="jelly:fmt">
     <t:summary icon="/plugin/tap/icons/tap-48.png">
-		This build contains ${it.result.testSets.size()} TAP test sets. 
-		Click <a href="tapResults">here</a> for details.
+		<p>This build contains ${it.result.testSets.size()} TAP test sets. 
+		Click <a href="tapResults">here</a> for details.</p>
+		<p>${it.result.parseErrorTestSets.size()} parse error(s).</p>
 	</t:summary>
 </j:jelly>
