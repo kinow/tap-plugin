@@ -1,0 +1,19 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
+	xmlns:i="jelly:fmt" xmlns:tap="/org/tap4j/plugin/tags">
+
+	<j:if 
+		test="${attrs.diagnostic != null and attrs.diagnostic.size() > 0 }">
+
+		<j:set var="diagnostic" value="${attrs.diagnostic}" />
+		<tr>
+            <td></td>
+            <td colspan='3'>
+            <j:forEach items="${diagnostic}" var="entry">
+                # ${entry.text}<br/>
+            </j:forEach>
+            </td>
+        </tr>
+	</j:if>
+
+</j:jelly>

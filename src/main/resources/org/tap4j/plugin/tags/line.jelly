@@ -14,7 +14,8 @@
 				        <td width="65%">${tapLine.description}</td>
 				        <tap:directive directive="${tapLine.directive}" />
 				    </tr>
-				    
+				    <!-- Comments diagnostics -->
+                    <tap:comments diagnostic="${tapLine.comments}" />
 				    <!-- YAML Diagnostics -->
                     <tap:yaml diagnostic="${tapLine.diagnostic}" />
 				</j:when>
