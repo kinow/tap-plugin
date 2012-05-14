@@ -8,7 +8,7 @@
 			<j:choose>
 				<j:when test="${directive.getDirectiveValue() == 'TODO'}">
 					<td width="25%">
-					   <span class="red_text bold">#TODO </span>
+					   <span class="bold">TODO </span>
 					   <j:if test="${directive.getReason() != null and directive.getReason().length() > 0}">
 					       ${directive.getReason()}
 					   </j:if>
@@ -16,7 +16,7 @@
 				</j:when>
 				<j:when test="${directive.getDirectiveValue() == 'SKIP'}">
                     <td width="25%">
-                        <span class="yellow_text bold">#SKIP </span>
+                        <span class="yellow_text bold">SKIP </span>
                         <j:if test="${directive.getReason() != null and directive.getReason().length() > 0}">
                            ${directive.getReason()}
                        </j:if>

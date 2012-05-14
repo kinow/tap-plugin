@@ -9,7 +9,7 @@
 			    <j:when test="${testResult.directive != null and testResult.directive.directiveValue.toString() == 'SKIP'}">
                     <td class="yellow" width="5%"> </td>
                 </j:when>
-				<j:when test="${testResult.status.toString() == 'ok' and (testResult.directive eq null or testResult.directive.directiveValue.toString() != 'TODO')}">
+				<j:when test="${testResult.status.toString() == 'ok'}">
 					<td class="green" width="5%"> </td>
 				</j:when>
 				<j:otherwise>

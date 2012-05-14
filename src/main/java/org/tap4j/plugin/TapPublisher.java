@@ -32,8 +32,8 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
-import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+import hudson.tasks.Recorder;
 
 import java.io.IOException;
 import java.util.List;
@@ -48,127 +48,123 @@ import org.tap4j.plugin.model.TestSetMap;
  * @since 1.0
  */
 @SuppressWarnings("unchecked")
-public class TapPublisher 
-extends Notifier
-{
+public class TapPublisher extends Recorder {
 	private final String testResults;
 	private final Boolean failedTestsMarkBuildAsFailure;
-	
+
 	@DataBoundConstructor
-	public TapPublisher( String testResults, Boolean failedTestsMarkBuildAsFailure )
-	{
+	public TapPublisher(String testResults,
+			Boolean failedTestsMarkBuildAsFailure) {
 		this.testResults = testResults;
-		if( failedTestsMarkBuildAsFailure == null ) 
-		{
+		if (failedTestsMarkBuildAsFailure == null) {
 			this.failedTestsMarkBuildAsFailure = Boolean.FALSE;
-		}
-		else
-		{
+		} else {
 			this.failedTestsMarkBuildAsFailure = failedTestsMarkBuildAsFailure;
 		}
-		
+
 	}
-	
-	public Object readResolve() 
-	{
-		if (this.failedTestsMarkBuildAsFailure != null)
-		{
+
+	public Object readResolve() {
+		if (this.failedTestsMarkBuildAsFailure != null) {
 			return this;
-		}
-		else
-		{
+		} else {
 			return new TapPublisher(this.testResults, Boolean.FALSE);
 		}
 	}
-	
+
 	/**
 	 * @return the testResults
 	 */
-	public String getTestResults()
-	{
+	public String getTestResults() {
 		return testResults;
 	}
-	
-	public Boolean getFailedTestsMarkBuildAsFailure()
-	{
+
+	public Boolean getFailedTestsMarkBuildAsFailure() {
 		return failedTestsMarkBuildAsFailure;
 	}
-	
-	/* (non-Javadoc)
-	 * @see hudson.tasks.BuildStepCompatibilityLayer#getProjectAction(hudson.model.AbstractProject)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * hudson.tasks.BuildStepCompatibilityLayer#getProjectAction(hudson.model
+	 * .AbstractProject)
 	 */
 	@Override
-	public Action getProjectAction( AbstractProject<?, ?> project )
-	{
-		return new TapProjectAction( project );
+	public Action getProjectAction(AbstractProject<?, ?> project) {
+		return new TapProjectAction(project);
 	}
-	
-	/* (non-Javadoc)
-	 * @see hudson.tasks.BuildStepCompatibilityLayer#perform(hudson.model.AbstractBuild, hudson.Launcher, hudson.model.BuildListener)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * hudson.tasks.BuildStepCompatibilityLayer#perform(hudson.model.AbstractBuild
+	 * , hudson.Launcher, hudson.model.BuildListener)
 	 */
 	@Override
-	public boolean perform( AbstractBuild<?, ?> build, Launcher launcher,
-			BuildListener listener ) throws InterruptedException, IOException
-	{
-		
-		build.setResult( Result.SUCCESS );
-		
+	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,
+			BuildListener listener) throws InterruptedException, IOException {
+
+		build.setResult(Result.SUCCESS);
+
 		TapResult tapResult = null;
 		TapBuildAction buildAction = null;
-		
-		final TapRemoteCallable remoteCallable = new TapRemoteCallable(testResults, listener);
-		
-		final List<TestSetMap> testSets = build.getWorkspace().act( remoteCallable );
-		
-		if ( remoteCallable.hasParserErrors() )
-		{
-			build.setResult( Result.UNSTABLE );
+
+		final TapRemoteCallable remoteCallable = new TapRemoteCallable(
+				testResults, listener);
+
+		final List<TestSetMap> testSets = build.getWorkspace().act(
+				remoteCallable);
+
+		if (remoteCallable.hasParserErrors()) {
+			build.setResult(Result.UNSTABLE);
 		}
-		
-		if ( remoteCallable.hasFailedTests() && this.getFailedTestsMarkBuildAsFailure() )
-		{
-			build.setResult( Result.FAILURE );
+
+		if (remoteCallable.hasFailedTests()
+				&& this.getFailedTestsMarkBuildAsFailure()) {
+			build.setResult(Result.FAILURE);
 		}
-		
+
 		tapResult = new TapResult(build, testSets);
-		buildAction = new TapBuildAction( build, tapResult );
-		build.addAction( buildAction );
-		
-		return true;
+		buildAction = new TapBuildAction(build, tapResult);
+		build.addAction(buildAction);
+
+		return Boolean.TRUE;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see hudson.tasks.BuildStep#getRequiredMonitorService()
 	 */
-	public BuildStepMonitor getRequiredMonitorService()
-	{
+	public BuildStepMonitor getRequiredMonitorService() {
 		return BuildStepMonitor.BUILD;
 	}
-	
-	@Extension
-	public static class DescriptorImpl extends BuildStepDescriptor<Publisher>
-	{
-		public DescriptorImpl()
-		{
-			super( TapPublisher.class );
+
+	@Extension(ordinal = 1000.0)
+	public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+		public DescriptorImpl() {
+			super(TapPublisher.class);
 			load();
 		}
-		
+
 		@Override
-		public String getDisplayName()
-		{
+		public String getDisplayName() {
 			return "Publish TAP Results";
 		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
+		 * 
 		 * @see hudson.tasks.BuildStepDescriptor#isApplicable(java.lang.Class)
 		 */
 		@Override
-		public boolean isApplicable( @SuppressWarnings("rawtypes") Class<? extends AbstractProject> jobType )
-		{
-			return true;
+		@SuppressWarnings("rawtypes")
+		public boolean isApplicable(Class<? extends AbstractProject> jobType) {
+			return Boolean.TRUE;
 		}
-		
+
 	}
 
 }
