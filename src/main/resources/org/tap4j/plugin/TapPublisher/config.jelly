@@ -6,4 +6,7 @@
   <f:entry title="Failed tests mark build as failure">
       <f:checkbox name="TapPublisher.failedTestsMarkBuildAsFailure" value="${instance.failedTestsMarkBuildAsFailure}" checked="${instance.failedTestsMarkBuildAsFailure}" />
   </f:entry>
+  <f:entry title="Output TAP to console">
+      <f:checkbox name="TapPublisher.outputTapToConsole" value="${instance.outputTapToConsole}" checked="${instance.outputTapToConsole}" />
+  </f:entry>
 </j:jelly>

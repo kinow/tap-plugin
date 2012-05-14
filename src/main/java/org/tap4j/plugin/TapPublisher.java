@@ -54,7 +54,8 @@ public class TapPublisher extends Recorder {
 	private final Boolean outputTapToConsole;
 
 	@DataBoundConstructor
-	public TapPublisher(String testResults, Boolean failedTestsMarkBuildAsFailure, Boolean outputTapToConsole) {
+	public TapPublisher(String testResults,
+			Boolean failedTestsMarkBuildAsFailure, Boolean outputTapToConsole) {
 		this.testResults = testResults;
 		if (failedTestsMarkBuildAsFailure == null) {
 			this.failedTestsMarkBuildAsFailure = Boolean.FALSE;
@@ -66,15 +67,17 @@ public class TapPublisher extends Recorder {
 
 	public Object readResolve() {
 		String testResults = this.getTestResults();
-		Boolean failedTestsMarkBuildAsFailure = this.getFailedTestsMarkBuildAsFailure();
+		Boolean failedTestsMarkBuildAsFailure = this
+				.getFailedTestsMarkBuildAsFailure();
 		Boolean outputTapToConsole = this.getOutputTapToConsole();
-		if(failedTestsMarkBuildAsFailure == null) {
+		if (failedTestsMarkBuildAsFailure == null) {
 			failedTestsMarkBuildAsFailure = Boolean.FALSE;
 		}
-		if(outputTapToConsole == null) {
+		if (outputTapToConsole == null) {
 			outputTapToConsole = Boolean.FALSE;
 		}
-		return new TapPublisher(testResults, failedTestsMarkBuildAsFailure, outputTapToConsole);
+		return new TapPublisher(testResults, failedTestsMarkBuildAsFailure,
+				outputTapToConsole);
 	}
 
 	/**
@@ -87,7 +90,7 @@ public class TapPublisher extends Recorder {
 	public Boolean getFailedTestsMarkBuildAsFailure() {
 		return failedTestsMarkBuildAsFailure;
 	}
-	
+
 	/**
 	 * @return the outputTapToConsole
 	 */
@@ -121,7 +124,7 @@ public class TapPublisher extends Recorder {
 		TapBuildAction buildAction = null;
 
 		final TapRemoteCallable remoteCallable = new TapRemoteCallable(
-				testResults, listener);
+				testResults, outputTapToConsole, listener);
 
 		final List<TestSetMap> testSets = build.getWorkspace().act(
 				remoteCallable);

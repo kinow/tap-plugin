@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.types.FileSet;
@@ -50,116 +51,115 @@ import org.tap4j.plugin.model.TestSetMap;
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.1
  */
-public class TapRemoteCallable 
-implements FileCallable<List<TestSetMap>>
-{
+public class TapRemoteCallable implements FileCallable<List<TestSetMap>> {
 
 	private String testResults;
+	private Boolean outputTapToConsole;
 	private BuildListener listener;
 	private boolean parserErrors;
 	private boolean hasFailedTests;
-	
-	public TapRemoteCallable( String testResults, BuildListener listener )
-	{
+
+	public TapRemoteCallable(String testResults, Boolean outputTapToConsole, BuildListener listener) {
 		this.testResults = testResults;
+		this.outputTapToConsole = outputTapToConsole;
 		this.listener = listener;
 		this.parserErrors = false;
 		this.hasFailedTests = false;
 	}
-	
-	public boolean hasParserErrors()
-	{
+
+	public boolean hasParserErrors() {
 		return this.parserErrors;
 	}
-	
-	public boolean hasFailedTests()
-	{
+
+	public boolean hasFailedTests() {
 		return this.hasFailedTests;
 	}
-	
+
 	private static final long serialVersionUID = 2177054820555042304L;
 
-	/* (non-Javadoc)
-	 * @see hudson.FilePath.FileCallable#invoke(java.io.File, hudson.remoting.VirtualChannel)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see hudson.FilePath.FileCallable#invoke(java.io.File,
+	 * hudson.remoting.VirtualChannel)
 	 */
-	public List<TestSetMap> invoke( File f, VirtualChannel channel ) 
-	throws IOException, InterruptedException
-	{
+	public List<TestSetMap> invoke(File f, VirtualChannel channel)
+			throws IOException, InterruptedException {
 		this.parserErrors = Boolean.FALSE;
 		this.hasFailedTests = Boolean.FALSE;
-		
+
 		List<TestSetMap> testSets = null;
-		
-		if ( StringUtils.isBlank( testResults ) )
-		{
+
+		if (StringUtils.isBlank(testResults)) {
 			listener.getLogger().println();
 			listener.getLogger().println("Empty TAP test results.");
 			listener.getLogger().println();
-			
+
 			testSets = Collections.emptyList();
-		}
-		else
-		{
+		} else {
 			testSets = new LinkedList<TestSetMap>();
-			
 			String[] fileNames = null;
-			
+
 			listener.getLogger().println();
-			
-			listener.getLogger().println("Looking for TAP test results that match the pattern [" + this.testResults + "].");
-			
+
+			listener.getLogger().println(
+					"Looking for TAP test results that match the pattern ["
+							+ this.testResults + "].");
+
 			listener.getLogger().println();
-			
-			try
-			{
-				final FileSet fs = Util.createFileSet( f , testResults );
+
+			try {
+				final FileSet fs = Util.createFileSet(f, testResults);
 				final DirectoryScanner ds = fs.getDirectoryScanner();
-				
+
 				fileNames = ds.getIncludedFiles();
-				
-				listener.getLogger().println("Found ["+fileNames.length+"] TAP test result(s).");
-				
+
+				listener.getLogger().println(
+						"Found [" + fileNames.length + "] TAP test result(s).");
+
 				listener.getLogger().println();
-			}
-			catch (Exception e) 
-			{
-				e.printStackTrace( listener.fatalError(e.getMessage()) );				
+			} catch (Exception e) {
+				e.printStackTrace(listener.fatalError(e.getMessage()));
 				throw new AbortException(e.getMessage());
 			}
-			
-			for ( String fileName : fileNames )
-			{
-				try
-				{
-					final File tapFile = new File( f, fileName );
-					
-					listener.getLogger().println("Parsing TAP test result ["+tapFile+"].");
-					
+
+			for (String fileName : fileNames) {
+				try {
+					final File tapFile = new File(f, fileName);
+
+					listener.getLogger().println(
+							"Parsing TAP test result [" + tapFile + "].");
+
 					listener.getLogger().println();
-					
-					final TestSet testSet = new Tap13YamlParser().parseFile( tapFile );
-					
-					if ( testSet.containsNotOk() || testSet.containsBailOut() )
-					{
+
+					final TestSet testSet = new Tap13YamlParser()
+							.parseFile(tapFile);
+
+					if (testSet.containsNotOk() || testSet.containsBailOut()) {
 						this.hasFailedTests = Boolean.TRUE;
 					}
+
+					final TestSetMap map = new TestSetMap(
+							tapFile.getAbsolutePath(), testSet);
+					testSets.add(map);
 					
-					final TestSetMap map = new TestSetMap( tapFile.getAbsolutePath(), testSet );
-					testSets.add( map );
-				}
-				catch ( ParserException pe )
-				{
+					if(this.outputTapToConsole) {
+						try {
+							listener.getLogger().println(FileUtils.readFileToString(tapFile));
+						} catch ( RuntimeException re ) {
+							re.printStackTrace(listener.getLogger());
+						}
+					}
+				} catch (ParserException pe) {
 					testSets.add(new ParseErrorTestSetMap(fileName, pe));
-					
+
 					this.parserErrors = true;
-					pe.printStackTrace( listener.getLogger() );
+					pe.printStackTrace(listener.getLogger());
 				}
 			}
 		}
-		
+
 		return testSets;
 	}
 
-	
-	
 }
