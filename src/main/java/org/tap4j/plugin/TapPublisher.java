@@ -51,25 +51,30 @@ import org.tap4j.plugin.model.TestSetMap;
 public class TapPublisher extends Recorder {
 	private final String testResults;
 	private final Boolean failedTestsMarkBuildAsFailure;
+	private final Boolean outputTapToConsole;
 
 	@DataBoundConstructor
-	public TapPublisher(String testResults,
-			Boolean failedTestsMarkBuildAsFailure) {
+	public TapPublisher(String testResults, Boolean failedTestsMarkBuildAsFailure, Boolean outputTapToConsole) {
 		this.testResults = testResults;
 		if (failedTestsMarkBuildAsFailure == null) {
 			this.failedTestsMarkBuildAsFailure = Boolean.FALSE;
 		} else {
 			this.failedTestsMarkBuildAsFailure = failedTestsMarkBuildAsFailure;
 		}
-
+		this.outputTapToConsole = outputTapToConsole;
 	}
 
 	public Object readResolve() {
-		if (this.failedTestsMarkBuildAsFailure != null) {
-			return this;
-		} else {
-			return new TapPublisher(this.testResults, Boolean.FALSE);
+		String testResults = this.getTestResults();
+		Boolean failedTestsMarkBuildAsFailure = this.getFailedTestsMarkBuildAsFailure();
+		Boolean outputTapToConsole = this.getOutputTapToConsole();
+		if(failedTestsMarkBuildAsFailure == null) {
+			failedTestsMarkBuildAsFailure = Boolean.FALSE;
 		}
+		if(outputTapToConsole == null) {
+			outputTapToConsole = Boolean.FALSE;
+		}
+		return new TapPublisher(testResults, failedTestsMarkBuildAsFailure, outputTapToConsole);
 	}
 
 	/**
@@ -81,6 +86,13 @@ public class TapPublisher extends Recorder {
 
 	public Boolean getFailedTestsMarkBuildAsFailure() {
 		return failedTestsMarkBuildAsFailure;
+	}
+	
+	/**
+	 * @return the outputTapToConsole
+	 */
+	public Boolean getOutputTapToConsole() {
+		return outputTapToConsole;
 	}
 
 	/*
@@ -105,9 +117,6 @@ public class TapPublisher extends Recorder {
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,
 			BuildListener listener) throws InterruptedException, IOException {
-
-		build.setResult(Result.SUCCESS);
-
 		TapResult tapResult = null;
 		TapBuildAction buildAction = null;
 
