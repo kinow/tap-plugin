@@ -36,100 +36,93 @@ import org.kohsuke.stapler.StaplerProxy;
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
-public class TapBuildAction 
-implements Action, Serializable, StaplerProxy
-{
+public class TapBuildAction implements Action, Serializable, StaplerProxy {
 
-	private static final long serialVersionUID = 9152314570733265691L;
-	
+	private static final long serialVersionUID = 520981690971849654L;
 	public static final String URL_NAME = "tapResults";
 	public static final String ICON_NAME = "/plugin/tap/icons/tap-24.png";
 	public static final String DISPLAY_NAME = "TAP";
-	
+
 	private AbstractBuild<?, ?> build;
-	
+
 	private TapResult result;
 
-	public TapBuildAction( AbstractBuild<?, ?> build, TapResult result )
-	{
+	public TapBuildAction(AbstractBuild<?, ?> build, TapResult result) {
 		super();
 		this.build = build;
 		this.result = result;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.kohsuke.stapler.StaplerProxy#getTarget()
 	 */
-	public Object getTarget()
-	{
+	public Object getTarget() {
 		return this.result;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see hudson.model.Action#getDisplayName()
 	 */
-	public String getDisplayName()
-	{
+	public String getDisplayName() {
 		return DISPLAY_NAME;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see hudson.model.Action#getIconFileName()
 	 */
-	public String getIconFileName()
-	{
+	public String getIconFileName() {
 		return ICON_NAME;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see hudson.model.Action#getUrlName()
 	 */
-	public String getUrlName()
-	{
+	public String getUrlName() {
 		return URL_NAME;
 	}
 
 	/**
 	 * @return the build
 	 */
-	public AbstractBuild<?, ?> getBuild()
-	{
+	public AbstractBuild<?, ?> getBuild() {
 		return this.build;
 	}
-	
-	public TapResult getResult()
-	{
+
+	public TapResult getResult() {
 		return this.result;
 	}
-	
-	public TapResult getPreviousResult()
-	{
+
+	public TapResult getPreviousResult() {
 		TapResult previousResult = null;
-		
+
 		TapBuildAction previousAction = this.getPreviousAction();
-		
-		if ( previousAction != null )
-		{
+
+		if (previousAction != null) {
 			previousResult = previousAction.getResult();
 		}
-		
+
 		return previousResult;
 	}
-	
-	public TapBuildAction getPreviousAction()
-	{
+
+	public TapBuildAction getPreviousAction() {
 		TapBuildAction previousAction = null;
-		
-		if ( this.build != null )
-		{
+
+		if (this.build != null) {
 			AbstractBuild<?, ?> previousBuild = this.build.getPreviousBuild();
-			if ( previousBuild != null )
-			{
-				previousAction = previousBuild.getAction( TapBuildAction.class );
+			if (previousBuild != null) {
+				previousAction = previousBuild.getAction(TapBuildAction.class);
 			}
 		}
-		
+
 		return previousAction;
 	}
-	
+
 }

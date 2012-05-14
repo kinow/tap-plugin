@@ -24,6 +24,7 @@
 package org.tap4j.plugin;
 
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Action;
 import hudson.model.BuildListener;
@@ -35,11 +36,14 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.tap4j.plugin.model.TestSetMap;
 
 /**
  * Publishes TAP results in Jenkins builds.
@@ -120,29 +124,182 @@ public class TapPublisher extends Recorder {
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,
 			BuildListener listener) throws InterruptedException, IOException {
-		TapResult tapResult = null;
-		TapBuildAction buildAction = null;
 
-		final TapRemoteCallable remoteCallable = new TapRemoteCallable(
-				testResults, outputTapToConsole, listener);
+		PrintStream logger = listener.getLogger();
+		logger.println("TAP Reports Processing: START");
+		logger.println("Looking for TAP results report in workspace using pattern: "
+				+ this.testResults);
 
-		final List<TestSetMap> testSets = build.getWorkspace().act(
-				remoteCallable);
+		FilePath[] reports = locateReports(build.getWorkspace(),
+				this.testResults);
 
-		if (remoteCallable.hasParserErrors()) {
-			build.setResult(Result.UNSTABLE);
+		if (reports.length == 0) {
+			logger.println("Did not find any matching files.");
+			// build can still continue
+			return Boolean.TRUE;
 		}
 
-		if (remoteCallable.hasFailedTests()
-				&& this.getFailedTestsMarkBuildAsFailure()) {
-			build.setResult(Result.FAILURE);
+		/*
+		 * filter out the reports based on timestamps. See JENKINS-12187
+		 */
+		//reports = checkReports(build, reports, logger);
+
+		boolean filesSaved = saveReports(getTapReportDirectory(build), reports,
+				logger);
+		if (!filesSaved) {
+			logger.println("Failed to save TAP reports");
+			return Boolean.TRUE;
 		}
 
-		tapResult = new TapResult(build, testSets);
-		buildAction = new TapBuildAction(build, tapResult);
-		build.addAction(buildAction);
+		TapResult testResult = null; 
+		try {
+			testResult = loadResults(build, logger);
+			testResult.tally();
+		} catch (Throwable t) {
+			/*
+			 * don't fail build if TAP parser barfs. only print out the
+			 * exception to console.
+			 */
+			t.printStackTrace(logger);
+		}
 
-		return Boolean.TRUE;
+		if (testResult.getTestSets().size() > 0) {
+			// create an individual report for all of the results and add it to
+			// the build
+			TapBuildAction action = new TapBuildAction(build, testResult);
+			build.getActions().add(action);
+			if (testResult.hasParseErrors()) {
+				build.setResult(Result.UNSTABLE);
+			}
+			if (testResult.getFailed() > 0) {
+				if(this.getFailedTestsMarkBuildAsFailure()) {
+					build.setResult(Result.FAILURE);
+				} else {
+					build.setResult(Result.UNSTABLE);
+				}
+			}
+		} else {
+			logger.println("Found matching files but did not find any TAP results.");
+			return true;
+		}
+		logger.println("TAP Reports Processing: FINISH");
+		return true;
+	}
+
+	/**
+	 * @param build
+	 * @param logger
+	 * @return
+	 */
+	private TapResult loadResults(AbstractBuild<?, ?> owner,
+			PrintStream logger) {
+		FilePath tapDir = getTapReportDirectory(owner);
+		FilePath[] results = null;
+		try {
+			results = tapDir.list("*.tap");
+		} catch (Exception e) {
+			e.printStackTrace(logger);
+		}
+
+		TapResult tr = null;
+		if (results == null) {
+			tr = new TapResult("", owner, Collections.EMPTY_LIST);
+			tr.setOwner(owner);
+			return tr;
+		}
+
+		TapParser parser = new TapParser(this.outputTapToConsole, logger);
+		TapResult result = parser.parse(results, owner);
+		result.setOwner(owner);
+		return result;
+	}
+
+	/**
+	 * @param tapDir
+	 * @param reports
+	 * @param logger
+	 * @return
+	 */
+	private boolean saveReports(FilePath tapDir, FilePath[] reports,
+			PrintStream logger) {
+		logger.println("Saving reports...");
+		try {
+			tapDir.mkdirs();
+			// int i = 0;
+			for (FilePath report : reports) {
+				// String name = "tap-report" + (i > 0 ? "-" + i : "")
+				// + ".tap";
+				// i++;
+				FilePath dst = tapDir.child(report.getName());
+				report.copyTo(dst);
+			}
+		} catch (Exception e) {
+			e.printStackTrace(logger);
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * @param build
+	 * @return
+	 */
+	private FilePath getTapReportDirectory(AbstractBuild<?, ?> build) {
+		return new FilePath(new File(build.getRootDir(), "tap"));
+	}
+
+	/**
+	 * @param build
+	 * @param reports
+	 * @param logger
+	 * @return
+	 */
+	private FilePath[] checkReports(AbstractBuild<?, ?> build,
+			FilePath[] reports, PrintStream logger) {
+		List<FilePath> filePathList = new ArrayList<FilePath>(reports.length);
+
+		for (FilePath report : reports) {
+			/*
+			 * Check that the file was created as part of this build and is not
+			 * something left over from before.
+			 * 
+			 * Checks that the last modified time of file is greater than the
+			 * start time of the build
+			 */
+			try {
+				/*
+				 * dividing by 1000 and comparing because we want to compare
+				 * secs and not milliseconds
+				 */
+				if (build.getTimestamp().getTimeInMillis() / 1000 <= report
+						.lastModified() / 1000) {
+					filePathList.add(report);
+				} else {
+					logger.println(report.getName()
+							+ " was last modified before "
+							+ "this build started. Ignoring it.");
+				}
+			} catch (IOException e) {
+				// just log the exception
+				e.printStackTrace(logger);
+			} catch (InterruptedException e) {
+				// just log the exception
+				e.printStackTrace(logger);
+			}
+		}
+		return filePathList.toArray(new FilePath[] {});
+	}
+
+	/**
+	 * @param workspace
+	 * @param testResults
+	 * @return
+	 * @throws InterruptedException
+	 * @throws IOException
+	 */
+	private FilePath[] locateReports(FilePath workspace, String testResults)
+			throws IOException, InterruptedException {
+		return workspace.list(testResults);
 	}
 
 	/*
@@ -151,7 +308,7 @@ public class TapPublisher extends Recorder {
 	 * @see hudson.tasks.BuildStep#getRequiredMonitorService()
 	 */
 	public BuildStepMonitor getRequiredMonitorService() {
-		return BuildStepMonitor.BUILD;
+		return BuildStepMonitor.STEP;
 	}
 
 	@Extension(ordinal = 1000.0)

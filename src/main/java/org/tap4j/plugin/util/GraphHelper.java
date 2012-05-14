@@ -28,9 +28,9 @@ import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+import org.tap4j.plugin.AbstractTapProjectAction;
 import org.tap4j.plugin.TapBuildAction;
 import org.tap4j.plugin.TapResult;
-import org.tap4j.plugin.AbstractTapProjectAction;
 
 /**
  * Helper class for trend graph generation. 
@@ -109,7 +109,7 @@ public class GraphHelper
               NumberOnlyBuildLabel label = (NumberOnlyBuildLabel) dataset.getColumnKey(column);
               TapBuildAction build = label.build.getAction(TapBuildAction.class);
               TapResult report = build.getResult();
-              report.updateStats();
+              report.tally();
 
               switch (row) {
                   case 0:

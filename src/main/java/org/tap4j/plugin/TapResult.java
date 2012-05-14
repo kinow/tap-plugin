@@ -23,6 +23,7 @@
  */
 package org.tap4j.plugin;
 
+import hudson.model.ModelObject;
 import hudson.model.AbstractBuild;
 
 import java.io.Serializable;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.kohsuke.stapler.export.Exported;
 import org.tap4j.model.BailOut;
 import org.tap4j.model.Directive;
 import org.tap4j.model.TestResult;
@@ -44,9 +46,7 @@ import org.tap4j.util.StatusValues;
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
-public class TapResult 
-implements Serializable
-{
+public class TapResult implements ModelObject, Serializable {
 
 	private static final long serialVersionUID = 4343399327336076951L;
 
@@ -58,22 +58,25 @@ implements Serializable
 	private int skipped = 0;
 	private int bailOuts = 0;
 	private int total = 0;
+	private String name;
 
-	public TapResult(AbstractBuild<?, ?> build, List<TestSetMap> testSets)
-	{
-		this.build = build;
+	public TapResult(String name, AbstractBuild<?, ?> owner,
+			List<TestSetMap> testSets) {
+		this.name = name;
+		this.build = owner;
 		this.testSets = this.filterTestSet(testSets);
 		this.parseErrorTestSets = this.filterParseErrorTestSets(testSets);
 	}
 
 	/**
-	 * @param testSets Untiltered test sets
+	 * @param testSets
+	 *            Untiltered test sets
 	 * @return Test sets that failed to parse
 	 */
 	private List<TestSetMap> filterParseErrorTestSets(List<TestSetMap> testSets) {
 		final List<TestSetMap> filtered = new ArrayList<TestSetMap>();
-		for(TestSetMap testSet : testSets) {
-			if(testSet instanceof ParseErrorTestSetMap) {
+		for (TestSetMap testSet : testSets) {
+			if (testSet instanceof ParseErrorTestSetMap) {
 				filtered.add(testSet);
 			}
 		}
@@ -81,70 +84,68 @@ implements Serializable
 	}
 
 	/**
-	 * @param testSets Unfiltered test sets
+	 * @param testSets
+	 *            Unfiltered test sets
 	 * @return Test sets that didn't fail to parse
 	 */
 	private List<TestSetMap> filterTestSet(List<TestSetMap> testSets) {
 		final List<TestSetMap> filtered = new ArrayList<TestSetMap>();
-		for(TestSetMap testSet : testSets) {
-			if(testSet instanceof ParseErrorTestSetMap == false) {
+		for (TestSetMap testSet : testSets) {
+			if (testSet instanceof ParseErrorTestSetMap == false) {
 				filtered.add(testSet);
 			}
 		}
 		return filtered;
 	}
 
-	public void updateStats()
-	{
-		
+	public void tally() {
+
 		failed = 0;
 		passed = 0;
 		skipped = 0;
 		bailOuts = 0;
 		total = 0;
-		
-		for (TestSetMap testSet : testSets)
-		{
+
+		for (TestSetMap testSet : testSets) {
 			TestSet realTestSet = testSet.getTestSet();
 			List<TestResult> testResults = realTestSet.getTestResults();
-			
+
 			total += testResults.size();
-			
-			for (TestResult testResult : testResults)
-			{
-				if (isSkipped(testResult))
-				{
+
+			for (TestResult testResult : testResults) {
+				if (isSkipped(testResult)) {
 					skipped += 1;
-				} 
-				else if (isFailure(testResult))
-				{
+				} else if (isFailure(testResult)) {
 					failed += 1;
-				}
-				else
-				{
+				} else {
 					passed += 1;
 				}
 			}
-			
+
 			this.bailOuts += realTestSet.getNumberOfBailOuts();
 		}
 	}
 
-	public AbstractBuild<?, ?> getOwner()
-	{
+	public AbstractBuild<?, ?> getOwner() {
 		return this.build;
 	}
 
-	public List<TestSetMap> getTestSets()
-	{
+	/**
+	 * @param owner
+	 *            the owner to set
+	 */
+	public void setOwner(AbstractBuild<?, ?> owner) {
+		this.build = owner;
+	}
+
+	public List<TestSetMap> getTestSets() {
 		return this.testSets;
 	}
 
-	public boolean isEmptyTestSet()
-	{
+	public boolean isEmptyTestSet() {
 		return this.testSets.size() <= 0;
 	}
-	
+
 	/**
 	 * @return the parseErrorTestSets
 	 */
@@ -152,81 +153,83 @@ implements Serializable
 		return parseErrorTestSets;
 	}
 
-	public boolean hasParseErrors()
-	{
+	public boolean hasParseErrors() {
 		return this.parseErrorTestSets.size() > 0;
 	}
-	
-	public int getFailed()
-	{
+
+	public int getFailed() {
 		return this.failed;
 	}
 
-	public int getSkipped()
-	{
+	public int getSkipped() {
 		return this.skipped;
 	}
 
-	public int getPassed()
-	{
+	public int getPassed() {
 		return this.passed;
 	}
-	
-	public int getBailOuts()
-	{
+
+	public int getBailOuts() {
 		return this.bailOuts;
 	}
-	
-	public int getTotal()
-	{
+
+	public int getTotal() {
 		return this.total;
 	}
 
-	private boolean isSkipped( TestResult testResult )
-	{
+	private boolean isSkipped(TestResult testResult) {
 		boolean r = false;
 		Directive directive = testResult.getDirective();
 		if (directive != null
-				&& directive.getDirectiveValue() == DirectiveValues.SKIP)
-		{
+				&& directive.getDirectiveValue() == DirectiveValues.SKIP) {
 			r = true;
 		}
 		return r;
 	}
 
-	private boolean isFailure( TestResult testResult )
-	{
+	private boolean isFailure(TestResult testResult) {
 		boolean r = false;
 		Directive directive = testResult.getDirective();
 		StatusValues status = testResult.getStatus();
 		if (directive != null
-				&& directive.getDirectiveValue() == DirectiveValues.TODO)
-		{
+				&& directive.getDirectiveValue() == DirectiveValues.TODO) {
 			r = true;
-		} 
-		else if (status != null && status == StatusValues.NOT_OK)
-		{
+		} else if (status != null && status == StatusValues.NOT_OK) {
 			r = true;
 		}
 		return r;
 	}
 
 	/**
-	 * Called from TapResult/index..jelly 
+	 * Called from TapResult/index..jelly
 	 */
-	public String createDiagnosticTable( Map<String, Object> diagnostic )
-	{
+	public String createDiagnosticTable(Map<String, Object> diagnostic) {
 		return DiagnosticUtil.createDiagnosticTable(diagnostic);
 	}
-	
-	public boolean isTestResult( Object tapResult )
-	{
+
+	public boolean isTestResult(Object tapResult) {
 		return (tapResult != null && tapResult instanceof TestResult);
 	}
-	
-	public boolean isBailOut( Object tapResult )
-	{
+
+	public boolean isBailOut(Object tapResult) {
 		return (tapResult != null && tapResult instanceof BailOut);
+	}
+
+	/**
+	 * @return the name
+	 */
+	@Exported(visibility = 999)
+	public String getName() {
+		return name;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see hudson.model.ModelObject#getDisplayName()
+	 */
+	public String getDisplayName() {
+		return getName();
 	}
 
 }

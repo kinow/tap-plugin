@@ -28,7 +28,7 @@
 					
 					<j:forEach var="map" items="${it.testSets}">
 						
-						<p>File: <span class="underline">${map.fileName}</span></p>
+						<p>File: <span class="underline"><a href='contents?f=${map.fileName}'>${map.fileName}</a></span></p>
 						
 						<table class="tap" width="100%">
 						

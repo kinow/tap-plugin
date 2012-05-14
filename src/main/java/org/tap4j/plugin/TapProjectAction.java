@@ -242,7 +242,7 @@ public class TapProjectAction extends AbstractTapProjectAction
 			if (action != null)
 			{
 				TapResult report = action.getResult();
-				report.updateStats();
+				report.tally();
 
 				dataset.add(report.getPassed(), "Passed",
 						label);
