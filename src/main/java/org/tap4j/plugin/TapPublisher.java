@@ -26,6 +26,9 @@ package org.tap4j.plugin;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.matrix.MatrixAggregatable;
+import hudson.matrix.MatrixAggregator;
+import hudson.matrix.MatrixBuild;
 import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.Result;
@@ -35,6 +38,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
+import hudson.tasks.test.TestResultAggregator;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,7 +56,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
  * @since 1.0
  */
 @SuppressWarnings("unchecked")
-public class TapPublisher extends Recorder {
+public class TapPublisher extends Recorder implements MatrixAggregatable {
 	private final String testResults;
 	private final Boolean failedTestsMarkBuildAsFailure;
 	private final Boolean outputTapToConsole;
@@ -163,6 +167,8 @@ public class TapPublisher extends Recorder {
 			t.printStackTrace(logger);
 		}
 
+		build.getActions().add(new TapTestResultAction(build, testResult));
+		
 		if (testResult.getTestSets().size() > 0) {
 			// create an individual report for all of the results and add it to
 			// the build
@@ -180,10 +186,10 @@ public class TapPublisher extends Recorder {
 			}
 		} else {
 			logger.println("Found matching files but did not find any TAP results.");
-			return true;
+			return Boolean.TRUE;
 		}
 		logger.println("TAP Reports Processing: FINISH");
-		return true;
+		return Boolean.TRUE;
 	}
 
 	/**
@@ -309,6 +315,13 @@ public class TapPublisher extends Recorder {
 	 */
 	public BuildStepMonitor getRequiredMonitorService() {
 		return BuildStepMonitor.STEP;
+	}
+	
+	/* (non-Javadoc)
+	 * @see hudson.matrix.MatrixAggregatable#createAggregator(hudson.matrix.MatrixBuild, hudson.Launcher, hudson.model.BuildListener)
+	 */
+	public MatrixAggregator createAggregator(MatrixBuild build, Launcher launcher, BuildListener listener) {
+		return new TestResultAggregator(build, launcher, listener);
 	}
 
 	@Extension(ordinal = 1000.0)
