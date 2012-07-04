@@ -7,5 +7,5 @@
     xmlns:f="/lib/form" 
     xmlns:i="jelly:fmt" 
     xmlns:tap="/org/tap4j/plugin/tags">
-    <h2>${request.parameterMap}</h2>
+    ${it.getContents(request)}
 </j:jelly>

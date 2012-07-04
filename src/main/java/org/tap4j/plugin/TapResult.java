@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.export.Exported;
 import org.tap4j.model.BailOut;
 import org.tap4j.model.Directive;
@@ -39,6 +40,7 @@ import org.tap4j.model.TestSet;
 import org.tap4j.plugin.model.ParseErrorTestSetMap;
 import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.plugin.util.DiagnosticUtil;
+import org.tap4j.producer.TapProducerFactory;
 import org.tap4j.util.DirectiveValues;
 import org.tap4j.util.StatusValues;
 
@@ -230,6 +232,18 @@ public class TapResult implements ModelObject, Serializable {
 	 */
 	public String getDisplayName() {
 		return getName();
+	}
+	
+	public String getContents(StaplerRequest request) {
+		String contents = null;
+		String fileName = request.getParameter("f");
+		for(TestSetMap tsm : this.testSets) {
+			if(tsm.getFileName().equals(fileName)) {
+				TestSet ts = tsm.getTestSet();
+				contents = TapProducerFactory.makeTap13Producer().dump(ts);
+			}
+		}
+		return contents;
 	}
 
 }
