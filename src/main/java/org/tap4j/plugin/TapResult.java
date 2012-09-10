@@ -23,15 +23,17 @@
  */
 package org.tap4j.plugin;
 
+import hudson.FilePath;
 import hudson.model.ModelObject;
 import hudson.model.AbstractBuild;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.export.Exported;
 import org.tap4j.model.BailOut;
 import org.tap4j.model.Directive;
@@ -40,7 +42,6 @@ import org.tap4j.model.TestSet;
 import org.tap4j.plugin.model.ParseErrorTestSetMap;
 import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.plugin.util.DiagnosticUtil;
-import org.tap4j.producer.TapProducerFactory;
 import org.tap4j.util.DirectiveValues;
 import org.tap4j.util.StatusValues;
 
@@ -234,13 +235,18 @@ public class TapResult implements ModelObject, Serializable {
 		return getName();
 	}
 	
-	public String getContents(StaplerRequest request) {
-		String contents = null;
-		String fileName = request.getParameter("f");
-		for(TestSetMap tsm : this.testSets) {
-			if(tsm.getFileName().equals(fileName)) {
-				TestSet ts = tsm.getTestSet();
-				contents = TapProducerFactory.makeTap13Producer().dump(ts);
+	public String getContents(String fileName) {
+		String contents = "";
+		if(fileName != null) {
+			FilePath tapDir = new FilePath(new FilePath(new File(build.getRootDir(), "tap")), fileName);
+			try {
+				if(tapDir.exists()) {
+					contents = tapDir.readToString();
+				}
+			} catch (IOException e) {
+				contents = e.getMessage();
+			} catch (InterruptedException e) {
+				contents = e.getMessage();
 			}
 		}
 		return contents;

@@ -1,0 +1,6 @@
+1..3
+ok 1
+not ok 2
+  # some IO error
+  # and more text here
+ok 3 # SKIP error in test 2
