@@ -241,7 +241,7 @@ public class TapResult implements ModelObject, Serializable {
 			FilePath tapDir = new FilePath(new FilePath(new File(build.getRootDir(), "tap")), fileName);
 			try {
 				if(tapDir.exists()) {
-					contents = tapDir.readToString();
+					contents = org.apache.commons.lang.StringEscapeUtils.escapeHtml(tapDir.readToString());
 				}
 			} catch (IOException e) {
 				contents = e.getMessage();

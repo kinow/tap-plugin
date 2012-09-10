@@ -33,67 +33,56 @@ import java.util.Set;
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
-public class DiagnosticUtil
-{
+public class DiagnosticUtil {
 
-	private enum RENDER_TYPE 
-	{
+	private enum RENDER_TYPE {
 		TEXT, IMAGE
 	};
-	
-	private static final String INNER_TABLE_HEADER = 
-		"<tr>\n<td colspan='4' class='yaml'>\n<table width=\"100%\" class=\"yaml\">";
-	
-	private static final String INNER_TABLE_FOOTER = 
-		"</table>\n</td>\n</tr>";
-	
-	private DiagnosticUtil()
-	{
+
+	private static final String INNER_TABLE_HEADER = "<tr>\n<td colspan='4' class='yaml'>\n<table width=\"100%\" class=\"yaml\">";
+
+	private static final String INNER_TABLE_FOOTER = "</table>\n</td>\n</tr>";
+
+	private DiagnosticUtil() {
 		super();
 	}
-	
-	public static String createDiagnosticTable( Map<String, Object> diagnostic )
-	{
-		
+
+	public static String createDiagnosticTable(Map<String, Object> diagnostic) {
 		StringBuilder sb = new StringBuilder();
-		
-		createDiagnosticTableRecursively( diagnostic, sb, 1 ); // 1 is the first depth
-		
+		createDiagnosticTableRecursively(diagnostic, sb, 1); // 1 is the first
+																// depth
 		return sb.toString();
 	}
-	
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static void createDiagnosticTableRecursively( Map<String, Object> diagnostic, StringBuilder sb, int depth )
-	{
-		
-		sb.append( INNER_TABLE_HEADER );
-		
-		RENDER_TYPE renderType = getMapEntriesRenderType( diagnostic ); 
-		
-		for (Entry<String, Object> entry : diagnostic.entrySet() )
-		{
+	public static void createDiagnosticTableRecursively(
+			Map<String, Object> diagnostic, StringBuilder sb, int depth) {
+
+		sb.append(INNER_TABLE_HEADER);
+
+		RENDER_TYPE renderType = getMapEntriesRenderType(diagnostic);
+
+		for (Entry<String, Object> entry : diagnostic.entrySet()) {
 			String key = entry.getKey();
 			Object value = entry.getValue();
 			sb.append("<tr>");
-			
-			for( int i =0 ; i < depth ; ++i )
-			{
-				sb.append( "<td width='5%' class='hidden'> </td>" );
+
+			for (int i = 0; i < depth; ++i) {
+				sb.append("<td width='5%' class='hidden'> </td>");
 			}
-			sb.append( "<td style=\"width: auto;\">"+key+"</td>" );
-			if ( value instanceof java.util.Map )
-			{
-				sb.append( "<td> </td>" );
-				createDiagnosticTableRecursively ( (java.util.Map)value, sb, (depth+1));
+			sb.append("<td style=\"width: auto;\">" + key + "</td>");
+			if (value instanceof java.util.Map) {
+				sb.append("<td> </td>");
+				createDiagnosticTableRecursively((java.util.Map) value, sb,
+						(depth + 1));
+			} else {
+				sb.append("<td>" + getRenderedValue(key, value, renderType)
+						+ "</td>");
 			}
-			else
-			{
-				sb.append( "<td>"+ getRenderedValue( key, value, renderType ) +"</td>" );
-			}
-			sb.append( "</tr>" );			
+			sb.append("</tr>");
 		}
-		
-		sb.append( INNER_TABLE_FOOTER );
+
+		sb.append(INNER_TABLE_FOOTER);
 	}
 
 	/**
@@ -101,40 +90,36 @@ public class DiagnosticUtil
 	 * @return
 	 */
 	private static RENDER_TYPE getMapEntriesRenderType(
-			Map<String, Object> diagnostic )
-	{
+			Map<String, Object> diagnostic) {
 		RENDER_TYPE renderType = RENDER_TYPE.TEXT;
 		final Set<String> keys = diagnostic.keySet();
-		if ( keys.contains("File-Type") && (keys.contains("File-Location") || keys.contains("File-Content") ))
-		{
+		if (keys.contains("File-Type")
+				&& (keys.contains("File-Location") || keys
+						.contains("File-Content"))) {
 			renderType = RENDER_TYPE.IMAGE;
 		}
 		return renderType;
 	}
-	
+
 	/**
 	 * @param key
-	 * @param value 
-	 * @param renderType 
+	 * @param value
+	 * @param renderType
 	 * @return
 	 */
-	private static String getRenderedValue( String key, Object value, RENDER_TYPE renderType )
-	{
-		switch( renderType )
-		{
+	private static String getRenderedValue(String key, Object value,
+			RENDER_TYPE renderType) {
+		switch (renderType) {
 		case IMAGE:
-			if( key.equals("File-Content") )
-			{
+			if (key.equals("File-Content")) {
 				return "Base64 content suppressed!";
-			}
-			else
-			{
-				return value.toString();
+			} else {
+				return org.apache.commons.lang.StringEscapeUtils.escapeHtml(value.toString());
 			}
 		default:
 		case TEXT:
-			return value.toString();
+			return org.apache.commons.lang.StringEscapeUtils.escapeHtml(value.toString());
 		}
 	}
-	
+
 }
