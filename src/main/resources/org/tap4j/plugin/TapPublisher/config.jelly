@@ -3,6 +3,9 @@
   <f:entry title="Test results" field="testResults">
     <f:textbox />
   </f:entry>
+  <f:entry title="Fail the build if no test results are present">
+      <f:checkbox name="TapPublisher.failIfNoResults" value="${instance.failIfNoResults}" checked="${instance.failIfNoResults}" />
+  </f:entry>
   <f:entry title="Failed tests mark build as failure">
       <f:checkbox name="TapPublisher.failedTestsMarkBuildAsFailure" value="${instance.failedTestsMarkBuildAsFailure}" checked="${instance.failedTestsMarkBuildAsFailure}" />
   </f:entry>

@@ -58,13 +58,21 @@ import org.kohsuke.stapler.DataBoundConstructor;
 @SuppressWarnings("unchecked")
 public class TapPublisher extends Recorder implements MatrixAggregatable {
 	private final String testResults;
+	private final Boolean failIfNoResults;
 	private final Boolean failedTestsMarkBuildAsFailure;
 	private final Boolean outputTapToConsole;
 
 	@DataBoundConstructor
 	public TapPublisher(String testResults,
-			Boolean failedTestsMarkBuildAsFailure, Boolean outputTapToConsole) {
+			Boolean failIfNoResults, 
+			Boolean failedTestsMarkBuildAsFailure, 
+			Boolean outputTapToConsole) {
 		this.testResults = testResults;
+		if(failIfNoResults == null) {
+			this.failIfNoResults = Boolean.FALSE;
+		} else {
+			this.failIfNoResults = failIfNoResults;
+		}
 		if (failedTestsMarkBuildAsFailure == null) {
 			this.failedTestsMarkBuildAsFailure = Boolean.FALSE;
 		} else {
@@ -75,19 +83,28 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 
 	public Object readResolve() {
 		String testResults = this.getTestResults();
-		Boolean failedTestsMarkBuildAsFailure = this
-				.getFailedTestsMarkBuildAsFailure();
+		Boolean failIfNoResults = this.getFailIfNoResults();
+		Boolean failedTestsMarkBuildAsFailure = this.getFailedTestsMarkBuildAsFailure();
 		Boolean outputTapToConsole = this.getOutputTapToConsole();
 		if (failedTestsMarkBuildAsFailure == null) {
 			failedTestsMarkBuildAsFailure = Boolean.FALSE;
 		}
+		if(failIfNoResults == null) {
+			failIfNoResults = Boolean.FALSE;
+		}
 		if (outputTapToConsole == null) {
 			outputTapToConsole = Boolean.FALSE;
 		}
-		return new TapPublisher(testResults, failedTestsMarkBuildAsFailure,
-				outputTapToConsole);
+		return new TapPublisher(testResults, failIfNoResults, failedTestsMarkBuildAsFailure, outputTapToConsole);
 	}
 
+	/**
+	 * @return the failIfNoResults
+	 */
+	public Boolean getFailIfNoResults() {
+		return failIfNoResults;
+	}
+	
 	/**
 	 * @return the testResults
 	 */
@@ -138,9 +155,15 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 				this.testResults);
 
 		if (reports.length == 0) {
-			logger.println("Did not find any matching files.");
-			// build can still continue
-			return Boolean.TRUE;
+			if(this.getFailIfNoResults()) {
+				logger.println("Did not find any matching files. Setting build result to FAILURE.");
+				build.setResult(Result.FAILURE);
+				return Boolean.FALSE;
+			} else {
+				logger.println("Did not find any matching files.");
+				// build can still continue
+				return Boolean.TRUE;
+			}
 		}
 
 		/*
@@ -148,8 +171,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		 */
 		//reports = checkReports(build, reports, logger);
 
-		boolean filesSaved = saveReports(getTapReportDirectory(build), reports,
-				logger);
+		boolean filesSaved = saveReports(getTapReportDirectory(build), reports,logger);
 		if (!filesSaved) {
 			logger.println("Failed to save TAP reports");
 			return Boolean.TRUE;
