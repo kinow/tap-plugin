@@ -119,5 +119,22 @@ public class TapTestResultAction extends AbstractTestResultAction<AbstractTestRe
 	public TestResult getResult() {
 		return new TapStreamResult(owner, tapResult);
 	}
+	
+	/* (non-Javadoc)
+	 * @see hudson.tasks.test.AbstractTestResultAction#getUrlName()
+	 */
+	@Override
+	@Exported(visibility = 2)
+	public String getUrlName() {
+		return "tapTestReport";
+	}
+	
+	/* (non-Javadoc)
+	 * @see hudson.tasks.test.AbstractTestResultAction#getDisplayName()
+	 */
+	@Override
+	public String getDisplayName() {
+		return "TAP Test Result";
+	}
 
 }
