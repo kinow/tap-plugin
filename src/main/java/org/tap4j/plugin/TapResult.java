@@ -34,7 +34,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletOutputStream;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
+import org.tap4j.consumer.TapConsumer;
+import org.tap4j.consumer.TapConsumerFactory;
 import org.tap4j.model.BailOut;
 import org.tap4j.model.Directive;
 import org.tap4j.model.TestResult;
@@ -206,8 +214,8 @@ public class TapResult implements ModelObject, Serializable {
 	/**
 	 * Called from TapResult/index..jelly
 	 */
-	public String createDiagnosticTable(Map<String, Object> diagnostic) {
-		return DiagnosticUtil.createDiagnosticTable(diagnostic);
+	public String createDiagnosticTable(String tapFile, Map<String, Object> diagnostic) {
+		return DiagnosticUtil.createDiagnosticTable(tapFile, diagnostic);
 	}
 
 	public boolean isTestResult(Object tapResult) {
@@ -250,6 +258,84 @@ public class TapResult implements ModelObject, Serializable {
 			}
 		}
 		return contents;
+	}
+	
+	public void doDownloadAttachment(StaplerRequest request, StaplerResponse response) {
+		String f = request.getParameter("f");
+		String key = request.getParameter("key");
+		try {
+			FilePath tapDir = new FilePath(new FilePath(new File(build.getRootDir(), "tap")), f);
+			ServletOutputStream sos = response.getOutputStream();
+			if(tapDir.exists()) {
+				String tapStream = tapDir.readToString();
+				TapConsumer consumer = TapConsumerFactory.makeTap13YamlConsumer();
+				TestSet ts = consumer.load(tapStream);
+				
+				String content = getContent(ts, key);
+				if(StringUtils.isNotBlank(content)) {
+					response.setContentType("application/force-download");
+					//response.setContentLength((int)tapDir.length());
+			        response.setContentLength(-1);
+					response.setHeader("Content-Transfer-Encoding", "binary");
+					response.setHeader("Content-Disposition","attachment; filename=\"" + f + "\"");//fileName);
+					
+					sos.write(Base64.decodeBase64(content));
+					sos.print('\n');
+				} else {
+					sos.println("Couldn't locate attachment in YAMLish: " + f);
+				}
+			} else {
+				sos.println("Couldn't read FilePath.");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} finally {
+		}
+	}
+
+	/**
+	 * @param ts
+	 * @param key
+	 * @return
+	 */
+	private String getContent(TestSet ts, String key) {
+		for(TestResult tr : ts.getTestResults()){
+			Map<String, Object> diagnostics = tr.getDiagnostic();
+			String parentKey = null;
+			if(diagnostics != null && diagnostics.size() > 0) {
+				return recursivelySearch(diagnostics, parentKey, key);
+			}
+		}
+		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private String recursivelySearch(Map<String, Object> diagnostics, String parentKey, String key) {
+		for(String diagnosticKey : diagnostics.keySet()) {
+			Object value = diagnostics.get(diagnosticKey);
+			if(value != null) {
+				if(value instanceof Map<?, ?>) {
+					return recursivelySearch((Map<String, Object>)value, diagnosticKey, key);
+				} else {
+					if(parentKey != null && parentKey.equals(key)) {
+						Object o = diagnostics.get("File-Content");
+						if(o == null)
+							o = diagnostics.get("File-content");
+						if(o != null && o instanceof String)
+							return (String)o;
+					} else if(diagnosticKey.equalsIgnoreCase("file-name") && diagnosticKey.equals(key)) {
+						Object o = diagnostics.get("File-Content");
+						if(o == null)
+							o = diagnostics.get("File-content");
+						if(o != null && o instanceof String)
+							return (String)o;
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 }

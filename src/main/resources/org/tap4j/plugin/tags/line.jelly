@@ -5,6 +5,7 @@
     <j:choose>
         <j:when test="${attrs.tapLine != null}">
 	        <j:set var="tapLine" value="${attrs.tapLine}" />
+	        <j:set var="tapFile" value="${attrs.tapFile}" />
 	        
 	        <j:choose>
                 <j:when test="${it.isTestResult( tapLine )}">
@@ -17,7 +18,7 @@
 				    <!-- Comments diagnostics -->
                     <tap:comments diagnostic="${tapLine.comments}" />
 				    <!-- YAML Diagnostics -->
-                    <tap:yaml diagnostic="${tapLine.diagnostic}" />
+                    <tap:yaml diagnostic="${tapLine.diagnostic}" tapFile="${tapFile}" />
 				</j:when>
 				<j:when  test="${it.isBailOut( tapLine )}">
 				    <tr>

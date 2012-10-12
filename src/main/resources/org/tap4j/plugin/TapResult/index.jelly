@@ -42,7 +42,7 @@
 							<j:forEach var="tapLine" items="${map.testSet.tapLines}">
 								
 								<!-- TAP Test Result information -->
-								<tap:line tapLine="${tapLine}" />
+								<tap:line tapLine="${tapLine}" tapFile="${map.fileName}" />
 								
 							</j:forEach>
 						
