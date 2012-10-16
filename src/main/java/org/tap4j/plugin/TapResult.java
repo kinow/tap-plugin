@@ -37,7 +37,6 @@ import java.util.Map;
 import javax.servlet.ServletOutputStream;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
@@ -48,6 +47,7 @@ import org.tap4j.model.Directive;
 import org.tap4j.model.TestResult;
 import org.tap4j.model.TestSet;
 import org.tap4j.plugin.model.ParseErrorTestSetMap;
+import org.tap4j.plugin.model.TapAttachment;
 import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.plugin.util.DiagnosticUtil;
 import org.tap4j.util.DirectiveValues;
@@ -271,15 +271,15 @@ public class TapResult implements ModelObject, Serializable {
 				TapConsumer consumer = TapConsumerFactory.makeTap13YamlConsumer();
 				TestSet ts = consumer.load(tapStream);
 				
-				String content = getContent(ts, key);
-				if(StringUtils.isNotBlank(content)) {
+				TapAttachment attachment = getAttachment(ts, key);
+				if(attachment != null) {
 					response.setContentType("application/force-download");
 					//response.setContentLength((int)tapDir.length());
-			        response.setContentLength(-1);
+			        response.setContentLength(attachment.getSize());
 					response.setHeader("Content-Transfer-Encoding", "binary");
-					response.setHeader("Content-Disposition","attachment; filename=\"" + f + "\"");//fileName);
+					response.setHeader("Content-Disposition","attachment; filename=\"" + attachment.getFileName() + "\"");//fileName);
 					
-					sos.write(Base64.decodeBase64(content));
+					sos.write(attachment.getContent());
 					sos.print('\n');
 				} else {
 					sos.println("Couldn't locate attachment in YAMLish: " + f);
@@ -300,7 +300,7 @@ public class TapResult implements ModelObject, Serializable {
 	 * @param key
 	 * @return
 	 */
-	private String getContent(TestSet ts, String key) {
+	private TapAttachment getAttachment(TestSet ts, String key) {
 		for(TestResult tr : ts.getTestResults()){
 			Map<String, Object> diagnostics = tr.getDiagnostic();
 			String parentKey = null;
@@ -312,7 +312,7 @@ public class TapResult implements ModelObject, Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private String recursivelySearch(Map<String, Object> diagnostics, String parentKey, String key) {
+	private TapAttachment recursivelySearch(Map<String, Object> diagnostics, String parentKey, String key) {
 		for(String diagnosticKey : diagnostics.keySet()) {
 			Object value = diagnostics.get(diagnosticKey);
 			if(value != null) {
@@ -324,13 +324,13 @@ public class TapResult implements ModelObject, Serializable {
 						if(o == null)
 							o = diagnostics.get("File-content");
 						if(o != null && o instanceof String)
-							return (String)o;
+							return new TapAttachment(Base64.decodeBase64((String)o), diagnostics);
 					} else if(diagnosticKey.equalsIgnoreCase("file-name") && value.equals(key)) {
 						Object o = diagnostics.get("File-Content");
 						if(o == null)
 							o = diagnostics.get("File-content");
 						if(o != null && o instanceof String)
-							return (String)o;
+							return new TapAttachment(Base64.decodeBase64((String)o), diagnostics);
 					}
 				}
 			}
