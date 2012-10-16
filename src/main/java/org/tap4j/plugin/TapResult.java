@@ -325,7 +325,7 @@ public class TapResult implements ModelObject, Serializable {
 							o = diagnostics.get("File-content");
 						if(o != null && o instanceof String)
 							return (String)o;
-					} else if(diagnosticKey.equalsIgnoreCase("file-name") && diagnosticKey.equals(key)) {
+					} else if(diagnosticKey.equalsIgnoreCase("file-name") && value.equals(key)) {
 						Object o = diagnostics.get("File-Content");
 						if(o == null)
 							o = diagnostics.get("File-content");
