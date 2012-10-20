@@ -224,7 +224,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		FilePath tapDir = getTapReportDirectory(owner);
 		FilePath[] results = null;
 		try {
-			results = tapDir.list("*.tap");
+			results = tapDir.list("**/*.*");
 		} catch (Exception e) {
 			e.printStackTrace(logger);
 		}
@@ -273,7 +273,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 	 * @return
 	 */
 	private FilePath getTapReportDirectory(AbstractBuild<?, ?> build) {
-		return new FilePath(new File(build.getRootDir(), "tap"));
+		return new FilePath(new File(build.getRootDir(), "tap-master-files"));
 	}
 
 	/**
