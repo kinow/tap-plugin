@@ -61,24 +61,38 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 	private final Boolean failIfNoResults;
 	private final Boolean failedTestsMarkBuildAsFailure;
 	private final Boolean outputTapToConsole;
+	private final Boolean enableSubtests;
+	private final Boolean discardOldReports;
 
 	@DataBoundConstructor
 	public TapPublisher(String testResults,
 			Boolean failIfNoResults, 
 			Boolean failedTestsMarkBuildAsFailure, 
-			Boolean outputTapToConsole) {
+			Boolean outputTapToConsole,
+			Boolean enableSubtests, 
+			Boolean discardOldReports) {
 		this.testResults = testResults;
 		if(failIfNoResults == null) {
 			this.failIfNoResults = Boolean.FALSE;
 		} else {
 			this.failIfNoResults = failIfNoResults;
 		}
-		if (failedTestsMarkBuildAsFailure == null) {
+		if(failedTestsMarkBuildAsFailure == null) {
 			this.failedTestsMarkBuildAsFailure = Boolean.FALSE;
 		} else {
 			this.failedTestsMarkBuildAsFailure = failedTestsMarkBuildAsFailure;
 		}
 		this.outputTapToConsole = outputTapToConsole;
+		if(enableSubtests == null) {
+			this.enableSubtests = Boolean.TRUE;
+		} else {
+			this.enableSubtests = enableSubtests;
+		}
+		if(discardOldReports == null) {
+			this.discardOldReports = Boolean.FALSE;
+		} else {
+			this.discardOldReports = discardOldReports;
+		}
 	}
 
 	public Object readResolve() {
@@ -86,6 +100,8 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		Boolean failIfNoResults = this.getFailIfNoResults();
 		Boolean failedTestsMarkBuildAsFailure = this.getFailedTestsMarkBuildAsFailure();
 		Boolean outputTapToConsole = this.getOutputTapToConsole();
+		Boolean enableSubtests = this.getEnableSubtests();
+		Boolean discardOldReports = this.getDiscardOldReports();
 		if (failedTestsMarkBuildAsFailure == null) {
 			failedTestsMarkBuildAsFailure = Boolean.FALSE;
 		}
@@ -95,7 +111,14 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		if (outputTapToConsole == null) {
 			outputTapToConsole = Boolean.FALSE;
 		}
-		return new TapPublisher(testResults, failIfNoResults, failedTestsMarkBuildAsFailure, outputTapToConsole);
+		if(enableSubtests == null) {
+			enableSubtests = Boolean.TRUE;
+		}
+		if(discardOldReports == null) {
+			discardOldReports = Boolean.FALSE;
+		}
+		
+		return new TapPublisher(testResults, failIfNoResults, failedTestsMarkBuildAsFailure, outputTapToConsole, enableSubtests, discardOldReports);
 	}
 
 	/**
@@ -121,6 +144,20 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 	 */
 	public Boolean getOutputTapToConsole() {
 		return outputTapToConsole;
+	}
+	
+	/**
+	 * @return the enableSubtests
+	 */
+	public Boolean getEnableSubtests() {
+		return enableSubtests;
+	}
+	
+	/**
+	 * @return the discardOldReports
+	 */
+	public Boolean getDiscardOldReports() {
+		return discardOldReports;
 	}
 
 	/*
@@ -169,7 +206,9 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		/*
 		 * filter out the reports based on timestamps. See JENKINS-12187
 		 */
-		//reports = checkReports(build, reports, logger);
+		if(this.getDiscardOldReports()) {
+			reports = checkReports(build, reports, logger);
+		}
 
 		boolean filesSaved = saveReports(getTapReportDirectory(build), reports,logger);
 		if (!filesSaved) {
@@ -236,7 +275,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 			return tr;
 		}
 
-		TapParser parser = new TapParser(this.outputTapToConsole, logger);
+		TapParser parser = new TapParser(this.outputTapToConsole, this.enableSubtests, logger);
 		TapResult result = parser.parse(results, owner);
 		result.setOwner(owner);
 		return result;

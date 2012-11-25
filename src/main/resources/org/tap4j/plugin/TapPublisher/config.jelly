@@ -12,4 +12,10 @@
   <f:entry title="Output TAP to console">
       <f:checkbox name="TapPublisher.outputTapToConsole" value="${instance.outputTapToConsole}" checked="${instance.outputTapToConsole}" />
   </f:entry>
+  <f:entry title="Enable subtests">
+      <f:checkbox name="TapPublisher.enableSubtests" value="${instance.enableSubtests}" checked="${instance.enableSubtests}" />
+  </f:entry>
+  <f:entry title="Discard old reports">
+      <f:checkbox name="TapPublisher.discardOldReports" value="${instance.discardOldReports}" checked="${instance.discardOldReports}" />
+  </f:entry>
 </j:jelly>

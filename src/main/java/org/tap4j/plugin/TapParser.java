@@ -52,13 +52,15 @@ public class TapParser {
 	private static final Logger log = Logger.getLogger(TapParser.class
 			.getName());
 	private Boolean outputTapToConsole;
+	private Boolean enableSubtests;
 	/** Build's logger to print logs as part of build's console output */
 	private PrintStream logger;
 	private boolean parserErrors;
 	private boolean hasFailedTests;
 
-	public TapParser(Boolean outputTapToConsole, PrintStream logger) {
+	public TapParser(Boolean outputTapToConsole, Boolean enableSubtests, PrintStream logger) {
 		this.outputTapToConsole = outputTapToConsole;
+		this.enableSubtests = enableSubtests;
 		this.logger = logger;
 		this.parserErrors = false;
 		this.hasFailedTests = false;
@@ -91,8 +93,13 @@ public class TapParser {
 				try {
 					log("Parsing TAP test result [" + tapFile + "].");
 	
-					final TestSet testSet = new Tap13YamlParser()
-							.parseFile(tapFile);
+					final Tap13YamlParser parser;
+					if(enableSubtests != null) {
+						parser = new Tap13YamlParser(enableSubtests);
+					} else {
+						parser = new Tap13YamlParser();
+					}
+					final TestSet testSet = parser.parseFile(tapFile);
 	
 					if (testSet.containsNotOk() || testSet.containsBailOut()) {
 						this.hasFailedTests = Boolean.TRUE;

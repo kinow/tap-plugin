@@ -36,7 +36,6 @@ import org.tap4j.model.Comment;
 import org.tap4j.model.Directive;
 import org.tap4j.model.TestSet;
 import org.tap4j.plugin.TapResult;
-import org.tap4j.producer.TapProducer;
 import org.tap4j.util.DirectiveValues;
 import org.tap4j.util.StatusValues;
 
