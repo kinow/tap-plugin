@@ -6,7 +6,6 @@
         <j:when test="${attrs.tapLine != null}">
 	        <j:set var="tapLine" value="${attrs.tapLine}" />
 	        <j:set var="tapFile" value="${attrs.tapFile}" />
-	        
 	        <j:choose>
                 <j:when test="${it.isTestResult( tapLine )}">
 				    <tr>
@@ -16,7 +15,7 @@
 				        <tap:directive directive="${tapLine.directive}" />
 				    </tr>
 				    <!-- Comments diagnostics -->
-                    <tap:comments diagnostic="${tapLine.comments}" />
+                    <!-- tap:comments diagnostic="${tapLine.comments}" /-->
 				    <!-- YAML Diagnostics -->
                     <tap:yaml diagnostic="${tapLine.diagnostic}" tapFile="${tapFile}" />
 				</j:when>
@@ -28,6 +27,14 @@
                         <tap:directive directive="" />
                     </tr>
 				</j:when>
+				<j:when  test="${it.isComment( tapLine )}">
+                    <tr>
+                        <td></td>
+                        <td colspan='3'>
+                            # ${tapLine.text}<br/>
+                        </td>
+                    </tr>
+                </j:when>
 		    </j:choose>
         </j:when>
             <j:otherwise></j:otherwise>

@@ -43,6 +43,7 @@ import org.kohsuke.stapler.export.Exported;
 import org.tap4j.consumer.TapConsumer;
 import org.tap4j.consumer.TapConsumerFactory;
 import org.tap4j.model.BailOut;
+import org.tap4j.model.Comment;
 import org.tap4j.model.Directive;
 import org.tap4j.model.TestResult;
 import org.tap4j.model.TestSet;
@@ -202,6 +203,7 @@ public class TapResult implements ModelObject, Serializable {
 		boolean r = false;
 		Directive directive = testResult.getDirective();
 		StatusValues status = testResult.getStatus();
+		// TODO !
 		if (directive != null
 				&& directive.getDirectiveValue() == DirectiveValues.TODO) {
 			r = true;
@@ -224,6 +226,10 @@ public class TapResult implements ModelObject, Serializable {
 
 	public boolean isBailOut(Object tapResult) {
 		return (tapResult != null && tapResult instanceof BailOut);
+	}
+	
+	public boolean isComment(Object tapResult) {
+		return (tapResult != null && tapResult instanceof Comment);
 	}
 
 	/**
