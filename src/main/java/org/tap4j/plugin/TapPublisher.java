@@ -26,6 +26,7 @@ package org.tap4j.plugin;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
 import hudson.matrix.MatrixBuild;
@@ -227,7 +228,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 			reports = checkReports(build, reports, logger);
 		}
 
-		boolean filesSaved = saveReports(getTapReportDirectory(build), reports,logger);
+		boolean filesSaved = saveReports(build.getWorkspace(), getTapReportDirectory(build), reports, logger);
 		if (!filesSaved) {
 			logger.println("Failed to save TAP reports");
 			return Boolean.TRUE;
@@ -299,23 +300,20 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 	}
 
 	/**
+	 * @param workspace 
 	 * @param tapDir
 	 * @param reports
 	 * @param logger
 	 * @return
 	 */
-	private boolean saveReports(FilePath tapDir, FilePath[] reports,
+	private boolean saveReports(FilePath workspace, FilePath tapDir, FilePath[] reports,
 			PrintStream logger) {
 		logger.println("Saving reports...");
 		try {
 			tapDir.mkdirs();
-			// int i = 0;
 			for (FilePath report : reports) {
-				// String name = "tap-report" + (i > 0 ? "-" + i : "")
-				// + ".tap";
-				// i++;
-				// TODO: !
-				FilePath dst = tapDir.child(report.getName());
+				//FilePath dst = tapDir.child(report.getName());
+				FilePath dst = getDistDir(workspace, tapDir, report);
 				report.copyTo(dst);
 			}
 		} catch (Exception e) {
@@ -323,6 +321,20 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 			return false;
 		}
 		return true;
+	}
+	
+	private FilePath getDistDir(FilePath workspace, FilePath tapDir, FilePath orig) {
+		if(orig == null)
+			return null;
+		StringBuilder difference = new StringBuilder();
+		FilePath parent = orig.getParent();
+		do {
+			if(parent.equals(workspace))
+				break;
+			difference.insert(0, parent.getName() + File.separatorChar);
+		} while((parent = parent.getParent()) !=null);
+		difference.append(orig.getName());
+		return tapDir.child(difference.toString());
 	}
 
 	/**
