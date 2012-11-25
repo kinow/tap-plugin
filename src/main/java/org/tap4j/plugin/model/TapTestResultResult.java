@@ -50,13 +50,31 @@ public class TapTestResultResult extends TestResult {
 	private final AbstractBuild<?, ?> owner;
 	private final org.tap4j.model.TestResult tapTestResult;
 	private final TestSetMap testSetMap;
+	private final Boolean todoIsFailure;
 
+	/**
+	 * @deprecated
+	 * @param owner
+	 * @param testSetMap
+	 * @param tapTestResult
+	 */
 	public TapTestResultResult(AbstractBuild<?, ?> owner, 
 			TestSetMap testSetMap, 
 			org.tap4j.model.TestResult tapTestResult) {
 		this.owner = owner;
 		this.testSetMap = testSetMap;
 		this.tapTestResult = tapTestResult;
+		this.todoIsFailure = Boolean.TRUE;
+	}
+	
+	public TapTestResultResult(AbstractBuild<?, ?> owner, 
+			TestSetMap testSetMap, 
+			org.tap4j.model.TestResult tapTestResult, 
+			Boolean todoIsFailure) {
+		this.owner = owner;
+		this.testSetMap = testSetMap;
+		this.tapTestResult = tapTestResult;
+		this.todoIsFailure = todoIsFailure;
 	}
 	
 	/* (non-Javadoc)
@@ -86,7 +104,7 @@ public class TapTestResultResult extends TestResult {
 			if(subTest != null) {
 				List<TestSetMap> list = new ArrayList<TestSetMap>();
 				list.add(subTest);
-				parent = new TapStreamResult(owner, new TapResult("TAP Test Results", owner, list));
+				parent = new TapStreamResult(owner, new TapResult("TAP Test Results", owner, list, todoIsFailure));
 			}
 		}
 		return parent;

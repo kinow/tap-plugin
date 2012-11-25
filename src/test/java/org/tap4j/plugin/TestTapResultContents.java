@@ -58,7 +58,7 @@ public class TestTapResultContents extends HudsonTestCase {
 				return new File(TestTapResultContents.class.getResource("/org/tap4j/plugin/").getFile());
 			}
 		};
-		TapResult result = new TapResult("name", a, tss);
+		TapResult result = new TapResult("name", a, tss, true);
 		String contents = result.getContents("sample.tap");
 		String expected = "1..3\nok 1\nnot ok 2\n  # some IO error\n  # and more text here\nok 3 # SKIP error in test 2";
 		assertEquals(expected, contents);

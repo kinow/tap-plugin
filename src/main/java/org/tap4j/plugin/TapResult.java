@@ -71,15 +71,39 @@ public class TapResult implements ModelObject, Serializable {
 	private int bailOuts = 0;
 	private int total = 0;
 	private String name;
+	private Boolean todoIsFailure;
 
+	/**
+	 * @deprecated since JENKINS-15401
+	 * @param name
+	 * @param owner
+	 * @param testSets
+	 */
 	public TapResult(String name, AbstractBuild<?, ?> owner,
 			List<TestSetMap> testSets) {
 		this.name = name;
 		this.build = owner;
 		this.testSets = this.filterTestSet(testSets);
 		this.parseErrorTestSets = this.filterParseErrorTestSets(testSets);
+		this.todoIsFailure = true;
 	}
-
+	
+	public TapResult(String name, AbstractBuild<?, ?> owner,
+			List<TestSetMap> testSets, Boolean todoIsFailure) {
+		this.name = name;
+		this.build = owner;
+		this.testSets = this.filterTestSet(testSets);
+		this.parseErrorTestSets = this.filterParseErrorTestSets(testSets);
+		this.todoIsFailure = todoIsFailure;
+	}
+	
+	/**
+	 * @return the todoIsFailure
+	 */
+	public Boolean getTodoIsFailure() {
+		return todoIsFailure;
+	}
+	
 	/**
 	 * @param testSets
 	 *            Untiltered test sets
@@ -203,10 +227,10 @@ public class TapResult implements ModelObject, Serializable {
 		boolean r = false;
 		Directive directive = testResult.getDirective();
 		StatusValues status = testResult.getStatus();
-		// TODO !
-		if (directive != null
-				&& directive.getDirectiveValue() == DirectiveValues.TODO) {
-			r = true;
+		if (directive != null) {
+			if(directive.getDirectiveValue() == DirectiveValues.TODO && todoIsFailure != null && true == todoIsFailure) {
+				r = true;
+			}
 		} else if (status != null && status == StatusValues.NOT_OK) {
 			r = true;
 		}

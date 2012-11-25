@@ -63,6 +63,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 	private final Boolean outputTapToConsole;
 	private final Boolean enableSubtests;
 	private final Boolean discardOldReports;
+	private final Boolean todoIsFailure;
 
 	@DataBoundConstructor
 	public TapPublisher(String testResults,
@@ -70,7 +71,8 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 			Boolean failedTestsMarkBuildAsFailure, 
 			Boolean outputTapToConsole,
 			Boolean enableSubtests, 
-			Boolean discardOldReports) {
+			Boolean discardOldReports,
+			Boolean todoIsFailure) {
 		this.testResults = testResults;
 		if(failIfNoResults == null) {
 			this.failIfNoResults = Boolean.FALSE;
@@ -93,6 +95,11 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		} else {
 			this.discardOldReports = discardOldReports;
 		}
+		if(todoIsFailure == null) {
+			this.todoIsFailure = Boolean.TRUE;
+		} else {
+			this.todoIsFailure = todoIsFailure;
+		}
 	}
 
 	public Object readResolve() {
@@ -102,6 +109,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		Boolean outputTapToConsole = this.getOutputTapToConsole();
 		Boolean enableSubtests = this.getEnableSubtests();
 		Boolean discardOldReports = this.getDiscardOldReports();
+		Boolean todoIsFailure = this.getTodoIsFailure();
 		if (failedTestsMarkBuildAsFailure == null) {
 			failedTestsMarkBuildAsFailure = Boolean.FALSE;
 		}
@@ -117,8 +125,10 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		if(discardOldReports == null) {
 			discardOldReports = Boolean.FALSE;
 		}
-		
-		return new TapPublisher(testResults, failIfNoResults, failedTestsMarkBuildAsFailure, outputTapToConsole, enableSubtests, discardOldReports);
+		if(todoIsFailure == null) {
+			todoIsFailure = Boolean.TRUE;
+		}
+		return new TapPublisher(testResults, failIfNoResults, failedTestsMarkBuildAsFailure, outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure);
 	}
 
 	/**
@@ -158,6 +168,13 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 	 */
 	public Boolean getDiscardOldReports() {
 		return discardOldReports;
+	}
+	
+	/**
+	 * @return the todoIsFailure
+	 */
+	public Boolean getTodoIsFailure() {
+		return todoIsFailure;
 	}
 
 	/*
@@ -270,12 +287,12 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 
 		TapResult tr = null;
 		if (results == null) {
-			tr = new TapResult("", owner, Collections.EMPTY_LIST);
+			tr = new TapResult("", owner, Collections.EMPTY_LIST, this.todoIsFailure);
 			tr.setOwner(owner);
 			return tr;
 		}
 
-		TapParser parser = new TapParser(this.outputTapToConsole, this.enableSubtests, logger);
+		TapParser parser = new TapParser(this.outputTapToConsole, this.enableSubtests, this.todoIsFailure, logger);
 		TapResult result = parser.parse(results, owner);
 		result.setOwner(owner);
 		return result;
@@ -297,6 +314,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 				// String name = "tap-report" + (i > 0 ? "-" + i : "")
 				// + ".tap";
 				// i++;
+				// TODO: !
 				FilePath dst = tapDir.child(report.getName());
 				report.copyTo(dst);
 			}

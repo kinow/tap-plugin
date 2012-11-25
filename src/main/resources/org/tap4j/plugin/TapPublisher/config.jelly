@@ -18,4 +18,7 @@
   <f:entry title="Discard old reports">
       <f:checkbox name="TapPublisher.discardOldReports" value="${instance.discardOldReports}" checked="${instance.discardOldReports}" />
   </f:entry>
+  <f:entry title="TODO directive fails a test">
+      <f:checkbox name="TapPublisher.todoIsFailure" value="${instance.todoIsFailure}" checked="${instance.todoIsFailure}" />
+  </f:entry>
 </j:jelly>

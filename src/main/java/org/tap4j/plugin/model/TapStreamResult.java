@@ -59,7 +59,7 @@ public class TapStreamResult extends TabulatedResult {
 		for(TestSetMap tsm : tapResult.getTestSets()) {
 			TestSet ts = tsm.getTestSet();
 			for(org.tap4j.model.TestResult tr : ts.getTestResults()) {
-				this.children.add(new TapTestResultResult(owner, tsm, tr));
+				this.children.add(new TapTestResultResult(owner, tsm, tr, this.tapResult.getTodoIsFailure()));
 			}
 		}
 	}
@@ -154,7 +154,7 @@ public class TapStreamResult extends TabulatedResult {
 				TestSet ts = tsm.getTestSet();
 				for(org.tap4j.model.TestResult tr : ts.getTestResults()) {
 					if(tr.getStatus() == StatusValues.NOT_OK) {
-						failedTests.add(new TapTestResultResult(owner, tsm, tr));
+						failedTests.add(new TapTestResultResult(owner, tsm, tr, this.tapResult.getTodoIsFailure()));
 					}
 				}
 			}
@@ -183,7 +183,7 @@ public class TapStreamResult extends TabulatedResult {
 			if(tsm.getFileName().equals(fileName)) {
 				TestSet ts = tsm.getTestSet();
 				org.tap4j.model.TestResult desired = ts.getTestResult(Integer.parseInt(testNumber));
-				return new TapTestResultResult(owner, tsm, desired);
+				return new TapTestResultResult(owner, tsm, desired, this.tapResult.getTodoIsFailure());
 			}
 		}
 		return null;
