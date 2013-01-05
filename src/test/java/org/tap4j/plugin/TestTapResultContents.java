@@ -36,6 +36,7 @@ import org.jvnet.hudson.test.HudsonTestCase;
 import org.tap4j.model.TestSet;
 import org.tap4j.parser.Tap13Parser;
 import org.tap4j.plugin.model.TestSetMap;
+import org.tap4j.plugin.util.Constants;
 
 /**
  * 
@@ -48,7 +49,7 @@ public class TestTapResultContents extends HudsonTestCase {
 	@Test
 	public void testContents() throws IOException, InterruptedException {
 		Tap13Parser parser = new Tap13Parser();
-		TestSet ts = parser.parseFile(new File(TestTapResultContents.class.getResource("/org/tap4j/plugin/tap/sample.tap").getFile()));
+		TestSet ts = parser.parseFile(new File(TestTapResultContents.class.getResource("/org/tap4j/plugin/"+Constants.TAP_DIR_NAME+"/sample.tap").getFile()));
 		TestSetMap tsm = new TestSetMap("sample.tap", ts);
 		List<TestSetMap> tss = new ArrayList<TestSetMap>();
 		tss.add(tsm);
