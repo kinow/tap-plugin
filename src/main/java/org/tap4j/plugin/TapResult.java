@@ -50,6 +50,7 @@ import org.tap4j.model.TestSet;
 import org.tap4j.plugin.model.ParseErrorTestSetMap;
 import org.tap4j.plugin.model.TapAttachment;
 import org.tap4j.plugin.model.TestSetMap;
+import org.tap4j.plugin.util.Constants;
 import org.tap4j.plugin.util.DiagnosticUtil;
 import org.tap4j.util.DirectiveValues;
 import org.tap4j.util.StatusValues;
@@ -276,7 +277,7 @@ public class TapResult implements ModelObject, Serializable {
 	public String getContents(String fileName) {
 		String contents = "";
 		if(fileName != null) {
-			FilePath tapDir = new FilePath(new FilePath(new File(build.getRootDir(), "tap")), fileName);
+			FilePath tapDir = new FilePath(new FilePath(new File(build.getRootDir(), Constants.TAP_DIR_NAME)), fileName);
 			try {
 				if(tapDir.exists()) {
 					contents = org.apache.commons.lang.StringEscapeUtils.escapeHtml(tapDir.readToString());
@@ -294,7 +295,7 @@ public class TapResult implements ModelObject, Serializable {
 		String f = request.getParameter("f");
 		String key = request.getParameter("key");
 		try {
-			FilePath tapDir = new FilePath(new FilePath(new File(build.getRootDir(), "tap")), f);
+			FilePath tapDir = new FilePath(new FilePath(new File(build.getRootDir(), Constants.TAP_DIR_NAME)), f);
 			ServletOutputStream sos = response.getOutputStream();
 			if(tapDir.exists()) {
 				String tapStream = tapDir.readToString();

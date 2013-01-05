@@ -26,7 +26,6 @@ package org.tap4j.plugin;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.Util;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
 import hudson.matrix.MatrixBuild;
@@ -49,6 +48,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.tap4j.plugin.util.Constants;
 
 /**
  * Publishes TAP results in Jenkins builds.
@@ -342,7 +342,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 	 * @return
 	 */
 	private FilePath getTapReportDirectory(AbstractBuild<?, ?> build) {
-		return new FilePath(new File(build.getRootDir(), "tap-master-files"));
+		return new FilePath(new File(build.getRootDir(), Constants.TAP_DIR_NAME));
 	}
 
 	/**
