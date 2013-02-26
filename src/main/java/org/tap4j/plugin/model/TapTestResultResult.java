@@ -30,6 +30,7 @@ import hudson.tasks.test.TestResult;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.tap4j.model.Comment;
@@ -46,6 +47,8 @@ import org.tap4j.util.StatusValues;
  */
 public class TapTestResultResult extends TestResult {
 
+	private static final String DURATION_KEY = "duration_ms";
+	
 	private static final long serialVersionUID = -4499261655602135921L;
 	private final AbstractBuild<?, ?> owner;
 	private final org.tap4j.model.TestResult tapTestResult;
@@ -173,6 +176,19 @@ public class TapTestResultResult extends TestResult {
 	@Override
 	public String getTitle() {
 		return getName();
+	}
+	
+	@Override
+	public float getDuration() {
+		Map<String, Object> diagnostic = this.tapTestResult.getDiagnostic();
+		if (diagnostic != null && ! diagnostic.isEmpty()) {
+			Object duration = diagnostic.get(DURATION_KEY);
+			if (duration != null) {
+				Float durationMS = Float.parseFloat(duration.toString());
+				return durationMS.floatValue();
+			}
+		}
+		return super.getDuration();
 	}
 	
 	/* (non-Javadoc)
