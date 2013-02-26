@@ -33,6 +33,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletOutputStream;
 
@@ -52,6 +53,7 @@ import org.tap4j.plugin.model.TapAttachment;
 import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.plugin.util.Constants;
 import org.tap4j.plugin.util.DiagnosticUtil;
+import org.tap4j.plugin.util.Util;
 import org.tap4j.util.DirectiveValues;
 import org.tap4j.util.StatusValues;
 
@@ -62,6 +64,8 @@ import org.tap4j.util.StatusValues;
 public class TapResult implements ModelObject, Serializable {
 
 	private static final long serialVersionUID = 4343399327336076951L;
+	
+	private static final Logger LOGGER = Logger.getLogger(TapResult.class.getName());
 
 	private AbstractBuild<?, ?> build;
 	private List<TestSetMap> testSets;
@@ -129,7 +133,13 @@ public class TapResult implements ModelObject, Serializable {
 		final List<TestSetMap> filtered = new ArrayList<TestSetMap>();
 		for (TestSetMap testSet : testSets) {
 			if (testSet instanceof ParseErrorTestSetMap == false) {
-				filtered.add(testSet);
+				String rootDir = build.getRootDir().getAbsolutePath();
+				try {
+					rootDir = new File(build.getRootDir().getCanonicalPath().toString(), Constants.TAP_DIR_NAME).getAbsolutePath();
+				} catch (IOException e) {
+					LOGGER.warning(e.getMessage());
+				}
+				filtered.add(new TestSetMap(Util.normalizeFolders(rootDir, testSet.getFileName()), testSet.getTestSet()));
 			}
 		}
 		return filtered;

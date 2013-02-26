@@ -109,7 +109,7 @@ public class TapParser {
 					}
 	
 					final TestSetMap map = new TestSetMap(
-							tapFile.getName(), testSet);
+							tapFile.getAbsolutePath(), testSet);
 					testSets.add(map);
 	
 					if (this.outputTapToConsole) {
