@@ -209,6 +209,13 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		FilePath[] reports = locateReports(build.getWorkspace(),
 				this.testResults);
 
+		/*
+		 * filter out the reports based on timestamps. See JENKINS-12187
+		 */
+		if(this.getDiscardOldReports()) {
+			reports = checkReports(build, reports, logger);
+		}
+		
 		if (reports.length == 0) {
 			if(this.getFailIfNoResults()) {
 				logger.println("Did not find any matching files. Setting build result to FAILURE.");
@@ -219,13 +226,6 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 				// build can still continue
 				return Boolean.TRUE;
 			}
-		}
-
-		/*
-		 * filter out the reports based on timestamps. See JENKINS-12187
-		 */
-		if(this.getDiscardOldReports()) {
-			reports = checkReports(build, reports, logger);
 		}
 
 		boolean filesSaved = saveReports(build.getWorkspace(), getTapReportDirectory(build), reports, logger);
