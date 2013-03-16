@@ -27,10 +27,12 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.util.ChartUtil;
 import hudson.util.DataSetBuilder;
+import hudson.util.RunList;
 
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.jfree.chart.JFreeChart;
@@ -44,8 +46,7 @@ import org.tap4j.plugin.util.GraphHelper;
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
-public class TapProjectAction extends AbstractTapProjectAction
-{
+public class TapProjectAction extends AbstractTapProjectAction {
 
 	private AbstractProject<?, ?> project;
 
@@ -56,28 +57,23 @@ public class TapProjectAction extends AbstractTapProjectAction
 	 */
 	private transient Map<String, Integer> requestMap = new HashMap<String, Integer>();
 
-	public TapProjectAction(AbstractProject<?, ?> project)
-	{
+	public TapProjectAction(AbstractProject<?, ?> project) {
 		this.project = project;
 	}
 
-	public AbstractProject<?, ?> getProject()
-	{
+	public AbstractProject<?, ?> getProject() {
 		return this.project;
 	}
 
-	protected Class<TapBuildAction> getBuildActionClass()
-	{
+	protected Class<TapBuildAction> getBuildActionClass() {
 		return TapBuildAction.class;
 	}
 
-	public TapBuildAction getLastBuildAction()
-	{
+	public TapBuildAction getLastBuildAction() {
 		TapBuildAction action = null;
 		final AbstractBuild<?, ?> lastBuild = this.getLastBuildWithTap();
 
-		if (lastBuild != null)
-		{
+		if (lastBuild != null) {
 			action = lastBuild.getAction(TapBuildAction.class);
 		}
 
@@ -87,26 +83,20 @@ public class TapProjectAction extends AbstractTapProjectAction
 	/**
 	 * @return
 	 */
-	private AbstractBuild<?, ?> getLastBuildWithTap()
-	{
+	private AbstractBuild<?, ?> getLastBuildWithTap() {
 		AbstractBuild<?, ?> lastBuild = this.project.getLastBuild();
-		while (lastBuild != null
-				&& lastBuild.getAction(TapBuildAction.class) == null)
-		{
+		while (lastBuild != null && lastBuild.getAction(TapBuildAction.class) == null) {
 			lastBuild = lastBuild.getPreviousBuild();
 		}
 		return lastBuild;
 	}
 
 	public void doIndex( final StaplerRequest request,
-			final StaplerResponse response ) throws IOException
-	{
+			final StaplerResponse response ) throws IOException {
 		AbstractBuild<?, ?> lastBuild = this.getLastBuildWithTap();
-		if (lastBuild == null)
-		{
+		if (lastBuild == null) {
 			response.sendRedirect2("nodata");
-		} else
-		{
+		} else {
 			int buildNumber = lastBuild.getNumber();
 			response.sendRedirect2(String.format("../%d/%s", buildNumber,
 					TapBuildAction.URL_NAME));
@@ -114,40 +104,29 @@ public class TapProjectAction extends AbstractTapProjectAction
 	}
 
 	/**
-	 * Generates the graph that shows test pass/fail ratio
-	 * 
-	 * @param req
-	 *            -
-	 * @param rsp
-	 *            -
-	 * @throws IOException
-	 *             -
+	 * Generates the graph that shows test pass/fail ratio.
+	 *
+	 * @param req Stapler request
+	 * @param rsp Stapler response
+	 * @throws IOException if it fails to create the graph image and serve it
 	 */
-	public void doGraph( final StaplerRequest req, StaplerResponse rsp )
-			throws IOException
-	{
-		if (newGraphNotNeeded(req, rsp))
-		{
+	public void doGraph( final StaplerRequest req, StaplerResponse rsp ) throws IOException {
+		if (newGraphNotNeeded(req, rsp)) {
 			return;
 		}
 
 		final DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel>();
 
 		populateDataSetBuilder(dataSetBuilder);
-		new hudson.util.Graph(-1, getGraphWidth(), getGraphHeight())
-		{
-			protected JFreeChart createGraph()
-			{
+		new hudson.util.Graph(-1, getGraphWidth(), getGraphHeight()) {
+			protected JFreeChart createGraph() {
 				return GraphHelper.createChart(req, dataSetBuilder.build());
 			}
 		}.doPng(req, rsp);
 	}
 
-	public void doGraphMap( final StaplerRequest req, StaplerResponse rsp )
-			throws IOException
-	{
-		if (newGraphNotNeeded(req, rsp))
-		{
+	public void doGraphMap( final StaplerRequest req, StaplerResponse rsp ) throws IOException {
+		if (newGraphNotNeeded(req, rsp)) {
 			return;
 		}
 
@@ -155,10 +134,8 @@ public class TapProjectAction extends AbstractTapProjectAction
 
 		// TODO: optimize by using cache
 		populateDataSetBuilder(dataSetBuilder);
-		new hudson.util.Graph(-1, getGraphWidth(), getGraphHeight())
-		{
-			protected JFreeChart createGraph()
-			{
+		new hudson.util.Graph(-1, getGraphWidth(), getGraphHeight()) {
+			protected JFreeChart createGraph() {
 				return GraphHelper.createChart(req, dataSetBuilder.build());
 			}
 		}.doMap(req, rsp);
@@ -167,21 +144,17 @@ public class TapProjectAction extends AbstractTapProjectAction
 	/**
 	 * Returns <code>true</code> if there is a graph to plot.
 	 * 
-	 * @return Value for property 'graphAvailable'.
+	 * @return value for property 'graphAvailable'
 	 */
-	public boolean isGraphActive()
-	{
+	public boolean isGraphActive() {
 		AbstractBuild<?, ?> build = getProject().getLastBuild();
 		// in order to have a graph, we must have at least two points.
 		int numPoints = 0;
-		while (numPoints < 2)
-		{
-			if (build == null)
-			{
+		while (numPoints < 2) {
+			if (build == null) {
 				return false;
 			}
-			if (build.getAction(getBuildActionClass()) != null)
-			{
+			if (build.getAction(getBuildActionClass()) != null) {
 				numPoints++;
 			}
 			build = build.getPreviousBuild();
@@ -193,32 +166,32 @@ public class TapProjectAction extends AbstractTapProjectAction
 	 * If number of builds hasn't changed and if checkIfModified() returns true,
 	 * no need to regenerate the graph. Browser should reuse it's cached image
 	 * 
-	 * @param req
-	 * @param rsp
+	 * @param req Stapler request
+	 * @param rsp Stapler response
 	 * @return true, if new image does NOT need to be generated, false otherwise
 	 */
-	private boolean newGraphNotNeeded( final StaplerRequest req,
-			StaplerResponse rsp )
-	{
+	private boolean newGraphNotNeeded( final StaplerRequest req, StaplerResponse rsp ) {
 		Calendar t = getProject().getLastCompletedBuild().getTimestamp();
 		Integer prevNumBuilds = requestMap.get(req.getRequestURI());
-		int numBuilds = getProject().getBuilds().size();
+		int numBuilds = 0;
+		RunList<?> builds = getProject().getBuilds();
+		Iterator<?> it = builds.iterator();
+		while (it.hasNext()) {
+			it.next();
+			numBuilds += 1;
+		}
 
-		// change null to 0
 		prevNumBuilds = prevNumBuilds == null ? 0 : prevNumBuilds;
-		if (prevNumBuilds != numBuilds)
-		{
+		if (prevNumBuilds != numBuilds) {
 			requestMap.put(req.getRequestURI(), numBuilds);
 		}
 
-		if (requestMap.keySet().size() > 10)
-		{
+		if (requestMap.keySet().size() > 10) {
 			// keep map size in check
 			requestMap.clear();
 		}
 
-		if (prevNumBuilds == numBuilds && req.checkIfModified(t, rsp))
-		{
+		if (prevNumBuilds == numBuilds && req.checkIfModified(t, rsp)) {
 			/*
 			 * checkIfModified() is after '&&' because we want it evaluated only
 			 * if number of builds is different
@@ -229,18 +202,12 @@ public class TapProjectAction extends AbstractTapProjectAction
 		return false;
 	}
 
-	protected void populateDataSetBuilder(
-			DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel> dataset )
-	{
+	protected void populateDataSetBuilder(DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel> dataset ) {
 
-		for (AbstractBuild<?, ?> build = getProject().getLastBuild(); build != null; build = build
-				.getPreviousBuild())
-		{
-			ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(
-					build);
+		for (AbstractBuild<?, ?> build = getProject().getLastBuild(); build != null; build = build.getPreviousBuild()) {
+			ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(build);
 			TapBuildAction action = build.getAction(getBuildActionClass());
-			if (action != null)
-			{
+			if (action != null) {
 				TapResult report = action.getResult();
 				report.tally();
 
@@ -259,8 +226,7 @@ public class TapProjectAction extends AbstractTapProjectAction
 	 * 
 	 * @return Value for property 'graphWidth'.
 	 */
-	public int getGraphWidth()
-	{
+	public int getGraphWidth() {
 		return 500;
 	}
 
@@ -269,8 +235,7 @@ public class TapProjectAction extends AbstractTapProjectAction
 	 * 
 	 * @return Value for property 'graphHeight'.
 	 */
-	public int getGraphHeight()
-	{
+	public int getGraphHeight() {
 		return 200;
 	}
 

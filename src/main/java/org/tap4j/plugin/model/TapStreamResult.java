@@ -177,13 +177,15 @@ public class TapStreamResult extends TabulatedResult {
 	 * @return
 	 */
 	private TapTestResultResult getTapTestResultResult(String name) {
-		String fileName = name.substring(0, name.lastIndexOf("-"));
-		String testNumber = name.substring(name.lastIndexOf("-")+1);
-		for(TestSetMap tsm : tapResult.getTestSets()) {
-			if(tsm.getFileName().equals(fileName)) {
-				TestSet ts = tsm.getTestSet();
-				org.tap4j.model.TestResult desired = ts.getTestResult(Integer.parseInt(testNumber));
-				return new TapTestResultResult(owner, tsm, desired, this.tapResult.getTodoIsFailure());
+		if (name != null && name.lastIndexOf("-") > 0) {
+			String fileName = name.substring(0, name.lastIndexOf("-"));
+			String testNumber = name.substring(name.lastIndexOf("-")+1);
+			for(TestSetMap tsm : tapResult.getTestSets()) {
+				if(tsm.getFileName().equals(fileName)) {
+					TestSet ts = tsm.getTestSet();
+					org.tap4j.model.TestResult desired = ts.getTestResult(Integer.parseInt(testNumber));
+					return new TapTestResultResult(owner, tsm, desired, this.tapResult.getTodoIsFailure());
+				}
 			}
 		}
 		return null;

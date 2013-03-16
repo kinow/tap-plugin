@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.tap4j.model.TestSet;
 import org.tap4j.parser.ParserException;
-import org.tap4j.parser.Tap13YamlParser;
+import org.tap4j.parser.Tap13Parser;
 import org.tap4j.plugin.model.ParseErrorTestSetMap;
 import org.tap4j.plugin.model.TestSetMap;
 
@@ -96,11 +96,11 @@ public class TapParser {
 				try {
 					log("Parsing TAP test result [" + tapFile + "].");
 	
-					final Tap13YamlParser parser;
+					final Tap13Parser parser;
 					if(enableSubtests != null) {
-						parser = new Tap13YamlParser(enableSubtests);
+						parser = new Tap13Parser(enableSubtests);
 					} else {
-						parser = new Tap13YamlParser();
+						parser = new Tap13Parser();
 					}
 					final TestSet testSet = parser.parseFile(tapFile);
 	

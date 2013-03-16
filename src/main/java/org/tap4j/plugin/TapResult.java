@@ -46,6 +46,7 @@ import org.tap4j.consumer.TapConsumerFactory;
 import org.tap4j.model.BailOut;
 import org.tap4j.model.Comment;
 import org.tap4j.model.Directive;
+import org.tap4j.model.Plan;
 import org.tap4j.model.TestResult;
 import org.tap4j.model.TestSet;
 import org.tap4j.plugin.model.ParseErrorTestSetMap;
@@ -158,17 +159,23 @@ public class TapResult implements ModelObject, Serializable {
 			List<TestResult> testResults = realTestSet.getTestResults();
 
 			total += testResults.size();
-
-			for (TestResult testResult : testResults) {
-				if (isSkipped(testResult)) {
-					skipped += 1;
-				} else if (isFailure(testResult)) {
-					failed += 1;
-				} else {
-					passed += 1;
+			
+			Plan plan = realTestSet.getPlan();
+			
+			if (plan.isSkip()) {
+				this.skipped = testResults.size();
+			} else {
+				for (TestResult testResult : testResults) {
+					if (isSkipped(testResult)) {
+						skipped += 1;
+					} else if (isFailure(testResult)) {
+						failed += 1;
+					} else {
+						passed += 1;
+					}
 				}
 			}
-
+			
 			this.bailOuts += realTestSet.getNumberOfBailOuts();
 		}
 	}
