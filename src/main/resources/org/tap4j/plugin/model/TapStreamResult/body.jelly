@@ -58,8 +58,8 @@ THE SOFTWARE.
       <j:forEach var="f" items="${it.failedTests2}" varStatus="i">
         <tr>
           <td class="pane">
-            <a id="test-${f.fullName}-showlink"
-               href="javascript:showStackTrace('test-${h.jsStringEscape(f.fullName)}','${f.getRelativePathFrom(it)}/summary')">&gt;&gt;&gt;</a>
+            <!--a id="test-${f.fullName}-showlink"
+               href="javascript:showStackTrace('test-${h.jsStringEscape(f.fullName)}','${f.getRelativePathFrom(it)}/')">&gt;&gt;&gt;</a-->
             <a id="test-${f.fullName}-hidelink" style="display:none"
                href="javascript:hideStackTrace('test-${h.jsStringEscape(f.fullName)}')">&lt;&lt;&lt;</a>
             <st:nbsp/>

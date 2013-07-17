@@ -47,7 +47,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.plugin.util.Constants;
 
 /**
@@ -56,8 +58,8 @@ import org.tap4j.plugin.util.Constants;
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
-@SuppressWarnings("unchecked")
 public class TapPublisher extends Recorder implements MatrixAggregatable {
+    
 	private final String testResults;
 	private final Boolean failIfNoResults;
 	private final Boolean failedTestsMarkBuildAsFailure;
@@ -75,60 +77,22 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 			Boolean discardOldReports,
 			Boolean todoIsFailure) {
 		this.testResults = testResults;
-		if(failIfNoResults == null) {
-			this.failIfNoResults = Boolean.FALSE;
-		} else {
-			this.failIfNoResults = failIfNoResults;
-		}
-		if(failedTestsMarkBuildAsFailure == null) {
-			this.failedTestsMarkBuildAsFailure = Boolean.FALSE;
-		} else {
-			this.failedTestsMarkBuildAsFailure = failedTestsMarkBuildAsFailure;
-		}
+		this.failIfNoResults = BooleanUtils.toBooleanDefaultIfNull(failIfNoResults, false);
+		this.failedTestsMarkBuildAsFailure = BooleanUtils.toBooleanDefaultIfNull(failedTestsMarkBuildAsFailure, false);
 		this.outputTapToConsole = outputTapToConsole;
-		if(enableSubtests == null) {
-			this.enableSubtests = Boolean.TRUE;
-		} else {
-			this.enableSubtests = enableSubtests;
-		}
-		if(discardOldReports == null) {
-			this.discardOldReports = Boolean.FALSE;
-		} else {
-			this.discardOldReports = discardOldReports;
-		}
-		if(todoIsFailure == null) {
-			this.todoIsFailure = Boolean.TRUE;
-		} else {
-			this.todoIsFailure = todoIsFailure;
-		}
+		this.enableSubtests = BooleanUtils.toBooleanDefaultIfNull(enableSubtests, true);
+		this.discardOldReports = BooleanUtils.toBooleanDefaultIfNull(discardOldReports, false);
+		this.todoIsFailure = BooleanUtils.toBooleanDefaultIfNull(todoIsFailure, true);
 	}
 
 	public Object readResolve() {
 		String testResults = this.getTestResults();
-		Boolean failIfNoResults = this.getFailIfNoResults();
-		Boolean failedTestsMarkBuildAsFailure = this.getFailedTestsMarkBuildAsFailure();
-		Boolean outputTapToConsole = this.getOutputTapToConsole();
-		Boolean enableSubtests = this.getEnableSubtests();
-		Boolean discardOldReports = this.getDiscardOldReports();
-		Boolean todoIsFailure = this.getTodoIsFailure();
-		if (failedTestsMarkBuildAsFailure == null) {
-			failedTestsMarkBuildAsFailure = Boolean.FALSE;
-		}
-		if(failIfNoResults == null) {
-			failIfNoResults = Boolean.FALSE;
-		}
-		if (outputTapToConsole == null) {
-			outputTapToConsole = Boolean.FALSE;
-		}
-		if(enableSubtests == null) {
-			enableSubtests = Boolean.TRUE;
-		}
-		if(discardOldReports == null) {
-			discardOldReports = Boolean.FALSE;
-		}
-		if(todoIsFailure == null) {
-			todoIsFailure = Boolean.TRUE;
-		}
+		Boolean failIfNoResults = BooleanUtils.toBooleanDefaultIfNull(this.getFailIfNoResults(), false);
+		Boolean failedTestsMarkBuildAsFailure = BooleanUtils.toBooleanDefaultIfNull(this.getFailedTestsMarkBuildAsFailure(), false);
+		Boolean outputTapToConsole = BooleanUtils.toBooleanDefaultIfNull(this.getOutputTapToConsole(), false);
+		Boolean enableSubtests = BooleanUtils.toBooleanDefaultIfNull(this.getEnableSubtests(), true);
+		Boolean discardOldReports = BooleanUtils.toBooleanDefaultIfNull(this.getDiscardOldReports(), false);
+		Boolean todoIsFailure = BooleanUtils.toBooleanDefaultIfNull(this.getTodoIsFailure(), true);
 		return new TapPublisher(testResults, failIfNoResults, failedTestsMarkBuildAsFailure, outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure);
 	}
 
@@ -177,6 +141,19 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 	public Boolean getTodoIsFailure() {
 		return todoIsFailure;
 	}
+	
+	/**
+	 * Gets the directory where the plug-in saves its TAP streams before processing them and
+	 * displaying in the UI.
+	 * <p>
+	 * Adapted from JUnit Attachments Plug-in.
+	 * 
+	 * @param build Jenkins build
+	 * @return virtual directory (FilePath)
+	 */
+	public static FilePath getReportsDirectory(AbstractBuild<?, ?> build) {
+	    return new FilePath(new File(build.getRootDir().getAbsolutePath())).child(Constants.TAP_DIR_NAME);
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -203,16 +180,14 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 
 		PrintStream logger = listener.getLogger();
 		logger.println("TAP Reports Processing: START");
-		logger.println("Looking for TAP results report in workspace using pattern: "
-				+ this.testResults);
+		logger.println("Looking for TAP results report in workspace using pattern: " + this.testResults);
 
-		FilePath[] reports = locateReports(build.getWorkspace(),
-				this.testResults);
+		FilePath[] reports = locateReports(build.getWorkspace(), this.testResults);
 
 		/*
 		 * filter out the reports based on timestamps. See JENKINS-12187
 		 */
-		if(this.getDiscardOldReports()) {
+		if (this.getDiscardOldReports()) {
 			reports = checkReports(build, reports, logger);
 		}
 		
@@ -228,7 +203,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 			}
 		}
 
-		boolean filesSaved = saveReports(build.getWorkspace(), getTapReportDirectory(build), reports, logger);
+		boolean filesSaved = saveReports(build.getWorkspace(), TapPublisher.getReportsDirectory(build), reports, logger);
 		if (!filesSaved) {
 			logger.println("Failed to save TAP reports");
 			return Boolean.TRUE;
@@ -276,27 +251,24 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 	 * @param logger
 	 * @return
 	 */
-	private TapResult loadResults(AbstractBuild<?, ?> owner,
-			PrintStream logger) {
-		FilePath tapDir = getTapReportDirectory(owner);
+	private TapResult loadResults(AbstractBuild<?, ?> owner, PrintStream logger) {
+		final FilePath tapDir = TapPublisher.getReportsDirectory(owner);
 		FilePath[] results = null;
+		TapResult tr = null;
 		try {
 			results = tapDir.list("**/*.*");
+
+			final TapParser parser = new TapParser(getOutputTapToConsole(), getEnableSubtests(), getTodoIsFailure(), logger);
+	        final TapResult result = parser.parse(results, owner);
+	        result.setOwner(owner);
+	        return result;
 		} catch (Exception e) {
 			e.printStackTrace(logger);
-		}
 
-		TapResult tr = null;
-		if (results == null) {
-			tr = new TapResult("", owner, Collections.EMPTY_LIST, this.todoIsFailure);
-			tr.setOwner(owner);
-			return tr;
+			tr = new TapResult("", owner, Collections.<TestSetMap>emptyList(), getTodoIsFailure());
+            tr.setOwner(owner);
+            return tr;
 		}
-
-		TapParser parser = new TapParser(this.outputTapToConsole, this.enableSubtests, this.todoIsFailure, logger);
-		TapResult result = parser.parse(results, owner);
-		result.setOwner(owner);
-		return result;
 	}
 
 	/**
@@ -323,6 +295,14 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		return true;
 	}
 	
+	/**
+	 * Used to maintain the directory structure when persisting to the tap-reports dir.
+	 * 
+	 * @param workspace Jenkins WS
+	 * @param tapDir tap reports dir
+	 * @param orig original directory
+	 * @return persisted directory virtual structure
+	 */
 	private FilePath getDistDir(FilePath workspace, FilePath tapDir, FilePath orig) {
 		if(orig == null)
 			return null;
@@ -338,14 +318,8 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 	}
 
 	/**
-	 * @param build
-	 * @return
-	 */
-	private FilePath getTapReportDirectory(AbstractBuild<?, ?> build) {
-		return new FilePath(new File(build.getRootDir(), Constants.TAP_DIR_NAME));
-	}
-
-	/**
+	 * Checks that there are new report files.
+	 * 
 	 * @param build
 	 * @param reports
 	 * @param logger
@@ -368,13 +342,10 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 				 * dividing by 1000 and comparing because we want to compare
 				 * secs and not milliseconds
 				 */
-				if (build.getTimestamp().getTimeInMillis() / 1000 <= report
-						.lastModified() / 1000) {
+				if (build.getTimestamp().getTimeInMillis() / 1000 <= report.lastModified() / 1000) {
 					filePathList.add(report);
 				} else {
-					logger.println(report.getName()
-							+ " was last modified before "
-							+ "this build started. Ignoring it.");
+					logger.println(report.getName() + " was last modified before " + "this build started. Ignoring it.");
 				}
 			} catch (IOException e) {
 				// just log the exception
@@ -394,8 +365,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 	 * @throws InterruptedException
 	 * @throws IOException
 	 */
-	private FilePath[] locateReports(FilePath workspace, String testResults)
-			throws IOException, InterruptedException {
+	private FilePath[] locateReports(FilePath workspace, String testResults) throws IOException, InterruptedException {
 		return workspace.list(testResults);
 	}
 
@@ -407,6 +377,8 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 	public BuildStepMonitor getRequiredMonitorService() {
 		return BuildStepMonitor.STEP;
 	}
+	
+	// matrix jobs and test result aggregation support
 	
 	/* (non-Javadoc)
 	 * @see hudson.matrix.MatrixAggregatable#createAggregator(hudson.matrix.MatrixBuild, hudson.Launcher, hudson.model.BuildListener)
@@ -433,7 +405,6 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		 * @see hudson.tasks.BuildStepDescriptor#isApplicable(java.lang.Class)
 		 */
 		@Override
-		@SuppressWarnings("rawtypes")
 		public boolean isApplicable(Class<? extends AbstractProject> jobType) {
 			return Boolean.TRUE;
 		}

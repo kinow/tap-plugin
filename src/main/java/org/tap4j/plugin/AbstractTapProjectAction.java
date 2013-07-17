@@ -31,9 +31,7 @@ import hudson.model.Action;
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
-public class AbstractTapProjectAction 
-implements Action
-{
+public class AbstractTapProjectAction implements Action {
 
 	public static final String URL_NAME = "tapResults";
 	public static final String ICON_NAME = "/plugin/tap/icons/tap-24.png";
@@ -41,29 +39,25 @@ implements Action
 	/* (non-Javadoc)
 	 * @see hudson.model.Action#getDisplayName()
 	 */
-	public String getDisplayName()
-	{
+	public String getDisplayName() {
 		return "TAP";
 	}
 
 	/* (non-Javadoc)
 	 * @see hudson.model.Action#getIconFileName()
 	 */
-	public String getIconFileName()
-	{
+	public String getIconFileName() {
 		return ICON_NAME;
 	}
 
 	/* (non-Javadoc)
 	 * @see hudson.model.Action#getUrlName()
 	 */
-	public String getUrlName()
-	{
+	public String getUrlName() {
 		return URL_NAME;
 	}
 	
-	public String getSearchUrl()
-	{
+	public String getSearchUrl() {
 		return URL_NAME;
 	}
 	
