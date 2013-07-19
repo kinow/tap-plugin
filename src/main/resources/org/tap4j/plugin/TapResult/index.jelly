@@ -64,6 +64,7 @@
 			</j:choose>
 			
 			<j:choose>
+			    <a name="parseErrors" />
                 <j:when test="${it.hasParseErrors() == false}">
                     No parse errors found.
                 </j:when>
