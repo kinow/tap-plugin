@@ -80,7 +80,7 @@
                         
                         <j:forEach var="testSet" items="${it.parseErrorTestSets}">
                         <tr>
-                            <td>${testSet.fileName}</td>
+                            <td><a href='contents?f=${testSet.fileName}'>${testSet.fileName}</a></td>
                             <td>${testSet.cause}</td>
                         </tr>
                         </j:forEach>
