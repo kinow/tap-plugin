@@ -2,8 +2,7 @@
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
 	xmlns:i="jelly:fmt" xmlns:tap="/org/tap4j/plugin/tags">
 
-	<j:if 
-		test="${attrs.diagnostic != null and attrs.diagnostic.size() > 0 }">
+	<j:if test="${attrs.diagnostic != null and attrs.diagnostic.size() > 0 }">
 
 		<j:set var="diagnostic" value="${attrs.diagnostic}" />
 		<j:set var="tapFile" value="${attrs.tapFile}" />

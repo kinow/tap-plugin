@@ -256,7 +256,7 @@ public class TapResult implements ModelObject, Serializable {
 	}
 
 	/**
-	 * Called from TapResult/index..jelly
+	 * Called from TapResult/index.jelly
 	 */
 	public String createDiagnosticTable(String tapFile, Map<String, Object> diagnostic) {
 		return DiagnosticUtil.createDiagnosticTable(tapFile, diagnostic);

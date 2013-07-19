@@ -108,8 +108,7 @@ public class TapParser {
 						this.hasFailedTests = Boolean.TRUE;
 					}
 	
-					final TestSetMap map = new TestSetMap(
-							tapFile.getAbsolutePath(), testSet);
+					final TestSetMap map = new TestSetMap(tapFile.getAbsolutePath(), testSet);
 					testSets.add(map);
 	
 					if (this.outputTapToConsole) {
