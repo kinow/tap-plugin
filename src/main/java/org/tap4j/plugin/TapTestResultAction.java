@@ -105,21 +105,37 @@ public class TapTestResultAction extends AbstractTestResultAction<AbstractTestRe
 		return Collections.emptyList();
 	}
 	
-	/* (non-Javadoc)
+	/* 
+	 * (non-Javadoc)
 	 * @see org.kohsuke.stapler.StaplerProxy#getTarget()
 	 */
 	public Object getTarget() {
 		return getResult();
 	}
 	
-	/* (non-Javadoc)
+	/*
+     * (non-Javadoc)
 	 * @see hudson.tasks.test.AbstractTestResultAction#getResult()
 	 */
 	@Override
 	public TestResult getResult() {
 		return new TapStreamResult(owner, tapResult);
 	}
-	
+
+	/*
+	 * (non-Javadoc)
+	 * @see hudson.tasks.test.AbstractTestResultAction#getPreviousResult()
+	 */
+	@Override
+    public AbstractTestResultAction<?> getPreviousResult() {
+        AbstractBuild<?, ?> previousBuild = owner.getPreviousBuild();
+        if (previousBuild != null) {
+            TapTestResultAction previousBuildAction = previousBuild.getAction(TapTestResultAction.class);
+            return previousBuildAction;
+        }
+        return null;
+    }
+
 	/* (non-Javadoc)
 	 * @see hudson.tasks.test.AbstractTestResultAction#getUrlName()
 	 */
@@ -128,7 +144,7 @@ public class TapTestResultAction extends AbstractTestResultAction<AbstractTestRe
 	public String getUrlName() {
 		return "tapTestReport";
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see hudson.tasks.test.AbstractTestResultAction#getDisplayName()
 	 */
