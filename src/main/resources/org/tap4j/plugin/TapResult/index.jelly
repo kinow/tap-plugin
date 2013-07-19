@@ -11,7 +11,7 @@
 		<st:include it="${it.owner}" page="sidepanel.jelly" />
 		<l:main-panel>
 			
-			<h1>TAP Test Results</h1>
+			<h1>TAP Extended Test Results</h1>
 			
 			<j:choose>
 				<j:when test="${it.isEmptyTestSet()}">
