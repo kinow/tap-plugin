@@ -13,7 +13,7 @@
     <groupId>org.tap4j</groupId>
     <artifactId>tap</artifactId>
     <name>Jenkins TAP Plugin</name>
-    <version>1.11</version>
+    <version>1.12-SNAPSHOT</version>
     <packaging>hpi</packaging>
     
     <description>This plugin publishes TAP test results.</description>
