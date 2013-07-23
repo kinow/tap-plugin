@@ -15,7 +15,7 @@
 			
 			<j:choose>
 				<j:when test="${it.isEmptyTestSet()}">
-					Empty test set.
+					<p>Empty test set</p>
 				</j:when>
 				<j:otherwise>
 				    ${it.updateStats()}
@@ -25,72 +25,58 @@
 				            <td>${it.getTotal()} tests, ${it.passed} ok, ${it.failed} not ok, ${it.skipped} skipped, ${it.bailOuts} Bail Out!</td>
 				        </tr>
 				    </table>				
-					
-					
+
 					<j:forEach var="map" items="${it.testSets}">
-					
 					   <j:choose>
-						<j:when test="${map.getTestSet().getPlan().isSkip()}">
-						<p>File: <span class="underline"><a href='contents?f=${map.fileName}'>${map.fileName}</a></span> (Skipped)</p>
-						</j:when>
-						<j:otherwise>
-					    <p>File: <span class="underline"><a href='contents?f=${map.fileName}'>${map.fileName}</a></span></p>
-						</j:otherwise>
-					  </j:choose>
-						
-						<table class="tap" width="100%">
-						
+					     <j:when test="${map.getTestSet().getPlan().isSkip()}">
+						   <p>File: <span class="underline"><a href='contents?f=${map.fileName}'>${map.fileName}</a></span> (Skipped)</p>
+						 </j:when>
+						 <j:otherwise>
+					       <p>File: <span class="underline"><a href='contents?f=${map.fileName}'>${map.fileName}</a></span></p>
+						 </j:otherwise>
+					   </j:choose>
+						 <table class="tap" width="100%">
 							<tr>
 								<th> </th>
 								<th>Number</th>
 								<th>Description</th>
 								<th>Directive</th>
 							</tr>
-						
 							<j:forEach var="tapLine" items="${map.testSet.tapLines}">
 								
 								<!-- TAP Test Result information -->
 								<tap:line tapLine="${tapLine}" tapFile="${map.fileName}" />
 								
 							</j:forEach>
-						
 						</table>
-						
 						<br />
-						
 					</j:forEach>
 
 				</j:otherwise>
 			</j:choose>
 			
+			<h3><a name="parseErrors">Parse errors</a></h3>
+			
 			<j:choose>
-			    <a name="parseErrors" />
                 <j:when test="${it.hasParseErrors() == false}">
-                    No parse errors found.
+                    <p>No parse errors found</p>
                 </j:when>
                 <j:otherwise>
-                    
-                    <h3>Parse errors</h3>       
-                         
                     <table class="tap" width="100%">
-                        
                         <tr>
                             <th>File name</th>
                             <th>Cause</th>
                         </tr>
-                        
                         <j:forEach var="testSet" items="${it.parseErrorTestSets}">
                         <tr>
                             <td><a href='contents?f=${testSet.fileName}'>${testSet.fileName}</a></td>
                             <td>${testSet.cause}</td>
                         </tr>
                         </j:forEach>
-                        
                      </table>
-
                 </j:otherwise>
             </j:choose>
-			
+            
 		</l:main-panel>
 	</l:layout>
 </j:jelly>
