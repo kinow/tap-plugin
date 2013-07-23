@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 import javax.servlet.ServletOutputStream;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
@@ -295,6 +296,10 @@ public class TapResult implements ModelObject, Serializable {
 	
 	public boolean isComment(Object tapResult) {
 		return (tapResult != null && tapResult instanceof Comment);
+	}
+	
+	public String escapeHTML(String html) {
+	    return StringUtils.replaceEach(html, new String[]{"&", "\"", "<", ">"}, new String[]{"&amp;", "&quot;", "&lt;", "&gt;"});
 	}
 
 	/**

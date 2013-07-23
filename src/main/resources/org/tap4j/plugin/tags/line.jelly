@@ -31,7 +31,7 @@
                     <tr>
                         <td></td>
                         <td colspan='3'>
-                            # ${tapLine.text}<br/>
+                            # ${it.escapeHTML(tapLine.text)}<br/>
                         </td>
                     </tr>
                 </j:when>

@@ -80,7 +80,7 @@ public class TapParser {
         this.todoIsFailure = todoIsFailure;
         this.logger = logger;
         this.parserErrors = false;
-        this.includeCommentDiagnostics = false;
+        this.includeCommentDiagnostics = includeCommentDiagnostics;
     }
 
 	public boolean hasParserErrors() {
