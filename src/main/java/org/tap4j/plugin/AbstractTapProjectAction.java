@@ -40,7 +40,7 @@ public class AbstractTapProjectAction implements Action {
 	 * @see hudson.model.Action#getDisplayName()
 	 */
 	public String getDisplayName() {
-		return "TAP";
+		return "TAP Extended Test Results";
 	}
 
 	/* (non-Javadoc)

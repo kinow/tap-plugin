@@ -3,22 +3,27 @@
   <f:entry title="Test results" field="testResults">
     <f:textbox />
   </f:entry>
-  <f:entry title="Fail the build if no test results are present">
-      <f:checkbox name="TapPublisher.failIfNoResults" value="${instance.failIfNoResults}" checked="${instance.failIfNoResults}" />
-  </f:entry>
-  <f:entry title="Failed tests mark build as failure">
-      <f:checkbox name="TapPublisher.failedTestsMarkBuildAsFailure" value="${instance.failedTestsMarkBuildAsFailure}" checked="${instance.failedTestsMarkBuildAsFailure}" />
-  </f:entry>
-  <f:entry title="Output TAP to console">
-      <f:checkbox name="TapPublisher.outputTapToConsole" value="${instance.outputTapToConsole}" checked="${instance.outputTapToConsole}" />
-  </f:entry>
-  <f:entry title="Enable subtests">
-      <f:checkbox name="TapPublisher.enableSubtests" value="${instance.enableSubtests}" checked="${instance.enableSubtests}" />
-  </f:entry>
-  <f:entry title="Discard old reports">
-      <f:checkbox name="TapPublisher.discardOldReports" value="${instance.discardOldReports}" checked="${instance.discardOldReports}" />
-  </f:entry>
-  <f:entry title="TODO directive fails a test">
-      <f:checkbox name="TapPublisher.todoIsFailure" value="${instance.todoIsFailure}" checked="${instance.todoIsFailure}" />
-  </f:entry>
+  <f:advanced>
+      <f:entry title="Fail the build if no test results are present">
+          <f:checkbox name="TapPublisher.failIfNoResults" value="${instance.failIfNoResults}" checked="${instance.failIfNoResults}" />
+      </f:entry>
+      <f:entry title="Failed tests mark build as failure">
+          <f:checkbox name="TapPublisher.failedTestsMarkBuildAsFailure" value="${instance.failedTestsMarkBuildAsFailure}" checked="${instance.failedTestsMarkBuildAsFailure}" />
+      </f:entry>
+      <f:entry title="Output TAP to console">
+          <f:checkbox name="TapPublisher.outputTapToConsole" value="${instance.outputTapToConsole}" checked="${instance.outputTapToConsole}" />
+      </f:entry>
+      <f:entry title="Enable subtests">
+          <f:checkbox name="TapPublisher.enableSubtests" value="${instance.enableSubtests}" checked="${instance.enableSubtests}" />
+      </f:entry>
+      <f:entry title="Discard old reports">
+          <f:checkbox name="TapPublisher.discardOldReports" value="${instance.discardOldReports}" checked="${instance.discardOldReports}" />
+      </f:entry>
+      <f:entry title="TODO directive fails a test">
+          <f:checkbox name="TapPublisher.todoIsFailure" value="${instance.todoIsFailure}" checked="${instance.todoIsFailure}" />
+      </f:entry>
+      <f:entry title="Include comment diagnostics (#) in the results table">
+          <f:checkbox name="TapPublisher.includeCommentDiagnostics" value="${instance.includeCommentDiagnostics}" checked="${instance.includeCommentDiagnostics}" />
+      </f:entry>
+  </f:advanced>
 </j:jelly>

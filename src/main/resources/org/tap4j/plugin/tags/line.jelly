@@ -27,7 +27,7 @@
                         <tap:directive directive="" />
                     </tr>
 				</j:when>
-				<j:when  test="${it.isComment( tapLine )}">
+				<j:when test="${it.isComment( tapLine ) and it.includeCommentDiagnostics}">
                     <tr>
                         <td></td>
                         <td colspan='3'>

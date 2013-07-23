@@ -59,7 +59,12 @@ public class TapParser {
 	private PrintStream logger;
 	private boolean parserErrors;
 	private boolean hasFailedTests;
+	private boolean includeCommentDiagnostics;
 
+	/**
+     * @deprecated
+	 */
+	@Deprecated
 	public TapParser(Boolean outputTapToConsole, Boolean enableSubtests, Boolean todoIsFailure, PrintStream logger) {
 		this.outputTapToConsole = outputTapToConsole;
 		this.enableSubtests = enableSubtests;
@@ -68,6 +73,15 @@ public class TapParser {
 		this.parserErrors = false;
 		this.hasFailedTests = false;
 	}
+	
+	public TapParser(Boolean outputTapToConsole, Boolean enableSubtests, Boolean todoIsFailure, Boolean includeCommentDiagnostics, PrintStream logger) {
+        this.outputTapToConsole = outputTapToConsole;
+        this.enableSubtests = enableSubtests;
+        this.todoIsFailure = todoIsFailure;
+        this.logger = logger;
+        this.parserErrors = false;
+        this.includeCommentDiagnostics = false;
+    }
 
 	public boolean hasParserErrors() {
 		return this.parserErrors;
@@ -128,7 +142,7 @@ public class TapParser {
 			}
 		}
 		//final TapResult testResult = new TapResult(UUID.randomUUID().toString(), build, testSets);
-		final TapResult testResult = new TapResult("TAP Test Results", build, testSets, this.todoIsFailure);
+		final TapResult testResult = new TapResult("TAP Test Results", build, testSets, this.todoIsFailure, this.includeCommentDiagnostics);
 		return testResult;
 	}
 

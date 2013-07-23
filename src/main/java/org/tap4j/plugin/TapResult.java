@@ -78,6 +78,7 @@ public class TapResult implements ModelObject, Serializable {
 	private int total = 0;
 	private String name;
 	private Boolean todoIsFailure;
+	private Boolean includeCommentDiagnostics;
 
 	/**
 	 * @deprecated since JENKINS-15401
@@ -85,6 +86,7 @@ public class TapResult implements ModelObject, Serializable {
 	 * @param owner
 	 * @param testSets
 	 */
+	@Deprecated
 	public TapResult(String name, AbstractBuild<?, ?> owner,
 			List<TestSetMap> testSets) {
 		this.name = name;
@@ -94,6 +96,10 @@ public class TapResult implements ModelObject, Serializable {
 		this.todoIsFailure = true;
 	}
 	
+	/**
+	 * @deprecated
+	 */
+	@Deprecated
 	public TapResult(String name, AbstractBuild<?, ?> owner,
 			List<TestSetMap> testSets, Boolean todoIsFailure) {
 		this.name = name;
@@ -103,12 +109,29 @@ public class TapResult implements ModelObject, Serializable {
 		this.todoIsFailure = todoIsFailure;
 	}
 	
+	public TapResult(String name, AbstractBuild<?, ?> owner,
+            List<TestSetMap> testSets, Boolean todoIsFailure, Boolean includeCommentDiagnostics) {
+        this.name = name;
+        this.build = owner;
+        this.testSets = this.filterTestSet(testSets);
+        this.parseErrorTestSets = this.filterParseErrorTestSets(testSets);
+        this.todoIsFailure = todoIsFailure;
+        this.includeCommentDiagnostics= includeCommentDiagnostics;
+    }
+	
 	/**
 	 * @return the todoIsFailure
 	 */
 	public Boolean getTodoIsFailure() {
 		return todoIsFailure;
 	}
+	
+	/**
+	 * @return the includeCommentDiagnostics
+	 */
+	public Boolean getIncludeCommentDiagnostics() {
+        return (includeCommentDiagnostics == null) ? true : includeCommentDiagnostics;
+    }
 	
 	/**
 	 * @param testSets

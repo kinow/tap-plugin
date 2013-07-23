@@ -67,6 +67,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 	private final Boolean enableSubtests;
 	private final Boolean discardOldReports;
 	private final Boolean todoIsFailure;
+	private final Boolean includeCommentDiagnostics;
 
 	@DataBoundConstructor
 	public TapPublisher(String testResults,
@@ -75,7 +76,8 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 			Boolean outputTapToConsole,
 			Boolean enableSubtests, 
 			Boolean discardOldReports,
-			Boolean todoIsFailure) {
+			Boolean todoIsFailure,
+			Boolean includeCommentDiagnostics) {
 		this.testResults = testResults;
 		this.failIfNoResults = BooleanUtils.toBooleanDefaultIfNull(failIfNoResults, false);
 		this.failedTestsMarkBuildAsFailure = BooleanUtils.toBooleanDefaultIfNull(failedTestsMarkBuildAsFailure, false);
@@ -83,6 +85,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		this.enableSubtests = BooleanUtils.toBooleanDefaultIfNull(enableSubtests, true);
 		this.discardOldReports = BooleanUtils.toBooleanDefaultIfNull(discardOldReports, false);
 		this.todoIsFailure = BooleanUtils.toBooleanDefaultIfNull(todoIsFailure, true);
+		this.includeCommentDiagnostics = BooleanUtils.toBooleanDefaultIfNull(includeCommentDiagnostics, true);
 	}
 
 	public Object readResolve() {
@@ -93,7 +96,8 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		Boolean enableSubtests = BooleanUtils.toBooleanDefaultIfNull(this.getEnableSubtests(), true);
 		Boolean discardOldReports = BooleanUtils.toBooleanDefaultIfNull(this.getDiscardOldReports(), false);
 		Boolean todoIsFailure = BooleanUtils.toBooleanDefaultIfNull(this.getTodoIsFailure(), true);
-		return new TapPublisher(testResults, failIfNoResults, failedTestsMarkBuildAsFailure, outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure);
+		Boolean includeCommentDiagnostics = BooleanUtils.toBooleanDefaultIfNull(this.getIncludeCommentDiagnostics(), true);
+		return new TapPublisher(testResults, failIfNoResults, failedTestsMarkBuildAsFailure, outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure, includeCommentDiagnostics);
 	}
 
 	/**
@@ -143,6 +147,13 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 	}
 	
 	/**
+     * @return the includeCommentDiagnostics
+     */
+    public Boolean getIncludeCommentDiagnostics() {
+        return includeCommentDiagnostics;
+    }
+
+    /**
 	 * Gets the directory where the plug-in saves its TAP streams before processing them and
 	 * displaying in the UI.
 	 * <p>
@@ -258,7 +269,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		try {
 			results = tapDir.list("**/*.*");
 
-			final TapParser parser = new TapParser(getOutputTapToConsole(), getEnableSubtests(), getTodoIsFailure(), logger);
+			final TapParser parser = new TapParser(getOutputTapToConsole(), getEnableSubtests(), getTodoIsFailure(), getIncludeCommentDiagnostics(), logger);
 	        final TapResult result = parser.parse(results, owner);
 	        result.setOwner(owner);
 	        return result;
