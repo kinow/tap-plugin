@@ -150,7 +150,7 @@ public class TapTestResultAction extends AbstractTestResultAction<AbstractTestRe
 	 */
 	@Override
 	public String getDisplayName() {
-		return "TAP Test Result";
+		return "TAP Test Results";
 	}
 
 }
