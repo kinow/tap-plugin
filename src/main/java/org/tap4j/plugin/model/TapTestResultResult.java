@@ -23,16 +23,26 @@
  */
 package org.tap4j.plugin.model;
 
+import hudson.Functions;
+import hudson.model.Item;
 import hudson.model.AbstractBuild;
+import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
 
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
+
+import jenkins.model.Jenkins;
 
 import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.Stapler;
+import org.kohsuke.stapler.StaplerRequest;
 import org.tap4j.model.Comment;
 import org.tap4j.model.Directive;
 import org.tap4j.model.TestSet;
@@ -50,11 +60,13 @@ public class TapTestResultResult extends TestResult {
 	private static final String DURATION_KEY = "duration_ms";
 	
 	private static final long serialVersionUID = -4499261655602135921L;
+	private static final Logger LOGGER = Logger.getLogger(TapTestResultResult.class.getName());
+	
 	private final AbstractBuild<?, ?> owner;
 	private final org.tap4j.model.TestResult tapTestResult;
 	private final TestSetMap testSetMap;
 	private final Boolean todoIsFailure;
-
+	
 	/**
 	 * @deprecated
 	 * @param owner
@@ -84,8 +96,7 @@ public class TapTestResultResult extends TestResult {
 	 * @see hudson.model.ModelObject#getDisplayName()
 	 */
 	public String getDisplayName() {
-		String name = tapTestResult.getDescription();
-		return name != null ? name : Integer.toString(tapTestResult.getTestNumber());
+	    return getName();
 	}
 
 	/* (non-Javadoc)
@@ -130,8 +141,14 @@ public class TapTestResultResult extends TestResult {
 	 */
 	@Override
 	public String getName() {
-		String name = tapTestResult.getDescription();
-		return testSetMap.getFileName() + "-" + name != null ? name : Integer.toString(tapTestResult.getTestNumber());
+	    StringBuilder buf = new StringBuilder();
+        buf.append(tapTestResult.getTestNumber());
+        String tapTestResultDescription = tapTestResult.getDescription();
+        if (StringUtils.isNotBlank(tapTestResultDescription)) {
+            buf.append(" - ");
+            buf.append(tapTestResultDescription);
+        }
+        return buf.toString();
 	}
 	
 	public String getStatus() {
@@ -164,12 +181,88 @@ public class TapTestResultResult extends TestResult {
 		return getName();
 	}
 	
+	public String getRelativePathFrom(TestObject it) {
+        // if (it is one of my ancestors) {
+        //    return a relative path from it
+        // } else {
+        //    return a complete path starting with "/"
+        // }
+        if (it==this) {
+            return ".";
+        }
+
+        StringBuilder buf = new StringBuilder();
+        TestObject next = this;
+        TestObject cur = this;  
+        // Walk up my ancesotors from leaf to root, looking for "it"
+        // and accumulating a relative url as I go
+        while (next!=null && it!=next) {
+            cur = next;
+            buf.insert(0,'/');
+            buf.insert(0,cur.getSafeName());
+            next = cur.getParent();
+        }
+        if (it==next) {
+            return buf.toString();
+        } else {
+            // Keep adding on to the string we've built so far
+
+            // Start with the test result action
+            AbstractTestResultAction action = getTestResultAction();
+            if (action==null) {
+                //LOGGER.warning("trying to get relative path, but we can't determine the action that owns this result.");
+                return ""; // this won't take us to the right place, but it also won't 404.
+            }
+            buf.insert(0,'/');
+            buf.insert(0,action.getUrlName());
+
+            // Now the build
+            AbstractBuild<?,?> myBuild = cur.getOwner();
+            if (myBuild ==null) {
+                //LOGGER.warning("trying to get relative path, but we can't determine the build that owns this result.");
+                return ""; // this won't take us to the right place, but it also won't 404. 
+            }
+            //buf.insert(0,'/');
+            buf.insert(0,myBuild.getUrl());
+
+            // If we're inside a stapler request, just delegate to Hudson.Functions to get the relative path!
+            StaplerRequest req = Stapler.getCurrentRequest();
+            if (req!=null && myBuild instanceof Item) {
+                buf.insert(0, '/');
+                // Ugly but I don't see how else to convince the compiler that myBuild is an Item
+                Item myBuildAsItem = (Item) myBuild;
+                buf.insert(0, Functions.getRelativeLinkTo(myBuildAsItem));
+            } else {
+                // We're not in a stapler request. Okay, give up.
+                //LOGGER.info("trying to get relative path, but it is not my ancestor, and we're not in a stapler request. Trying absolute hudson url...");
+                String hudsonRootUrl = Jenkins.getInstance().getRootUrl();
+                if (hudsonRootUrl==null||hudsonRootUrl.length()==0) {
+                    //LOGGER.warning("Can't find anything like a decent hudson url. Punting, returning empty string."); 
+                    return "";
+
+                }
+                //buf.insert(0, '/');
+                buf.insert(0, hudsonRootUrl);
+            }
+
+            //LOGGER.info("Here's our relative path: " + buf.toString()); 
+            return buf.toString(); 
+        }
+
+    }
+	
 	/* (non-Javadoc)
 	 * @see hudson.tasks.test.TestObject#getSafeName()
 	 */
 	@Override
 	public String getSafeName() {
-		return testSetMap.getFileName() + "-" + tapTestResult.getTestNumber();
+		String safeName = testSetMap.getFileName() + "-" + tapTestResult.getTestNumber();
+		try {
+		    safeName = URLEncoder.encode(safeName, "UTF-8");
+		} catch (UnsupportedEncodingException uee) {
+		    LOGGER.warning(uee.getMessage());
+		}
+		return safeName;
 	}
 	
 	/* (non-Javadoc)

@@ -41,7 +41,7 @@ public class TapBuildAction implements Action, Serializable, StaplerProxy {
 	private static final long serialVersionUID = 520981690971849654L;
 	public static final String URL_NAME = "tapResults";
 	public static final String ICON_NAME = "/plugin/tap/icons/tap-24.png";
-	public static final String DISPLAY_NAME = "TAP";
+	public static final String DISPLAY_NAME = "TAP Extended Test Results";
 
 	private AbstractBuild<?, ?> build;
 

@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
@@ -68,7 +69,7 @@ public class TapStreamResult extends TabulatedResult {
 	 * @see hudson.model.ModelObject#getDisplayName()
 	 */
 	public String getDisplayName() {
-		return "TAP Stream results";
+		return "TAP Stream Results";
 	}
 
 	/* (non-Javadoc)
@@ -177,18 +178,34 @@ public class TapStreamResult extends TabulatedResult {
 	 * @return
 	 */
 	private TapTestResultResult getTapTestResultResult(String name) {
-		if (name != null && name.lastIndexOf("-") > 0) {
-			String fileName = name.substring(0, name.lastIndexOf("-"));
-			String testNumber = name.substring(name.lastIndexOf("-")+1);
-			for(TestSetMap tsm : tapResult.getTestSets()) {
-				if(tsm.getFileName().equals(fileName)) {
-					TestSet ts = tsm.getTestSet();
-					org.tap4j.model.TestResult desired = ts.getTestResult(Integer.parseInt(testNumber));
-					return new TapTestResultResult(owner, tsm, desired, this.tapResult.getTodoIsFailure());
-				}
+	    if (name == null)
+	        return null; // we don't allow null, nay!
+	    if (name.lastIndexOf("-") <= 0)
+	        return null; // ops, where's the - mate?
+	    
+	    name = name.trim();
+	    
+	    int rightIndex = name.length();
+	    while (name.charAt(rightIndex-1) == '/') {
+	        rightIndex -= 1;
+	    }
+	    int leftIndex = name.lastIndexOf('/') +1;
+	    
+	    String testResultName = name.substring(leftIndex, rightIndex); // but we want the test result name (testSet1.tap)
+	    if (testResultName.indexOf('-') <= 0) // plus the number (testSet1.tap-2)
+	        return null;
+	    String testNumber = testResultName.substring(testResultName.lastIndexOf('-')+1);
+	    String fileName = name.substring(0, name.lastIndexOf('-'));
+		
+	    for(TestSetMap tsm : tapResult.getTestSets()) {
+			if(tsm.getFileName().equals(fileName)) {
+				TestSet ts = tsm.getTestSet();
+				org.tap4j.model.TestResult desired = ts.getTestResult(Integer.parseInt(testNumber));
+				return new TapTestResultResult(owner, tsm, desired, this.tapResult.getTodoIsFailure());
 			}
 		}
-		return null;
+		
+		return null; // ops, something went wrong
 	}
 
 }
