@@ -52,6 +52,7 @@ public class TestIssue16964 extends HudsonTestCase {
 				true, 
 				true, 
 				true,
+				true,
 				true);
 		project.getPublishersList().add(publisher);
 		project.save();
