@@ -25,5 +25,8 @@
       <f:entry title="Include comment diagnostics (#) in the results table">
           <f:checkbox name="TapPublisher.includeCommentDiagnostics" value="${instance.includeCommentDiagnostics}" checked="${instance.includeCommentDiagnostics}" />
       </f:entry>
+      <f:entry title="Validate number of tests">
+          <f:checkbox name="TapPublisher.validateNumberOfTests" value="${instance.validateNumberOfTests}" checked="${instance.validateNumberOfTests}" />
+      </f:entry>
   </f:advanced>
 </j:jelly>

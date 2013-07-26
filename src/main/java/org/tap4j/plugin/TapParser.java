@@ -60,6 +60,7 @@ public class TapParser {
 	private boolean parserErrors;
 	private boolean hasFailedTests;
 	private boolean includeCommentDiagnostics;
+	private boolean validateNumberOfTests;
 
 	/**
      * @deprecated
@@ -74,6 +75,10 @@ public class TapParser {
 		this.hasFailedTests = false;
 	}
 	
+	/**
+	 * @deprecated
+	 */
+	@Deprecated
 	public TapParser(Boolean outputTapToConsole, Boolean enableSubtests, Boolean todoIsFailure, Boolean includeCommentDiagnostics, PrintStream logger) {
         this.outputTapToConsole = outputTapToConsole;
         this.enableSubtests = enableSubtests;
@@ -81,6 +86,16 @@ public class TapParser {
         this.logger = logger;
         this.parserErrors = false;
         this.includeCommentDiagnostics = includeCommentDiagnostics;
+    }
+	
+	public TapParser(Boolean outputTapToConsole, Boolean enableSubtests, Boolean todoIsFailure, Boolean includeCommentDiagnostics, Boolean validateNumberOfTests, PrintStream logger) {
+        this.outputTapToConsole = outputTapToConsole;
+        this.enableSubtests = enableSubtests;
+        this.todoIsFailure = todoIsFailure;
+        this.logger = logger;
+        this.parserErrors = false;
+        this.includeCommentDiagnostics = includeCommentDiagnostics;
+        this.validateNumberOfTests = validateNumberOfTests;
     }
 
 	public boolean hasParserErrors() {
@@ -90,7 +105,7 @@ public class TapParser {
 	public boolean hasFailedTests() {
 		return this.hasFailedTests;
 	}
-
+	
 	public TapResult parse(FilePath[] results, AbstractBuild<?, ?> build) {
 		this.parserErrors = Boolean.FALSE;
 		this.hasFailedTests = Boolean.FALSE;
@@ -117,6 +132,12 @@ public class TapParser {
 						parser = new Tap13Parser();
 					}
 					final TestSet testSet = parser.parseFile(tapFile);
+					
+					if (this.validateNumberOfTests) {
+					    if (testSet.getPlan().getLastTestNumber() != testSet.getNumberOfTestResults()) {
+					        throw new ParserException("Number of tests results didn't go to plan");
+					    }
+					}
 	
 					if (testSet.containsNotOk() || testSet.containsBailOut()) {
 						this.hasFailedTests = Boolean.TRUE;
