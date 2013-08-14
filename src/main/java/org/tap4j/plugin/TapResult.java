@@ -319,23 +319,6 @@ public class TapResult implements ModelObject, Serializable {
 		return getName();
 	}
 	
-	public String getContents(String fileName) {
-		String contents = "";
-		if(fileName != null) {
-			FilePath tapDir = new FilePath(new FilePath(new File(build.getRootDir(), Constants.TAP_DIR_NAME)), fileName);
-			try {
-				if(tapDir.exists()) {
-					contents = org.apache.commons.lang.StringEscapeUtils.escapeHtml(tapDir.readToString());
-				}
-			} catch (IOException e) {
-				contents = e.getMessage();
-			} catch (InterruptedException e) {
-				contents = e.getMessage();
-			}
-		}
-		return contents;
-	}
-	
 	public void doDownloadAttachment(StaplerRequest request, StaplerResponse response) {
 		String f = request.getParameter("f");
 		String key = request.getParameter("key");
