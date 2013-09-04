@@ -152,7 +152,7 @@
         <dependency>
             <groupId>org.tap4j</groupId>
             <artifactId>tap4j</artifactId>
-            <version>4.0.3</version>
+            <version>4.0.4</version>
         </dependency>
     </dependencies>
     
