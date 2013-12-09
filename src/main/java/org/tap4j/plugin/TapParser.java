@@ -61,6 +61,7 @@ public class TapParser {
 	private boolean hasFailedTests;
 	private boolean includeCommentDiagnostics;
 	private boolean validateNumberOfTests;
+	private boolean planRequired;
 
 	/**
      * @deprecated
@@ -88,8 +89,11 @@ public class TapParser {
         this.includeCommentDiagnostics = includeCommentDiagnostics;
     }
 	
+	/**
+	 * @deprecated
+	 */
 	public TapParser(Boolean outputTapToConsole, Boolean enableSubtests, Boolean todoIsFailure, Boolean includeCommentDiagnostics, Boolean validateNumberOfTests, PrintStream logger) {
-        this.outputTapToConsole = outputTapToConsole;
+	    this.outputTapToConsole = outputTapToConsole;
         this.enableSubtests = enableSubtests;
         this.todoIsFailure = todoIsFailure;
         this.logger = logger;
@@ -98,7 +102,20 @@ public class TapParser {
         this.validateNumberOfTests = validateNumberOfTests;
     }
 
-	public boolean hasParserErrors() {
+	public TapParser(Boolean outputTapToConsole2, Boolean enableSubtests2, Boolean todoIsFailure2,
+            Boolean includeCommentDiagnostics2, Boolean validateNumberOfTests2, Boolean planRequired,
+            PrintStream logger2) {
+	    this.outputTapToConsole = outputTapToConsole;
+        this.enableSubtests = enableSubtests;
+        this.todoIsFailure = todoIsFailure;
+        this.logger = logger;
+        this.parserErrors = false;
+        this.includeCommentDiagnostics = includeCommentDiagnostics;
+        this.validateNumberOfTests = validateNumberOfTests;
+        this.planRequired = planRequired;
+    }
+
+    public boolean hasParserErrors() {
 		return this.parserErrors;
 	}
 
@@ -126,11 +143,8 @@ public class TapParser {
 					log("Parsing TAP test result [" + tapFile + "].");
 	
 					final Tap13Parser parser;
-					if(enableSubtests != null) {
-						parser = new Tap13Parser(enableSubtests);
-					} else {
-						parser = new Tap13Parser();
-					}
+					parser = new Tap13Parser();
+					//TODO: parser = new Tap13Parser("UTF-8", enableSubtests, planRequired);
 					final TestSet testSet = parser.parseFile(tapFile);
 					
 					if (this.validateNumberOfTests) {

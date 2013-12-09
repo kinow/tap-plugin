@@ -69,7 +69,25 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 	private final Boolean todoIsFailure;
 	private final Boolean includeCommentDiagnostics;
 	private final Boolean validateNumberOfTests;
+	private final Boolean planRequired;
 
+	/**
+	 * Kept for backward compatibility. To be removed in next major release.
+	 * @deprecated
+	 */
+    public TapPublisher(String testResults,
+            Boolean failIfNoResults, 
+            Boolean failedTestsMarkBuildAsFailure, 
+            Boolean outputTapToConsole,
+            Boolean enableSubtests, 
+            Boolean discardOldReports,
+            Boolean todoIsFailure,
+            Boolean includeCommentDiagnostics,
+            Boolean validateNumberOfTests) {
+	    this(testResults, failIfNoResults, failedTestsMarkBuildAsFailure, outputTapToConsole, enableSubtests, 
+	            discardOldReports, todoIsFailure, includeCommentDiagnostics, validateNumberOfTests, Boolean.TRUE);
+	}
+	
 	@DataBoundConstructor
 	public TapPublisher(String testResults,
 			Boolean failIfNoResults, 
@@ -79,7 +97,8 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 			Boolean discardOldReports,
 			Boolean todoIsFailure,
 			Boolean includeCommentDiagnostics,
-			Boolean validateNumberOfTests) {
+			Boolean validateNumberOfTests,
+			Boolean planRequired) {
 		this.testResults = testResults;
 		this.failIfNoResults = BooleanUtils.toBooleanDefaultIfNull(failIfNoResults, false);
 		this.failedTestsMarkBuildAsFailure = BooleanUtils.toBooleanDefaultIfNull(failedTestsMarkBuildAsFailure, false);
@@ -89,6 +108,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		this.todoIsFailure = BooleanUtils.toBooleanDefaultIfNull(todoIsFailure, true);
 		this.includeCommentDiagnostics = BooleanUtils.toBooleanDefaultIfNull(includeCommentDiagnostics, true);
 		this.validateNumberOfTests = BooleanUtils.toBooleanDefaultIfNull(validateNumberOfTests, false);
+		this.planRequired = BooleanUtils.toBooleanDefaultIfNull(planRequired, Boolean.TRUE); // true is the old behaviour
 	}
 
 	public Object readResolve() {
@@ -101,7 +121,8 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		Boolean todoIsFailure = BooleanUtils.toBooleanDefaultIfNull(this.getTodoIsFailure(), true);
 		Boolean includeCommentDiagnostics = BooleanUtils.toBooleanDefaultIfNull(this.getIncludeCommentDiagnostics(), true);
 		Boolean validateNumberOfTests = BooleanUtils.toBooleanDefaultIfNull(this.getValidateNumberOfTests(), false);
-		return new TapPublisher(testResults, failIfNoResults, failedTestsMarkBuildAsFailure, outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure, includeCommentDiagnostics, validateNumberOfTests);
+		Boolean planRequired = BooleanUtils.toBooleanDefaultIfNull(this.getPlanRequired(), true);
+		return new TapPublisher(testResults, failIfNoResults, failedTestsMarkBuildAsFailure, outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure, includeCommentDiagnostics, validateNumberOfTests, planRequired);
 	}
 
 	/**
@@ -159,6 +180,10 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
     
     public Boolean getValidateNumberOfTests() {
         return validateNumberOfTests;
+    }
+    
+    public Boolean getPlanRequired() {
+        return planRequired;
     }
 
     /**
@@ -277,7 +302,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		try {
 			results = tapDir.list("**/*.*");
 
-			final TapParser parser = new TapParser(getOutputTapToConsole(), getEnableSubtests(), getTodoIsFailure(), getIncludeCommentDiagnostics(), getValidateNumberOfTests(), logger);
+			final TapParser parser = new TapParser(getOutputTapToConsole(), getEnableSubtests(), getTodoIsFailure(), getIncludeCommentDiagnostics(), getValidateNumberOfTests(), getPlanRequired(), logger);
 	        final TapResult result = parser.parse(results, owner);
 	        result.setOwner(owner);
 	        return result;

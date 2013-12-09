@@ -28,5 +28,8 @@
       <f:entry title="Validate number of tests">
           <f:checkbox name="TapPublisher.validateNumberOfTests" value="${instance.validateNumberOfTests}" checked="${instance.validateNumberOfTests}" />
       </f:entry>
+      <f:entry title="Is TAP plan required?">
+          <f:checkbox name="TapPublisher.planRequired" value="${instance.planRequired}" checked="${instance.planRequired}" default="true" />
+      </f:entry>
   </f:advanced>
 </j:jelly>
