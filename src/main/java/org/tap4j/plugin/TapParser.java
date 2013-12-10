@@ -1,18 +1,18 @@
-/* 
+/*
  * The MIT License
- * 
+ *
  * Copyright (c) 2010 Bruno P. Kinoshita <http://www.kinoshita.eti.br>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -42,7 +42,7 @@ import org.tap4j.plugin.model.TestSetMap;
 
 /**
  * Executes remote TAP Stream retrieval and execution.
- * 
+ *
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.1
  */
@@ -54,7 +54,7 @@ public class TapParser {
 	private Boolean outputTapToConsole;
 	private Boolean enableSubtests;
 	private Boolean todoIsFailure;
-	
+
 	/** Build's logger to print logs as part of build's console output */
 	private PrintStream logger;
 	private boolean parserErrors;
@@ -75,7 +75,7 @@ public class TapParser {
 		this.parserErrors = false;
 		this.hasFailedTests = false;
 	}
-	
+
 	/**
 	 * @deprecated
 	 */
@@ -88,7 +88,7 @@ public class TapParser {
         this.parserErrors = false;
         this.includeCommentDiagnostics = includeCommentDiagnostics;
     }
-	
+
 	/**
 	 * @deprecated
 	 */
@@ -102,9 +102,9 @@ public class TapParser {
         this.validateNumberOfTests = validateNumberOfTests;
     }
 
-	public TapParser(Boolean outputTapToConsole2, Boolean enableSubtests2, Boolean todoIsFailure2,
-            Boolean includeCommentDiagnostics2, Boolean validateNumberOfTests2, Boolean planRequired,
-            PrintStream logger2) {
+	public TapParser(Boolean outputTapToConsole, Boolean enableSubtests, Boolean todoIsFailure,
+            Boolean includeCommentDiagnostics, Boolean validateNumberOfTests, Boolean planRequired,
+            PrintStream logger) {
 	    this.outputTapToConsole = outputTapToConsole;
         this.enableSubtests = enableSubtests;
         this.todoIsFailure = todoIsFailure;
@@ -122,7 +122,7 @@ public class TapParser {
 	public boolean hasFailedTests() {
 		return this.hasFailedTests;
 	}
-	
+
 	public TapResult parse(FilePath[] results, AbstractBuild<?, ?> build) {
 		this.parserErrors = Boolean.FALSE;
 		this.hasFailedTests = Boolean.FALSE;
@@ -141,25 +141,24 @@ public class TapParser {
 				}
 				try {
 					log("Parsing TAP test result [" + tapFile + "].");
-	
+
 					final Tap13Parser parser;
-					parser = new Tap13Parser();
-					//TODO: parser = new Tap13Parser("UTF-8", enableSubtests, planRequired);
+					parser = new Tap13Parser("UTF-8", enableSubtests, planRequired);
 					final TestSet testSet = parser.parseFile(tapFile);
-					
+
 					if (this.validateNumberOfTests) {
 					    if (testSet.getPlan().getLastTestNumber() != testSet.getNumberOfTestResults()) {
 					        throw new ParserException("Number of tests results didn't go to plan");
 					    }
 					}
-	
+
 					if (testSet.containsNotOk() || testSet.containsBailOut()) {
 						this.hasFailedTests = Boolean.TRUE;
 					}
-	
+
 					final TestSetMap map = new TestSetMap(tapFile.getAbsolutePath(), testSet);
 					testSets.add(map);
-	
+
 					if (this.outputTapToConsole) {
 						try {
 							log(FileUtils.readFileToString(tapFile));

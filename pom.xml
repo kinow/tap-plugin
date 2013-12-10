@@ -1,34 +1,34 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.488</version><!-- which version of Jenkins is this plugin built 
+        <version>1.488</version><!-- which version of Jenkins is this plugin built
             against? -->
     </parent>
-    
+
     <inceptionYear>2011</inceptionYear>
-    
+
     <groupId>org.tap4j</groupId>
     <artifactId>tap</artifactId>
     <name>Jenkins TAP Plugin</name>
     <version>1.17-SNAPSHOT</version>
     <packaging>hpi</packaging>
-    
+
     <description>This plugin publishes TAP test results.</description>
-    
+
     <url>http://wiki.jenkins-ci.org/display/JENKINS/TAP+Plugin</url>
-    
+
     <organization>
         <name>Jenkins</name>
         <url>http://www.jenkins-ci.org</url>
     </organization>
-    
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    
+
     <issueManagement>
         <system>JIRA</system>
         <url>https://issues.jenkins-ci.org/browse/JENKINS/component/15874</url>
@@ -40,7 +40,7 @@
             <url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
         </repository>
     </distributionManagement>
-    
+
         <developers>
         <developer>
             <id>kinow</id>
@@ -52,7 +52,7 @@
             </roles>
         </developer>
     </developers>
-    
+
     <build>
         <pluginManagement>
             <plugins>
@@ -141,21 +141,21 @@
             </plugins>
         </pluginManagement>
     </build>
-    
+
     <scm>
         <connection>scm:git:git://github.com/jenkinsci/tap-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/tap-plugin.git</developerConnection>
         <url>http://github.com/jenkinsci/tap-plugin</url>
     </scm>
-    
+
     <dependencies>
         <dependency>
             <groupId>org.tap4j</groupId>
             <artifactId>tap4j</artifactId>
-            <version>4.0.5</version>
+            <version>4.0.7</version>
         </dependency>
     </dependencies>
-    
+
     <repositories>
         <repository>
             <id>repo.jenkins-ci.org</id>
@@ -169,6 +169,6 @@
             <url>http://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
-    
+
 
 </project>
