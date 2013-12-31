@@ -86,7 +86,7 @@ public class DiagnosticUtil {
 					}
 					sb.append("<td><a href='downloadAttachment?f="+tapFile+"&key="+downloadKey+"'>"+fileName+"</a></td>");
 				} else {
-					sb.append("<td>" + org.apache.commons.lang.StringEscapeUtils.escapeHtml(value.toString()) + "</td>");
+					sb.append("<td><pre>" + org.apache.commons.lang.StringEscapeUtils.escapeHtml(value.toString()) + "</pre></td>");
 				}
 				sb.append("</tr>");
 			}
@@ -105,7 +105,7 @@ public class DiagnosticUtil {
 					createDiagnosticTableRecursively(tapFile, key, (java.util.Map) value, sb,
 							(depth + 1));
 				} else {
-					sb.append("<td>" + org.apache.commons.lang.StringEscapeUtils.escapeHtml(value.toString()) + "</td>");
+					sb.append("<td><pre>" + org.apache.commons.lang.StringEscapeUtils.escapeHtml(value.toString()) + "</pre></td>");
 				}
 				sb.append("</tr>");
 			}
