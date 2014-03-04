@@ -362,9 +362,11 @@ public class TapResult implements ModelObject, Serializable {
 	private TapAttachment getAttachment(TestSet ts, String key) {
 		for(TestResult tr : ts.getTestResults()){
 			Map<String, Object> diagnostics = tr.getDiagnostic();
-			String parentKey = null;
 			if(diagnostics != null && diagnostics.size() > 0) {
-				return recursivelySearch(diagnostics, parentKey, key);
+				TapAttachment attachement = recursivelySearch(diagnostics, null, key);
+				if (attachement != null) {
+ 					return attachement;
+				}
 			}
 		}
 		return null;
@@ -376,7 +378,10 @@ public class TapResult implements ModelObject, Serializable {
 			Object value = diagnostics.get(diagnosticKey);
 			if(value != null) {
 				if(value instanceof Map<?, ?>) {
-					return recursivelySearch((Map<String, Object>)value, diagnosticKey, key);
+					TapAttachment attachment = recursivelySearch((Map<String, Object>)value, diagnosticKey, key);
+					if (attachment != null) {
+						return attachment;
+					}
 				} else {
 					if(parentKey != null && parentKey.equals(key)) {
 						Object o = diagnostics.get("File-Content");
