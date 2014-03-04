@@ -186,7 +186,7 @@ public class TapResult implements ModelObject, Serializable {
 			
 			Plan plan = realTestSet.getPlan();
 			
-			if (plan.isSkip()) {
+			if (plan != null && plan.isSkip()) {
 				this.skipped += testResults.size();
 			} else {
 				for (TestResult testResult : testResults) {
