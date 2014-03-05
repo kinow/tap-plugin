@@ -49,8 +49,12 @@ import java.util.List;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.tap4j.model.Plan;
+import org.tap4j.model.TestResult;
+import org.tap4j.model.TestSet;
 import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.plugin.util.Constants;
+import org.tap4j.util.StatusValues;
 
 /**
  * Publishes TAP results in Jenkins builds.
@@ -71,23 +75,6 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 	private final Boolean validateNumberOfTests;
 	private final Boolean planRequired;
 
-	/**
-	 * Kept for backward compatibility. To be removed in next major release.
-	 * @deprecated
-	 */
-    public TapPublisher(String testResults,
-            Boolean failIfNoResults, 
-            Boolean failedTestsMarkBuildAsFailure, 
-            Boolean outputTapToConsole,
-            Boolean enableSubtests, 
-            Boolean discardOldReports,
-            Boolean todoIsFailure,
-            Boolean includeCommentDiagnostics,
-            Boolean validateNumberOfTests) {
-	    this(testResults, failIfNoResults, failedTestsMarkBuildAsFailure, outputTapToConsole, enableSubtests, 
-	            discardOldReports, todoIsFailure, includeCommentDiagnostics, validateNumberOfTests, Boolean.TRUE);
-	}
-	
 	@DataBoundConstructor
 	public TapPublisher(String testResults,
 			Boolean failIfNoResults, 
@@ -273,12 +260,21 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 			TapBuildAction action = new TapBuildAction(build, testResult);
 			build.getActions().add(action);
 			if (testResult.hasParseErrors()) {
+			    listener.getLogger().println("TAP parse errors found in the build. Marking build as UNSTABLE");
 				build.setResult(Result.UNSTABLE);
+			}
+			if (this.getValidateNumberOfTests()) {
+			    if (!this.validateNumberOfTests(testResult.getTestSets())) {
+			        listener.getLogger().println("Not all test cases were executed according to the test set plan. Marking build as UNSTABLE");
+	                build.setResult(Result.UNSTABLE);
+			    }
 			}
 			if (testResult.getFailed() > 0) {
 				if(this.getFailedTestsMarkBuildAsFailure()) {
+				    listener.getLogger().println("There are failed test cases and the job is configured to mark the build as failure. Marking build as FAILURE");
 					build.setResult(Result.FAILURE);
 				} else {
+				    listener.getLogger().println("There are failed test cases. Marking build as UNSTABLE");
 					build.setResult(Result.UNSTABLE);
 				}
 			}
@@ -291,6 +287,31 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 	}
 
 	/**
+	 * Iterates through the list of test sets and validates its plans and 
+	 * test results.
+	 * 
+	 * @param testSets
+	 * @return <true> if there are any test case that doesn't follow the plan
+	 */
+	private boolean validateNumberOfTests(List<TestSetMap> testSets) {
+        for (TestSetMap testSetMap : testSets) {
+            TestSet testSet = testSetMap.getTestSet();
+            Plan plan = testSet.getPlan();
+            if (plan != null) { 
+                int planned = plan.getLastTestNumber();
+                int totalWithSuccess = 0;
+                for (TestResult tr : testSet.getTestResults()) {
+                    if (tr.getStatus() == StatusValues.OK)
+                        totalWithSuccess++;
+                }
+                if (planned != totalWithSuccess)
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    /**
 	 * @param build
 	 * @param logger
 	 * @return
@@ -309,7 +330,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		} catch (Exception e) {
 			e.printStackTrace(logger);
 
-			tr = new TapResult("", owner, Collections.<TestSetMap>emptyList(), getTodoIsFailure(), getIncludeCommentDiagnostics());
+			tr = new TapResult("", owner, Collections.<TestSetMap>emptyList(), getTodoIsFailure(), getIncludeCommentDiagnostics(), getValidateNumberOfTests());
             tr.setOwner(owner);
             return tr;
 		}
@@ -449,7 +470,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		 * @see hudson.tasks.BuildStepDescriptor#isApplicable(java.lang.Class)
 		 */
 		@Override
-		public boolean isApplicable(Class<? extends AbstractProject> jobType) {
+		public boolean isApplicable(@SuppressWarnings("rawtypes") Class<? extends AbstractProject> jobType) {
 			return Boolean.TRUE;
 		}
 

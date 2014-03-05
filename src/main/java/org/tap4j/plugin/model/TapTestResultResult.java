@@ -66,30 +66,17 @@ public class TapTestResultResult extends TestResult {
 	private final org.tap4j.model.TestResult tapTestResult;
 	private final TestSetMap testSetMap;
 	private final Boolean todoIsFailure;
+	private final Boolean includeCommentDiagnostics;
+	private final Boolean validateNumberOfTests;
 	
-	/**
-	 * @deprecated
-	 * @param owner
-	 * @param testSetMap
-	 * @param tapTestResult
-	 */
-	public TapTestResultResult(AbstractBuild<?, ?> owner, 
-			TestSetMap testSetMap, 
-			org.tap4j.model.TestResult tapTestResult) {
-		this.owner = owner;
-		this.testSetMap = testSetMap;
-		this.tapTestResult = tapTestResult;
-		this.todoIsFailure = Boolean.TRUE;
-	}
-	
-	public TapTestResultResult(AbstractBuild<?, ?> owner, 
-			TestSetMap testSetMap, 
-			org.tap4j.model.TestResult tapTestResult, 
-			Boolean todoIsFailure) {
+	public TapTestResultResult(AbstractBuild<?, ?> owner, TestSetMap testSetMap, org.tap4j.model.TestResult tapTestResult, 
+			Boolean todoIsFailure, Boolean includeCommentDiagnostics, Boolean validateNumberOfTests) {
 		this.owner = owner;
 		this.testSetMap = testSetMap;
 		this.tapTestResult = tapTestResult;
 		this.todoIsFailure = todoIsFailure;
+		this.includeCommentDiagnostics = includeCommentDiagnostics;
+		this.validateNumberOfTests = validateNumberOfTests;
 	}
 	
 	/* (non-Javadoc)
@@ -119,7 +106,7 @@ public class TapTestResultResult extends TestResult {
 			if(subTest != null) {
 				List<TestSetMap> list = new ArrayList<TestSetMap>();
 				list.add(subTest);
-				parent = new TapStreamResult(owner, new TapResult("TAP Test Results", owner, list, todoIsFailure));
+				parent = new TapStreamResult(owner, new TapResult("TAP Test Results", owner, list, todoIsFailure, includeCommentDiagnostics, validateNumberOfTests));
 			}
 		}
 		return parent;
@@ -208,6 +195,7 @@ public class TapTestResultResult extends TestResult {
             // Keep adding on to the string we've built so far
 
             // Start with the test result action
+            @SuppressWarnings("rawtypes")
             AbstractTestResultAction action = getTestResultAction();
             if (action==null) {
                 //LOGGER.warning("trying to get relative path, but we can't determine the action that owns this result.");

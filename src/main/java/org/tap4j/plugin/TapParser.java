@@ -51,56 +51,18 @@ public class TapParser {
 	/** Prints the logs to the web server's console / log files */
 	private static final Logger log = Logger.getLogger(TapParser.class
 			.getName());
-	private Boolean outputTapToConsole;
-	private Boolean enableSubtests;
-	private Boolean todoIsFailure;
+	private final Boolean outputTapToConsole;
+	private final Boolean enableSubtests;
+	private final Boolean todoIsFailure;
 
 	/** Build's logger to print logs as part of build's console output */
-	private PrintStream logger;
-	private boolean parserErrors;
+	private final PrintStream logger;
+	private final Boolean includeCommentDiagnostics;
+	private final Boolean validateNumberOfTests;
+	private final Boolean planRequired;
+	
 	private boolean hasFailedTests;
-	private boolean includeCommentDiagnostics;
-	private boolean validateNumberOfTests;
-	private boolean planRequired;
-
-	/**
-     * @deprecated
-	 */
-	@Deprecated
-	public TapParser(Boolean outputTapToConsole, Boolean enableSubtests, Boolean todoIsFailure, PrintStream logger) {
-		this.outputTapToConsole = outputTapToConsole;
-		this.enableSubtests = enableSubtests;
-		this.todoIsFailure = todoIsFailure;
-		this.logger = logger;
-		this.parserErrors = false;
-		this.hasFailedTests = false;
-	}
-
-	/**
-	 * @deprecated
-	 */
-	@Deprecated
-	public TapParser(Boolean outputTapToConsole, Boolean enableSubtests, Boolean todoIsFailure, Boolean includeCommentDiagnostics, PrintStream logger) {
-        this.outputTapToConsole = outputTapToConsole;
-        this.enableSubtests = enableSubtests;
-        this.todoIsFailure = todoIsFailure;
-        this.logger = logger;
-        this.parserErrors = false;
-        this.includeCommentDiagnostics = includeCommentDiagnostics;
-    }
-
-	/**
-	 * @deprecated
-	 */
-	public TapParser(Boolean outputTapToConsole, Boolean enableSubtests, Boolean todoIsFailure, Boolean includeCommentDiagnostics, Boolean validateNumberOfTests, PrintStream logger) {
-	    this.outputTapToConsole = outputTapToConsole;
-        this.enableSubtests = enableSubtests;
-        this.todoIsFailure = todoIsFailure;
-        this.logger = logger;
-        this.parserErrors = false;
-        this.includeCommentDiagnostics = includeCommentDiagnostics;
-        this.validateNumberOfTests = validateNumberOfTests;
-    }
+	private boolean parserErrors;
 
 	public TapParser(Boolean outputTapToConsole, Boolean enableSubtests, Boolean todoIsFailure,
             Boolean includeCommentDiagnostics, Boolean validateNumberOfTests, Boolean planRequired,
@@ -115,11 +77,39 @@ public class TapParser {
         this.planRequired = planRequired;
     }
 
-    public boolean hasParserErrors() {
+    public Boolean hasParserErrors() {
 		return this.parserErrors;
 	}
+    
+	public Boolean getOutputTapToConsole() {
+        return outputTapToConsole;
+    }
 
-	public boolean hasFailedTests() {
+    public Boolean getTodoIsFailure() {
+        return todoIsFailure;
+    }
+
+    public boolean getParserErrors() {
+        return parserErrors;
+    }
+
+    public Boolean getIncludeCommentDiagnostics() {
+        return includeCommentDiagnostics;
+    }
+
+    public Boolean getValidateNumberOfTests() {
+        return validateNumberOfTests;
+    }
+
+    public Boolean getPlanRequired() {
+        return planRequired;
+    }
+
+    public Boolean getEnableSubtests() {
+        return enableSubtests;
+    }
+
+    public boolean hasFailedTests() {
 		return this.hasFailedTests;
 	}
 
@@ -133,8 +123,7 @@ public class TapParser {
 			for (FilePath path : results) {
 				File tapFile = new File(path.getRemote());
 				if (!tapFile.isFile()) {
-					log("'" + tapFile.getAbsolutePath()
-							+ "' points to an invalid test report");
+					log("'" + tapFile.getAbsolutePath() + "' points to an invalid test report");
 					continue; // move to next file
 				} else {
 					log("Processing '" + tapFile.getAbsolutePath() + "'");
@@ -142,15 +131,8 @@ public class TapParser {
 				try {
 					log("Parsing TAP test result [" + tapFile + "].");
 
-					final Tap13Parser parser;
-					parser = new Tap13Parser("UTF-8", enableSubtests, planRequired);
+					final Tap13Parser parser = new Tap13Parser("UTF-8", enableSubtests, planRequired);
 					final TestSet testSet = parser.parseFile(tapFile);
-
-					if (this.validateNumberOfTests) {
-					    if (testSet.getPlan().getLastTestNumber() != testSet.getNumberOfTestResults()) {
-					        throw new ParserException("Number of tests results didn't go to plan");
-					    }
-					}
 
 					if (testSet.containsNotOk() || testSet.containsBailOut()) {
 						this.hasFailedTests = Boolean.TRUE;
@@ -176,7 +158,7 @@ public class TapParser {
 			}
 		}
 		//final TapResult testResult = new TapResult(UUID.randomUUID().toString(), build, testSets);
-		final TapResult testResult = new TapResult("TAP Test Results", build, testSets, this.todoIsFailure, this.includeCommentDiagnostics);
+		final TapResult testResult = new TapResult("TAP Test Results", build, testSets, this.todoIsFailure, this.includeCommentDiagnostics, this.validateNumberOfTests);
 		return testResult;
 	}
 

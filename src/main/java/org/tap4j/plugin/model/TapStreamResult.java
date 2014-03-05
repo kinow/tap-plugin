@@ -34,7 +34,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
@@ -56,13 +55,13 @@ public class TapStreamResult extends TabulatedResult {
 
 	public TapStreamResult(AbstractBuild<?, ?> owner, TapResult tapResult) {
 		this.owner = owner;
-		this.tapResult = tapResult;
 		for(TestSetMap tsm : tapResult.getTestSets()) {
 			TestSet ts = tsm.getTestSet();
 			for(org.tap4j.model.TestResult tr : ts.getTestResults()) {
-				this.children.add(new TapTestResultResult(owner, tsm, tr, this.tapResult.getTodoIsFailure()));
+				this.children.add(new TapTestResultResult(owner, tsm, tr, tapResult.getTodoIsFailure(), tapResult.getIncludeCommentDiagnostics(), tapResult.getValidateNumberOfTests()));
 			}
 		}
+		this.tapResult = tapResult;
 	}
 	
 	/* (non-Javadoc)
@@ -155,7 +154,7 @@ public class TapStreamResult extends TabulatedResult {
 				TestSet ts = tsm.getTestSet();
 				for(org.tap4j.model.TestResult tr : ts.getTestResults()) {
 					if(tr.getStatus() == StatusValues.NOT_OK) {
-						failedTests.add(new TapTestResultResult(owner, tsm, tr, this.tapResult.getTodoIsFailure()));
+						failedTests.add(new TapTestResultResult(owner, tsm, tr, this.tapResult.getTodoIsFailure(), tapResult.getIncludeCommentDiagnostics(), tapResult.getValidateNumberOfTests()));
 					}
 				}
 			}
@@ -201,7 +200,7 @@ public class TapStreamResult extends TabulatedResult {
 			if(tsm.getFileName().equals(fileName)) {
 				TestSet ts = tsm.getTestSet();
 				org.tap4j.model.TestResult desired = ts.getTestResult(Integer.parseInt(testNumber));
-				return new TapTestResultResult(owner, tsm, desired, this.tapResult.getTodoIsFailure());
+				return new TapTestResultResult(owner, tsm, desired, this.tapResult.getTodoIsFailure(), tapResult.getIncludeCommentDiagnostics(), tapResult.getValidateNumberOfTests());
 			}
 		}
 		

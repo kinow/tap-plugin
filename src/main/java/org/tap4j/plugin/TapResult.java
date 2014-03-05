@@ -80,44 +80,18 @@ public class TapResult implements ModelObject, Serializable {
 	private String name;
 	private Boolean todoIsFailure;
 	private Boolean includeCommentDiagnostics;
+	private Boolean validateNumberOfTests;
 
-	/**
-	 * @deprecated since JENKINS-15401
-	 * @param name
-	 * @param owner
-	 * @param testSets
-	 */
-	@Deprecated
 	public TapResult(String name, AbstractBuild<?, ?> owner,
-			List<TestSetMap> testSets) {
-		this.name = name;
-		this.build = owner;
-		this.testSets = this.filterTestSet(testSets);
-		this.parseErrorTestSets = this.filterParseErrorTestSets(testSets);
-		this.todoIsFailure = true;
-	}
-	
-	/**
-	 * @deprecated
-	 */
-	@Deprecated
-	public TapResult(String name, AbstractBuild<?, ?> owner,
-			List<TestSetMap> testSets, Boolean todoIsFailure) {
-		this.name = name;
-		this.build = owner;
-		this.testSets = this.filterTestSet(testSets);
-		this.parseErrorTestSets = this.filterParseErrorTestSets(testSets);
-		this.todoIsFailure = todoIsFailure;
-	}
-	
-	public TapResult(String name, AbstractBuild<?, ?> owner,
-            List<TestSetMap> testSets, Boolean todoIsFailure, Boolean includeCommentDiagnostics) {
+            List<TestSetMap> testSets, Boolean todoIsFailure, Boolean includeCommentDiagnostics ,
+            Boolean validateNumberOfTests) {
         this.name = name;
         this.build = owner;
         this.testSets = this.filterTestSet(testSets);
         this.parseErrorTestSets = this.filterParseErrorTestSets(testSets);
         this.todoIsFailure = todoIsFailure;
         this.includeCommentDiagnostics= includeCommentDiagnostics;
+        this.validateNumberOfTests = validateNumberOfTests;
     }
 	
 	/**
@@ -132,6 +106,10 @@ public class TapResult implements ModelObject, Serializable {
 	 */
 	public Boolean getIncludeCommentDiagnostics() {
         return (includeCommentDiagnostics == null) ? true : includeCommentDiagnostics;
+    }
+	
+	public Boolean getValidateNumberOfTests() {
+	    return (validateNumberOfTests == null) ? false : validateNumberOfTests;
     }
 	
 	/**
