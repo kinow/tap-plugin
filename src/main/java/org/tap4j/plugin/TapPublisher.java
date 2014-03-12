@@ -299,12 +299,8 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
             Plan plan = testSet.getPlan();
             if (plan != null) { 
                 int planned = plan.getLastTestNumber();
-                int totalWithSuccess = 0;
-                for (TestResult tr : testSet.getTestResults()) {
-                    if (tr.getStatus() == StatusValues.OK)
-                        totalWithSuccess++;
-                }
-                if (planned != totalWithSuccess)
+                int numberOfTests = testSet.getTestResults().size();
+                if (planned != numberOfTests)
                     return false;
             }
         }
