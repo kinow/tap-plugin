@@ -49,8 +49,7 @@ import org.tap4j.plugin.model.TestSetMap;
 public class TapParser {
 
 	/** Prints the logs to the web server's console / log files */
-	private static final Logger log = Logger.getLogger(TapParser.class
-			.getName());
+	private static final Logger log = Logger.getLogger(TapParser.class.getName());
 	private final Boolean outputTapToConsole;
 	private final Boolean enableSubtests;
 	private final Boolean todoIsFailure;
@@ -60,21 +59,23 @@ public class TapParser {
 	private final Boolean includeCommentDiagnostics;
 	private final Boolean validateNumberOfTests;
 	private final Boolean planRequired;
+	private final Boolean verbose;
 	
 	private boolean hasFailedTests;
 	private boolean parserErrors;
 
 	public TapParser(Boolean outputTapToConsole, Boolean enableSubtests, Boolean todoIsFailure,
             Boolean includeCommentDiagnostics, Boolean validateNumberOfTests, Boolean planRequired,
-            PrintStream logger) {
+            Boolean verbose, PrintStream logger) {
 	    this.outputTapToConsole = outputTapToConsole;
         this.enableSubtests = enableSubtests;
         this.todoIsFailure = todoIsFailure;
-        this.logger = logger;
         this.parserErrors = false;
         this.includeCommentDiagnostics = includeCommentDiagnostics;
         this.validateNumberOfTests = validateNumberOfTests;
         this.planRequired = planRequired;
+        this.verbose = verbose;
+        this.logger = logger;
     }
 
     public Boolean hasParserErrors() {
@@ -111,6 +112,10 @@ public class TapParser {
 
     public boolean hasFailedTests() {
 		return this.hasFailedTests;
+	}
+    
+    public Boolean getVerbose() {
+		return verbose;
 	}
 
 	public TapResult parse(FilePath[] results, AbstractBuild<?, ?> build) {
@@ -163,7 +168,7 @@ public class TapParser {
 	}
 
 	private void log(String str) {
-		if (logger != null) {
+		if (verbose && logger != null) {
 			logger.println(str);
 		} else {
 			log.fine(str);
