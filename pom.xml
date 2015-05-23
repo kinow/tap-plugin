@@ -14,8 +14,7 @@
 	HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER ~ LIABILITY, WHETHER IN 
 	AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, ~ OUT OF OR IN CONNECTION 
 	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN ~ THE SOFTWARE. -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -30,7 +29,7 @@
 	<groupId>org.tap4j</groupId>
 	<artifactId>tap</artifactId>
 	<name>Jenkins TAP Plugin</name>
-	<version>1.23-SNAPSHOT</version>
+	<version>1.23</version>
 	<packaging>hpi</packaging>
 
 	<licenses>
@@ -85,7 +84,7 @@
 		<connection>scm:git:git://github.com/jenkinsci/tap-plugin.git</connection>
 		<developerConnection>scm:git:git@github.com:jenkinsci/tap-plugin.git</developerConnection>
 		<url>http://github.com/jenkinsci/tap-plugin</url>
-		<tag>HEAD</tag>
+		<tag>tap-1.23</tag>
 	</scm>
 
 	<dependencies>
