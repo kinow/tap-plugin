@@ -121,7 +121,13 @@ public class TapResult implements ModelObject, Serializable {
 		final List<TestSetMap> filtered = new ArrayList<TestSetMap>();
 		for (TestSetMap testSet : testSets) {
 			if (testSet instanceof ParseErrorTestSetMap) {
-				filtered.add(testSet);
+				String rootDir = build.getRootDir().getAbsolutePath();
+				try {
+					rootDir = new File(build.getRootDir().getCanonicalPath().toString(), Constants.TAP_DIR_NAME).getAbsolutePath();
+				} catch (IOException e) {
+					LOGGER.warning(e.getMessage());
+				}
+				filtered.add(new TestSetMap(Util.normalizeFolders(rootDir, testSet.getFileName()), testSet.getTestSet()));
 			}
 		}
 		return filtered;

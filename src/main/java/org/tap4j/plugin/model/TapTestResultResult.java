@@ -256,12 +256,10 @@ public class TapTestResultResult extends TestResult {
 	/* (non-Javadoc)
 	 * @see hudson.tasks.test.TestResult#getTitle()
 	 */
-	@Override
 	public String getTitle() {
 		return getName();
 	}
 	
-	@Override
 	public float getDuration() {
 		Map<String, Object> diagnostic = this.tapTestResult.getDiagnostic();
 		if (diagnostic != null && ! diagnostic.isEmpty()) {

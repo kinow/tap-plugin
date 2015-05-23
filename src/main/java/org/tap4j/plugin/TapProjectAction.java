@@ -25,6 +25,7 @@ package org.tap4j.plugin;
 
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Run;
 import hudson.util.ChartUtil;
 import hudson.util.DataSetBuilder;
 import hudson.util.RunList;
@@ -204,8 +205,8 @@ public class TapProjectAction extends AbstractTapProjectAction {
 
 	protected void populateDataSetBuilder(DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel> dataset ) {
 
-		for (AbstractBuild<?, ?> build = getProject().getLastBuild(); build != null; build = build.getPreviousBuild()) {
-			ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(build);
+		for (Run<?, ?> build = getProject().getLastBuild(); build != null; build = build.getPreviousBuild()) {
+			ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel((Run<?, ?>) build);
 			TapBuildAction action = build.getAction(getBuildActionClass());
 			if (action != null) {
 				TapResult report = action.getResult();

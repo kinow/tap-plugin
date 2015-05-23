@@ -50,11 +50,9 @@ import java.util.List;
 import org.apache.commons.lang.BooleanUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.tap4j.model.Plan;
-import org.tap4j.model.TestResult;
 import org.tap4j.model.TestSet;
 import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.plugin.util.Constants;
-import org.tap4j.util.StatusValues;
 
 /**
  * Publishes TAP results in Jenkins builds.
@@ -260,13 +258,13 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 			t.printStackTrace(logger);
 		}
 
-		build.getActions().add(new TapTestResultAction(build, testResult));
+		build.addAction(new TapTestResultAction(build, testResult));
 		
 		if (testResult.getTestSets().size() > 0 || testResult.getParseErrorTestSets().size() > 0) {
 			// create an individual report for all of the results and add it to
 			// the build
 			TapBuildAction action = new TapBuildAction(build, testResult);
-			build.getActions().add(action);
+			build.addAction(action);
 			if (testResult.hasParseErrors()) {
 			    listener.getLogger().println("TAP parse errors found in the build. Marking build as UNSTABLE");
 				build.setResult(Result.UNSTABLE);

@@ -29,10 +29,10 @@
 					<j:forEach var="map" items="${it.testSets}">
 					   <j:choose>
 					     <j:when test="${map.getTestSet().getPlan().isSkip()}">
-						   <p>File: <span class="underline"><a href='contents?f=${map.fileName}'>${map.fileName}</a></span> (Skipped)</p>
+						   <p>File: <span class="underline"><a href='${rootURL}/${it.owner.project.url}ws/${map.fileName}/*view*/'>${map.fileName}</a></span> (Skipped)</p>
 						 </j:when>
 						 <j:otherwise>
-					       <p>File: <span class="underline"><a href='/${it.owner.project.url}ws/${map.fileName}/*view*/'>${map.fileName}</a></span></p>
+					       <p>File: <span class="underline"><a href='${rootURL}/${it.owner.project.url}ws/${map.fileName}/*view*/'>${map.fileName}</a></span></p>
 						 </j:otherwise>
 					   </j:choose>
 						 <table class="tap" width="100%">
@@ -67,10 +67,10 @@
                             <th>File name</th>
                             <th>Cause</th>
                         </tr>
-                        <j:forEach var="testSet" items="${it.parseErrorTestSets}">
+                        <j:forEach var="map" items="${it.parseErrorTestSets}">
                         <tr>
-                            <td><a href='contents?f=${testSet.fileName}'>${testSet.fileName}</a></td>
-                            <td>${testSet.cause}</td>
+                            <td><a href='${rootURL}/${it.owner.project.url}ws/${map.fileName}/*view*/'>${map.fileName}</a></td>
+                            <td>${map.cause}</td>
                         </tr>
                         </j:forEach>
                      </table>
