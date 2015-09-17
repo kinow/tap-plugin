@@ -59,7 +59,7 @@ public class GraphHelper
 	public static JFreeChart createChart(StaplerRequest req, CategoryDataset dataset) {
 
       final JFreeChart chart = ChartFactory.createStackedAreaChart(
-          null,                     // chart title
+          "TAP Tests",                     // chart title
           null,                     // unused
           "TAP Tests Count",            // range axis label
           dataset,                  // data
