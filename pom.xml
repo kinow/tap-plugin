@@ -29,7 +29,7 @@
 	<groupId>org.tap4j</groupId>
 	<artifactId>tap</artifactId>
 	<name>Jenkins TAP Plugin</name>
-	<version>1.24</version>
+	<version>1.25-SNAPSHOT</version>
 	<packaging>hpi</packaging>
 
 	<licenses>
@@ -84,7 +84,7 @@
 		<connection>scm:git:git://github.com/jenkinsci/tap-plugin.git</connection>
 		<developerConnection>scm:git:git@github.com:jenkinsci/tap-plugin.git</developerConnection>
 		<url>http://github.com/jenkinsci/tap-plugin</url>
-		<tag>tap-1.24</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<dependencies>
