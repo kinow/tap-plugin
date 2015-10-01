@@ -23,9 +23,6 @@
  */
 package org.tap4j.plugin;
 
-import hudson.FilePath;
-import hudson.model.AbstractBuild;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -34,11 +31,17 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
+import org.tap4j.model.TestResult;
 import org.tap4j.model.TestSet;
 import org.tap4j.parser.ParserException;
 import org.tap4j.parser.Tap13Parser;
 import org.tap4j.plugin.model.ParseErrorTestSetMap;
 import org.tap4j.plugin.model.TestSetMap;
+import org.tap4j.util.DirectiveValues;
+import org.tap4j.util.StatusValues;
+
+import hudson.FilePath;
+import hudson.model.AbstractBuild;
 
 /**
  * Executes remote TAP Stream retrieval and execution.
@@ -60,62 +63,72 @@ public class TapParser {
 	private final Boolean validateNumberOfTests;
 	private final Boolean planRequired;
 	private final Boolean verbose;
-	
+
 	private boolean hasFailedTests;
 	private boolean parserErrors;
 
 	public TapParser(Boolean outputTapToConsole, Boolean enableSubtests, Boolean todoIsFailure,
-            Boolean includeCommentDiagnostics, Boolean validateNumberOfTests, Boolean planRequired,
-            Boolean verbose, PrintStream logger) {
-	    this.outputTapToConsole = outputTapToConsole;
-        this.enableSubtests = enableSubtests;
-        this.todoIsFailure = todoIsFailure;
-        this.parserErrors = false;
-        this.includeCommentDiagnostics = includeCommentDiagnostics;
-        this.validateNumberOfTests = validateNumberOfTests;
-        this.planRequired = planRequired;
-        this.verbose = verbose;
-        this.logger = logger;
-    }
+			Boolean includeCommentDiagnostics, Boolean validateNumberOfTests, Boolean planRequired, Boolean verbose,
+			PrintStream logger) {
+		this.outputTapToConsole = outputTapToConsole;
+		this.enableSubtests = enableSubtests;
+		this.todoIsFailure = todoIsFailure;
+		this.parserErrors = false;
+		this.includeCommentDiagnostics = includeCommentDiagnostics;
+		this.validateNumberOfTests = validateNumberOfTests;
+		this.planRequired = planRequired;
+		this.verbose = verbose;
+		this.logger = logger;
+	}
 
-    public Boolean hasParserErrors() {
+	public Boolean hasParserErrors() {
 		return this.parserErrors;
 	}
-    
+
 	public Boolean getOutputTapToConsole() {
-        return outputTapToConsole;
-    }
+		return outputTapToConsole;
+	}
 
-    public Boolean getTodoIsFailure() {
-        return todoIsFailure;
-    }
+	public Boolean getTodoIsFailure() {
+		return todoIsFailure;
+	}
 
-    public boolean getParserErrors() {
-        return parserErrors;
-    }
+	public boolean getParserErrors() {
+		return parserErrors;
+	}
 
-    public Boolean getIncludeCommentDiagnostics() {
-        return includeCommentDiagnostics;
-    }
+	public Boolean getIncludeCommentDiagnostics() {
+		return includeCommentDiagnostics;
+	}
 
-    public Boolean getValidateNumberOfTests() {
-        return validateNumberOfTests;
-    }
+	public Boolean getValidateNumberOfTests() {
+		return validateNumberOfTests;
+	}
 
-    public Boolean getPlanRequired() {
-        return planRequired;
-    }
+	public Boolean getPlanRequired() {
+		return planRequired;
+	}
 
-    public Boolean getEnableSubtests() {
-        return enableSubtests;
-    }
+	public Boolean getEnableSubtests() {
+		return enableSubtests;
+	}
 
-    public boolean hasFailedTests() {
+	public boolean hasFailedTests() {
 		return this.hasFailedTests;
 	}
-    
-    public Boolean getVerbose() {
+
+	public Boolean getVerbose() {
 		return verbose;
+	}
+
+	private boolean containsNotOk(TestSet testSet) {
+		for (TestResult testResult : testSet.getTestResults()) {
+			if (testResult.getStatus().equals(StatusValues.NOT_OK) && !(testResult.getDirective() != null
+					&& DirectiveValues.SKIP == testResult.getDirective().getDirectiveValue())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public TapResult parse(FilePath[] results, AbstractBuild<?, ?> build) {
@@ -139,7 +152,7 @@ public class TapParser {
 					final Tap13Parser parser = new Tap13Parser("UTF-8", enableSubtests, planRequired);
 					final TestSet testSet = parser.parseFile(tapFile);
 
-					if (testSet.containsNotOk() || testSet.containsBailOut()) {
+					if (containsNotOk(testSet) || testSet.containsBailOut()) {
 						this.hasFailedTests = Boolean.TRUE;
 					}
 
@@ -162,8 +175,10 @@ public class TapParser {
 				}
 			}
 		}
-		//final TapResult testResult = new TapResult(UUID.randomUUID().toString(), build, testSets);
-		final TapResult testResult = new TapResult("TAP Test Results", build, testSets, this.todoIsFailure, this.includeCommentDiagnostics, this.validateNumberOfTests);
+		// final TapResult testResult = new
+		// TapResult(UUID.randomUUID().toString(), build, testSets);
+		final TapResult testResult = new TapResult("TAP Test Results", build, testSets, this.todoIsFailure,
+				this.includeCommentDiagnostics, this.validateNumberOfTests);
 		return testResult;
 	}
 
