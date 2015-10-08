@@ -77,6 +77,7 @@ public class TapResult implements ModelObject, Serializable {
 	private int skipped = 0;
 	private int bailOuts = 0;
 	private int total = 0;
+	private float duration = 0.0f;
 	private String name;
 	private Boolean todoIsFailure;
 	private Boolean includeCommentDiagnostics;
@@ -161,6 +162,7 @@ public class TapResult implements ModelObject, Serializable {
 		skipped = 0;
 		bailOuts = 0;
 		total = 0;
+		duration = 0.0f;
 
 		for (TestSetMap testSet : testSets) {
 			TestSet realTestSet = testSet.getTestSet();
@@ -181,6 +183,7 @@ public class TapResult implements ModelObject, Serializable {
 					} else {
 						passed += 1;
 					}
+					duration += 0.0f; // FIXME add code to tally duration
 				}
 			}
 			
@@ -238,6 +241,10 @@ public class TapResult implements ModelObject, Serializable {
 	public int getTotal() {
 		return this.total;
 	}
+
+    public float getDuration() {
+        return this.duration;
+    }
 
 	private boolean isSkipped(TestResult testResult) {
 		boolean r = false;

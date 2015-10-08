@@ -42,7 +42,8 @@ import org.tap4j.plugin.TapResult;
 import org.tap4j.util.StatusValues;
 
 /**
- * 
+ * A tabulated TAP Stream result.
+ *
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 0.1
  */
@@ -147,6 +148,7 @@ public class TapStreamResult extends TabulatedResult {
 		return Collections.emptyList();
 	}
 	
+	// FIXME: use the getFailedTests, or explain why it's not used
 	public List<TestResult> getFailedTests2() {
 		List<TestResult> failedTests = new ArrayList<TestResult>();
 		if(tapResult != null && tapResult.getTestSets().size() > 0) {
@@ -161,7 +163,11 @@ public class TapStreamResult extends TabulatedResult {
 		}
 		return failedTests;
 	}
-	
+
+    public float getDuration() {
+        return this.tapResult.getDuration();
+    };
+
 	@Override
     public Object getDynamic(String name, StaplerRequest req, StaplerResponse rsp) {
     	TapTestResultResult tr = getTapTestResultResult(name);
