@@ -23,6 +23,11 @@
  */
 package org.tap4j.plugin.util;
 
+import org.tap4j.model.Directive;
+import org.tap4j.model.TestResult;
+import org.tap4j.util.DirectiveValues;
+import org.tap4j.util.StatusValues;
+
 /**
  * Utility methods used by tap-plugin.
  */
@@ -54,4 +59,27 @@ public final class Util {
 		return relative;
 	}
 	
+	public static boolean isSkipped(TestResult testResult) {
+		boolean r = false;
+		Directive directive = testResult.getDirective();
+		if (directive != null
+				&& directive.getDirectiveValue() == DirectiveValues.SKIP) {
+			r = true;
+		}
+		return r;
+	}
+
+	public static boolean isFailure(TestResult testResult, Boolean todoIsFailure) {
+		boolean r = false;
+		Directive directive = testResult.getDirective();
+		StatusValues status = testResult.getStatus();
+		if (directive != null) {
+			if(directive.getDirectiveValue() == DirectiveValues.TODO && todoIsFailure != null && true == todoIsFailure) {
+				r = true;
+			}
+		} else if (status != null && status == StatusValues.NOT_OK) {
+			r = true;
+		}
+		return r;
+	}
 }

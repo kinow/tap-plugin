@@ -23,13 +23,6 @@
  */
 package org.tap4j.plugin.model;
 
-import hudson.Functions;
-import hudson.model.Item;
-import hudson.model.AbstractBuild;
-import hudson.tasks.test.AbstractTestResultAction;
-import hudson.tasks.test.TestObject;
-import hudson.tasks.test.TestResult;
-
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -38,8 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import jenkins.model.Jenkins;
-
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
@@ -47,8 +38,16 @@ import org.tap4j.model.Comment;
 import org.tap4j.model.Directive;
 import org.tap4j.model.TestSet;
 import org.tap4j.plugin.TapResult;
+import org.tap4j.plugin.util.Util;
 import org.tap4j.util.DirectiveValues;
-import org.tap4j.util.StatusValues;
+
+import hudson.Functions;
+import hudson.model.AbstractBuild;
+import hudson.model.Item;
+import hudson.tasks.test.AbstractTestResultAction;
+import hudson.tasks.test.TestObject;
+import hudson.tasks.test.TestResult;
+import jenkins.model.Jenkins;
 
 /**
  * 
@@ -139,22 +138,18 @@ public class TapTestResultResult extends TestResult {
 	}
 	
 	public String getStatus() {
-		return this.tapTestResult.getStatus() == StatusValues.OK ? "OK" : "NOT OK";
+		boolean failure = Util.isFailure(this.tapTestResult, todoIsFailure);
+		return failure ? "NOT OK" : "OK";
 	}
 	
 	public String getSkip() {
-		String skip = "No";
-		Directive directive = this.tapTestResult.getDirective();
-		if(directive != null) {
-			if(directive.getDirectiveValue() == DirectiveValues.SKIP) {
-				skip = "Yes";
-			}
-		}
-		return skip;
+		boolean skip = Util.isSkipped(this.tapTestResult);
+		return skip ? "Yes" : "No";
 	}
 	
 	public String getTodo() {
 		String todo = "No";
+		// TODO: not consistent with the other methods in TapResult
 		Directive directive = this.tapTestResult.getDirective();
 		if(directive != null) {
 			if(directive.getDirectiveValue() == DirectiveValues.TODO) {

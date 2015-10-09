@@ -42,7 +42,6 @@ import org.tap4j.consumer.TapConsumer;
 import org.tap4j.consumer.TapConsumerFactory;
 import org.tap4j.model.BailOut;
 import org.tap4j.model.Comment;
-import org.tap4j.model.Directive;
 import org.tap4j.model.Plan;
 import org.tap4j.model.TestResult;
 import org.tap4j.model.TestSet;
@@ -52,8 +51,6 @@ import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.plugin.util.Constants;
 import org.tap4j.plugin.util.DiagnosticUtil;
 import org.tap4j.plugin.util.Util;
-import org.tap4j.util.DirectiveValues;
-import org.tap4j.util.StatusValues;
 
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
@@ -178,9 +175,9 @@ public class TapResult implements ModelObject, Serializable {
 				this.skipped += testResults.size();
 			} else {
 				for (TestResult testResult : testResults) {
-					if (isSkipped(testResult)) {
+					if (Util.isSkipped(testResult)) {
 						skipped += 1;
-					} else if (isFailure(testResult)) {
+					} else if (Util.isFailure(testResult, todoIsFailure)) {
 						failed += 1;
 					} else {
 						passed += 1;
@@ -255,30 +252,6 @@ public class TapResult implements ModelObject, Serializable {
     public float getDuration() {
         return this.duration;
     }
-
-	private boolean isSkipped(TestResult testResult) {
-		boolean r = false;
-		Directive directive = testResult.getDirective();
-		if (directive != null
-				&& directive.getDirectiveValue() == DirectiveValues.SKIP) {
-			r = true;
-		}
-		return r;
-	}
-
-	private boolean isFailure(TestResult testResult) {
-		boolean r = false;
-		Directive directive = testResult.getDirective();
-		StatusValues status = testResult.getStatus();
-		if (directive != null) {
-			if(directive.getDirectiveValue() == DirectiveValues.TODO && todoIsFailure != null && true == todoIsFailure) {
-				r = true;
-			}
-		} else if (status != null && status == StatusValues.NOT_OK) {
-			r = true;
-		}
-		return r;
-	}
 
 	/**
 	 * Called from TapResult/index.jelly
