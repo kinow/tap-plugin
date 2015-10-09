@@ -37,9 +37,11 @@ import org.tap4j.model.TestSet;
 import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.plugin.util.Constants;
 
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
 import hudson.matrix.MatrixBuild;
@@ -243,9 +245,12 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 
 		PrintStream logger = listener.getLogger();
 		logger.println("TAP Reports Processing: START");
-		logger.println("Looking for TAP results report in workspace using pattern: " + this.testResults);
 
-		FilePath[] reports = locateReports(build.getWorkspace(), this.testResults);
+		EnvVars envVars = build.getEnvironment(listener);
+		String antPattern = Util.replaceMacro(this.testResults, envVars);
+		logger.println("Looking for TAP results report in workspace using pattern: " + antPattern);
+		
+		FilePath[] reports = locateReports(build.getWorkspace(), antPattern);
 
 		/*
 		 * filter out the reports based on timestamps. See JENKINS-12187
