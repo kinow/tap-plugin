@@ -34,5 +34,8 @@
       <f:entry title="Is TAP plan required?">
           <f:checkbox name="TapPublisher.planRequired" value="${instance.planRequired}" checked="${instance.planRequired}" default="true" />
       </f:entry>
+      <f:entry title="Show only failures">
+          <f:checkbox name="TapPublisher.showOnlyFailures" value="${instance.showOnlyFailures}" checked="${instance.showOnlyFailures}" default="false" />
+      </f:entry>
   </f:advanced>
 </j:jelly>

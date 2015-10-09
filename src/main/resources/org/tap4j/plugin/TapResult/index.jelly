@@ -24,7 +24,11 @@
 				            <td width='5%'>${it.testSets.size()} files</td>
 				            <td>${it.getTotal()} tests, ${it.passed} ok, ${it.failed} not ok, ${it.skipped} skipped, ${it.bailOuts} Bail Out!</td>
 				        </tr>
-				    </table>				
+				    </table>
+				    
+				    <j:if test="${it.showOnlyFailures}">
+				    	<p><strong>Note:</strong> Displaying only failures</p>
+				    </j:if>
 
 					<j:forEach var="map" items="${it.testSets}">
 					   <j:choose>
@@ -43,10 +47,8 @@
 								<th>Directive</th>
 							</tr>
 							<j:forEach var="tapLine" items="${map.testSet.tapLines}">
-								
 								<!-- TAP Test Result information -->
-								<tap:line tapLine="${tapLine}" tapFile="${map.fileName}" />
-								
+								<tap:line tapLine="${tapLine}" tapFile="${map.fileName}" showOnlyFailures="${it.showOnlyFailures}" />
 							</j:forEach>
 						</table>
 						<br />

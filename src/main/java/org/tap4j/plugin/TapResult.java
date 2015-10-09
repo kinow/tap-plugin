@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 import javax.servlet.ServletOutputStream;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -81,6 +82,7 @@ public class TapResult implements ModelObject, Serializable {
 	private Boolean todoIsFailure;
 	private Boolean includeCommentDiagnostics;
 	private Boolean validateNumberOfTests;
+	private Boolean showOnlyFailures = Boolean.FALSE;
 
 	public TapResult(String name, AbstractBuild<?, ?> owner,
             List<TestSetMap> testSets, Boolean todoIsFailure, Boolean includeCommentDiagnostics ,
@@ -94,6 +96,14 @@ public class TapResult implements ModelObject, Serializable {
         this.validateNumberOfTests = validateNumberOfTests;
     }
 	
+	public Boolean getShowOnlyFailures() {
+		return BooleanUtils.toBooleanDefaultIfNull(showOnlyFailures, Boolean.FALSE);
+	}
+
+	public void setShowOnlyFailures(Boolean showOnlyFailures) {
+		this.showOnlyFailures = showOnlyFailures;
+	}
+
 	/**
 	 * @return the todoIsFailure
 	 */

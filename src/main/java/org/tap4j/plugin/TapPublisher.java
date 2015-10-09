@@ -73,8 +73,9 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 	private final Boolean validateNumberOfTests;
 	private final Boolean planRequired;
 	private final Boolean verbose;
+	private final Boolean showOnlyFailures;
 
-	@DataBoundConstructor
+	@Deprecated
 	public TapPublisher(String testResults,
 			Boolean failIfNoResults, 
 			Boolean failedTestsMarkBuildAsFailure, 
@@ -86,6 +87,25 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 			Boolean validateNumberOfTests,
 			Boolean planRequired,
 			Boolean verbose) {
+		this(testResults, failIfNoResults, failedTestsMarkBuildAsFailure, 
+				outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure,
+				includeCommentDiagnostics, validateNumberOfTests, planRequired, verbose,
+				Boolean.FALSE);
+	}
+	
+	@DataBoundConstructor
+	public TapPublisher(String testResults,
+			Boolean failIfNoResults, 
+			Boolean failedTestsMarkBuildAsFailure, 
+			Boolean outputTapToConsole,
+			Boolean enableSubtests, 
+			Boolean discardOldReports,
+			Boolean todoIsFailure,
+			Boolean includeCommentDiagnostics,
+			Boolean validateNumberOfTests,
+			Boolean planRequired,
+			Boolean verbose,
+			Boolean showOnlyFailures) {
 		this.testResults = testResults;
 		this.failIfNoResults = BooleanUtils.toBooleanDefaultIfNull(failIfNoResults, false);
 		this.failedTestsMarkBuildAsFailure = BooleanUtils.toBooleanDefaultIfNull(failedTestsMarkBuildAsFailure, false);
@@ -97,6 +117,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		this.validateNumberOfTests = BooleanUtils.toBooleanDefaultIfNull(validateNumberOfTests, false);
 		this.planRequired = BooleanUtils.toBooleanDefaultIfNull(planRequired, true); // true is the old behaviour
 		this.verbose = BooleanUtils.toBooleanDefaultIfNull(verbose, true);
+		this.showOnlyFailures = BooleanUtils.toBooleanDefaultIfNull(showOnlyFailures, false);
 	}
 
 	public Object readResolve() {
@@ -111,7 +132,12 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		Boolean validateNumberOfTests = BooleanUtils.toBooleanDefaultIfNull(this.getValidateNumberOfTests(), false);
 		Boolean planRequired = BooleanUtils.toBooleanDefaultIfNull(this.getPlanRequired(), true);
 		Boolean verbose = BooleanUtils.toBooleanDefaultIfNull(this.getVerbose(), true);
-		return new TapPublisher(testResults, failIfNoResults, failedTestsMarkBuildAsFailure, outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure, includeCommentDiagnostics, validateNumberOfTests, planRequired, verbose);
+		Boolean showOnlyFailures = BooleanUtils.toBooleanDefaultIfNull(this.getShowOnlyFailures(), false);
+		return new TapPublisher(testResults, failIfNoResults, failedTestsMarkBuildAsFailure, outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure, includeCommentDiagnostics, validateNumberOfTests, planRequired, verbose, showOnlyFailures);
+	}
+
+	public Boolean getShowOnlyFailures() {
+		return this.showOnlyFailures;
 	}
 
 	/**
@@ -249,6 +275,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 		TapResult testResult = null; 
 		try {
 			testResult = loadResults(build, logger);
+			testResult.setShowOnlyFailures(this.getShowOnlyFailures());
 			testResult.tally();
 		} catch (Throwable t) {
 			/*
