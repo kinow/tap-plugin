@@ -23,23 +23,6 @@
  */
 package org.tap4j.plugin;
 
-import hudson.Extension;
-import hudson.FilePath;
-import hudson.Launcher;
-import hudson.matrix.MatrixAggregatable;
-import hudson.matrix.MatrixAggregator;
-import hudson.matrix.MatrixBuild;
-import hudson.model.Action;
-import hudson.model.BuildListener;
-import hudson.model.Result;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.BuildStepMonitor;
-import hudson.tasks.Publisher;
-import hudson.tasks.Recorder;
-import hudson.tasks.test.TestResultAggregator;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -53,6 +36,23 @@ import org.tap4j.model.Plan;
 import org.tap4j.model.TestSet;
 import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.plugin.util.Constants;
+
+import hudson.Extension;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.matrix.MatrixAggregatable;
+import hudson.matrix.MatrixAggregator;
+import hudson.matrix.MatrixBuild;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Action;
+import hudson.model.BuildListener;
+import hudson.model.Result;
+import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.BuildStepMonitor;
+import hudson.tasks.Publisher;
+import hudson.tasks.Recorder;
+import hudson.tasks.test.TestResultAggregator;
 
 /**
  * Publishes TAP results in Jenkins builds.
@@ -442,7 +442,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 	 * @see hudson.tasks.BuildStep#getRequiredMonitorService()
 	 */
 	public BuildStepMonitor getRequiredMonitorService() {
-		return BuildStepMonitor.STEP;
+		return BuildStepMonitor.NONE;
 	}
 	
 	// matrix jobs and test result aggregation support
