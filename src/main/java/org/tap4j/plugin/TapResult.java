@@ -23,10 +23,6 @@
  */
 package org.tap4j.plugin;
 
-import hudson.FilePath;
-import hudson.model.ModelObject;
-import hudson.model.AbstractBuild;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -59,6 +55,10 @@ import org.tap4j.plugin.util.Util;
 import org.tap4j.util.DirectiveValues;
 import org.tap4j.util.StatusValues;
 
+import hudson.FilePath;
+import hudson.model.AbstractBuild;
+import hudson.model.ModelObject;
+
 /**
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
@@ -68,6 +68,8 @@ public class TapResult implements ModelObject, Serializable {
 	private static final long serialVersionUID = 4343399327336076951L;
 	
 	private static final Logger LOGGER = Logger.getLogger(TapResult.class.getName());
+	
+	private static final String DURATION_KEY = "duration_ms";
 
 	private AbstractBuild<?, ?> build;
 	private List<TestSetMap> testSets;
@@ -183,7 +185,15 @@ public class TapResult implements ModelObject, Serializable {
 					} else {
 						passed += 1;
 					}
-					duration += 0.0f; // FIXME add code to tally duration
+					// FIXME: code duplication. Refactor it and TapTestResultResult
+					Map<String, Object> diagnostic = testResult.getDiagnostic();
+					if (diagnostic != null && ! diagnostic.isEmpty()) {
+						Object duration = diagnostic.get(DURATION_KEY);
+						if (duration != null) {
+							Float durationMS = Float.parseFloat(duration.toString());
+							this.duration += durationMS;
+						}
+					}
 				}
 			}
 			

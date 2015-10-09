@@ -262,6 +262,7 @@ public class TapTestResultResult extends TestResult {
 	
 	public float getDuration() {
 		Map<String, Object> diagnostic = this.tapTestResult.getDiagnostic();
+		// FIXME: code duplication. Refactor it and TapResult
 		if (diagnostic != null && ! diagnostic.isEmpty()) {
 			Object duration = diagnostic.get(DURATION_KEY);
 			if (duration != null) {
