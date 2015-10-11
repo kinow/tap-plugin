@@ -91,7 +91,7 @@
 		<dependency>
 			<groupId>org.tap4j</groupId>
 			<artifactId>tap4j</artifactId>
-			<version>4.1.1</version>
+			<version>4.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jenkins-ci.plugins</groupId>
