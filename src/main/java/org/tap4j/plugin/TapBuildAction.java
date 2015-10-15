@@ -38,91 +38,91 @@ import org.kohsuke.stapler.StaplerProxy;
  */
 public class TapBuildAction implements Action, Serializable, StaplerProxy {
 
-	private static final long serialVersionUID = 520981690971849654L;
-	public static final String URL_NAME = "tapResults";
-	public static final String ICON_NAME = "/plugin/tap/icons/tap-24.png";
-	public static final String DISPLAY_NAME = "TAP Extended Test Results";
+    private static final long serialVersionUID = 520981690971849654L;
+    public static final String URL_NAME = "tapResults";
+    public static final String ICON_NAME = "/plugin/tap/icons/tap-24.png";
+    public static final String DISPLAY_NAME = "TAP Extended Test Results";
 
-	private AbstractBuild<?, ?> build;
+    private AbstractBuild<?, ?> build;
 
-	private TapResult result;
+    private TapResult result;
 
-	public TapBuildAction(AbstractBuild<?, ?> build, TapResult result) {
-		super();
-		this.build = build;
-		this.result = result;
-	}
+    public TapBuildAction(AbstractBuild<?, ?> build, TapResult result) {
+        super();
+        this.build = build;
+        this.result = result;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.kohsuke.stapler.StaplerProxy#getTarget()
-	 */
-	public Object getTarget() {
-		return this.result;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.kohsuke.stapler.StaplerProxy#getTarget()
+     */
+    public Object getTarget() {
+        return this.result;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see hudson.model.Action#getDisplayName()
-	 */
-	public String getDisplayName() {
-		return DISPLAY_NAME;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see hudson.model.Action#getDisplayName()
+     */
+    public String getDisplayName() {
+        return DISPLAY_NAME;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see hudson.model.Action#getIconFileName()
-	 */
-	public String getIconFileName() {
-		return ICON_NAME;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see hudson.model.Action#getIconFileName()
+     */
+    public String getIconFileName() {
+        return ICON_NAME;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see hudson.model.Action#getUrlName()
-	 */
-	public String getUrlName() {
-		return URL_NAME;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see hudson.model.Action#getUrlName()
+     */
+    public String getUrlName() {
+        return URL_NAME;
+    }
 
-	/**
-	 * @return the build
-	 */
-	public AbstractBuild<?, ?> getBuild() {
-		return this.build;
-	}
+    /**
+     * @return the build
+     */
+    public AbstractBuild<?, ?> getBuild() {
+        return this.build;
+    }
 
-	public TapResult getResult() {
-		return this.result;
-	}
+    public TapResult getResult() {
+        return this.result;
+    }
 
-	public TapResult getPreviousResult() {
-		TapResult previousResult = null;
+    public TapResult getPreviousResult() {
+        TapResult previousResult = null;
 
-		TapBuildAction previousAction = this.getPreviousAction();
+        TapBuildAction previousAction = this.getPreviousAction();
 
-		if (previousAction != null) {
-			previousResult = previousAction.getResult();
-		}
+        if (previousAction != null) {
+            previousResult = previousAction.getResult();
+        }
 
-		return previousResult;
-	}
+        return previousResult;
+    }
 
-	public TapBuildAction getPreviousAction() {
-		TapBuildAction previousAction = null;
+    public TapBuildAction getPreviousAction() {
+        TapBuildAction previousAction = null;
 
-		if (this.build != null) {
-			AbstractBuild<?, ?> previousBuild = this.build.getPreviousBuild();
-			if (previousBuild != null) {
-				previousAction = previousBuild.getAction(TapBuildAction.class);
-			}
-		}
+        if (this.build != null) {
+            AbstractBuild<?, ?> previousBuild = this.build.getPreviousBuild();
+            if (previousBuild != null) {
+                previousAction = previousBuild.getAction(TapBuildAction.class);
+            }
+        }
 
-		return previousAction;
-	}
+        return previousAction;
+    }
 
 }

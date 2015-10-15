@@ -56,78 +56,78 @@ import jenkins.model.Jenkins;
  */
 public class TapTestResultResult extends TestResult {
 
-	private static final String DURATION_KEY = "duration_ms";
-	
-	private static final long serialVersionUID = -4499261655602135921L;
-	private static final Logger LOGGER = Logger.getLogger(TapTestResultResult.class.getName());
-	
-	private final AbstractBuild<?, ?> owner;
-	private final org.tap4j.model.TestResult tapTestResult;
-	private final TestSetMap testSetMap;
-	private final Boolean todoIsFailure;
-	private final Boolean includeCommentDiagnostics;
-	private final Boolean validateNumberOfTests;
-	
-	public TapTestResultResult(AbstractBuild<?, ?> owner, TestSetMap testSetMap, org.tap4j.model.TestResult tapTestResult, 
-			Boolean todoIsFailure, Boolean includeCommentDiagnostics, Boolean validateNumberOfTests) {
-		this.owner = owner;
-		this.testSetMap = testSetMap;
-		this.tapTestResult = tapTestResult;
-		this.todoIsFailure = todoIsFailure;
-		this.includeCommentDiagnostics = includeCommentDiagnostics;
-		this.validateNumberOfTests = validateNumberOfTests;
-	}
-	
-	/* (non-Javadoc)
-	 * @see hudson.model.ModelObject#getDisplayName()
-	 */
-	public String getDisplayName() {
-	    return getName();
-	}
+    private static final String DURATION_KEY = "duration_ms";
+    
+    private static final long serialVersionUID = -4499261655602135921L;
+    private static final Logger LOGGER = Logger.getLogger(TapTestResultResult.class.getName());
+    
+    private final AbstractBuild<?, ?> owner;
+    private final org.tap4j.model.TestResult tapTestResult;
+    private final TestSetMap testSetMap;
+    private final Boolean todoIsFailure;
+    private final Boolean includeCommentDiagnostics;
+    private final Boolean validateNumberOfTests;
+    
+    public TapTestResultResult(AbstractBuild<?, ?> owner, TestSetMap testSetMap, org.tap4j.model.TestResult tapTestResult, 
+            Boolean todoIsFailure, Boolean includeCommentDiagnostics, Boolean validateNumberOfTests) {
+        this.owner = owner;
+        this.testSetMap = testSetMap;
+        this.tapTestResult = tapTestResult;
+        this.todoIsFailure = todoIsFailure;
+        this.includeCommentDiagnostics = includeCommentDiagnostics;
+        this.validateNumberOfTests = validateNumberOfTests;
+    }
+    
+    /* (non-Javadoc)
+     * @see hudson.model.ModelObject#getDisplayName()
+     */
+    public String getDisplayName() {
+        return getName();
+    }
 
-	/* (non-Javadoc)
-	 * @see hudson.tasks.test.TestObject#getOwner()
-	 */
-	@Override
-	public AbstractBuild<?, ?> getOwner() {
-		return owner;
-	}
+    /* (non-Javadoc)
+     * @see hudson.tasks.test.TestObject#getOwner()
+     */
+    @Override
+    public AbstractBuild<?, ?> getOwner() {
+        return owner;
+    }
 
-	/* (non-Javadoc)
-	 * @see hudson.tasks.test.TestObject#getParent()
-	 */
-	@Override
-	public TestObject getParent() {
-		TapStreamResult parent = null;
-		TestSet testSet = this.tapTestResult.getSubtest();
-		if(testSet != null) {
-			TestSetMap subTest = new TestSetMap(testSetMap.getFileName(), testSet);
-			if(subTest != null) {
-				List<TestSetMap> list = new ArrayList<TestSetMap>();
-				list.add(subTest);
-				parent = new TapStreamResult(owner, new TapResult("TAP Test Results", owner, list, todoIsFailure, includeCommentDiagnostics, validateNumberOfTests));
-			}
-		}
-		return parent;
-	}
+    /* (non-Javadoc)
+     * @see hudson.tasks.test.TestObject#getParent()
+     */
+    @Override
+    public TestObject getParent() {
+        TapStreamResult parent = null;
+        TestSet testSet = this.tapTestResult.getSubtest();
+        if(testSet != null) {
+            TestSetMap subTest = new TestSetMap(testSetMap.getFileName(), testSet);
+            if(subTest != null) {
+                List<TestSetMap> list = new ArrayList<TestSetMap>();
+                list.add(subTest);
+                parent = new TapStreamResult(owner, new TapResult("TAP Test Results", owner, list, todoIsFailure, includeCommentDiagnostics, validateNumberOfTests));
+            }
+        }
+        return parent;
+    }
 
-	/* (non-Javadoc)
-	 * @see hudson.tasks.test.TestObject#findCorrespondingResult(java.lang.String)
-	 */
-	@Override
-	public TestResult findCorrespondingResult(String id) {
-		if(this.getDisplayName().equals(id)) {
-			return this;
-		}
-		return null;
-	}
-	
-	/* (non-Javadoc)
-	 * @see hudson.tasks.test.TestObject#getName()
-	 */
-	@Override
-	public String getName() {
-	    StringBuilder buf = new StringBuilder();
+    /* (non-Javadoc)
+     * @see hudson.tasks.test.TestObject#findCorrespondingResult(java.lang.String)
+     */
+    @Override
+    public TestResult findCorrespondingResult(String id) {
+        if(this.getDisplayName().equals(id)) {
+            return this;
+        }
+        return null;
+    }
+    
+    /* (non-Javadoc)
+     * @see hudson.tasks.test.TestObject#getName()
+     */
+    @Override
+    public String getName() {
+        StringBuilder buf = new StringBuilder();
         buf.append(tapTestResult.getTestNumber());
         String tapTestResultDescription = tapTestResult.getDescription();
         if (StringUtils.isNotBlank(tapTestResultDescription)) {
@@ -135,35 +135,35 @@ public class TapTestResultResult extends TestResult {
             buf.append(tapTestResultDescription);
         }
         return buf.toString();
-	}
-	
-	public String getStatus() {
-		boolean failure = Util.isFailure(this.tapTestResult, todoIsFailure);
-		return failure ? "NOT OK" : "OK";
-	}
-	
-	public String getSkip() {
-		boolean skip = Util.isSkipped(this.tapTestResult);
-		return skip ? "Yes" : "No";
-	}
-	
-	public String getTodo() {
-		String todo = "No";
-		// TODO: not consistent with the other methods in TapResult
-		Directive directive = this.tapTestResult.getDirective();
-		if(directive != null) {
-			if(directive.getDirectiveValue() == DirectiveValues.TODO) {
-				todo = "Yes";
-			}
-		}
-		return todo;
-	}
-	
-	public String getFullName() {
-		return getName();
-	}
-	
-	public String getRelativePathFrom(TestObject it) {
+    }
+    
+    public String getStatus() {
+        boolean failure = Util.isFailure(this.tapTestResult, todoIsFailure);
+        return failure ? "NOT OK" : "OK";
+    }
+    
+    public String getSkip() {
+        boolean skip = Util.isSkipped(this.tapTestResult);
+        return skip ? "Yes" : "No";
+    }
+    
+    public String getTodo() {
+        String todo = "No";
+        // TODO: not consistent with the other methods in TapResult
+        Directive directive = this.tapTestResult.getDirective();
+        if(directive != null) {
+            if(directive.getDirectiveValue() == DirectiveValues.TODO) {
+                todo = "Yes";
+            }
+        }
+        return todo;
+    }
+    
+    public String getFullName() {
+        return getName();
+    }
+    
+    public String getRelativePathFrom(TestObject it) {
         // if (it is one of my ancestors) {
         //    return a relative path from it
         // } else {
@@ -233,74 +233,74 @@ public class TapTestResultResult extends TestResult {
         }
 
     }
-	
-	/* (non-Javadoc)
-	 * @see hudson.tasks.test.TestObject#getSafeName()
-	 */
-	@Override
-	public String getSafeName() {
-		String safeName = testSetMap.getFileName() + "-" + tapTestResult.getTestNumber();
-		try {
-		    safeName = URLEncoder.encode(safeName, "UTF-8");
-		} catch (UnsupportedEncodingException uee) {
-		    LOGGER.warning(uee.getMessage());
-		}
-		return safeName;
-	}
-	
-	/* (non-Javadoc)
-	 * @see hudson.tasks.test.TestResult#getTitle()
-	 */
-	public String getTitle() {
-		return getName();
-	}
-	
-	public float getDuration() {
-		Map<String, Object> diagnostic = this.tapTestResult.getDiagnostic();
-		// FIXME: code duplication. Refactor it and TapResult
-		if (diagnostic != null && ! diagnostic.isEmpty()) {
-			Object duration = diagnostic.get(DURATION_KEY);
-			if (duration != null) {
-				Float durationMS = Float.parseFloat(duration.toString());
-				return durationMS.floatValue();
-			}
-		}
-		return super.getDuration();
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		StringWriter pw = new StringWriter();
-		pw.append(tapTestResult.getStatus().toString());
-		if (tapTestResult.getTestNumber() != null) {
-			pw.append(' ' + Integer.toString(tapTestResult.getTestNumber()));
-		}
-		if (StringUtils.isNotBlank(tapTestResult.getDescription())) {
-			pw.append(' ' + tapTestResult.getDescription());
-		}
-		if (tapTestResult.getDirective() != null) {
-			pw.append(" # "
-			        + tapTestResult.getDirective().getDirectiveValue().toString());
-			if (StringUtils.isNotBlank(tapTestResult.getDirective().getReason())) {
-				pw.append(' ' + tapTestResult.getDirective().getReason());
-			}
-		}
-		List<Comment> comments = tapTestResult.getComments();
-		if (comments.size() > 0) {
-		    for(Comment comment : comments) {
-		        if(comment.isInline()) {
-		            pw.append(' ');
-		            pw.append("# " + comment.getText());
-		        } else {
-		            pw.append("\n");
-		            pw.append("# " + comment.getText());
-		        }
-		    }
-		}
-		return pw.toString();
-	}
+    
+    /* (non-Javadoc)
+     * @see hudson.tasks.test.TestObject#getSafeName()
+     */
+    @Override
+    public String getSafeName() {
+        String safeName = testSetMap.getFileName() + "-" + tapTestResult.getTestNumber();
+        try {
+            safeName = URLEncoder.encode(safeName, "UTF-8");
+        } catch (UnsupportedEncodingException uee) {
+            LOGGER.warning(uee.getMessage());
+        }
+        return safeName;
+    }
+    
+    /* (non-Javadoc)
+     * @see hudson.tasks.test.TestResult#getTitle()
+     */
+    public String getTitle() {
+        return getName();
+    }
+    
+    public float getDuration() {
+        Map<String, Object> diagnostic = this.tapTestResult.getDiagnostic();
+        // FIXME: code duplication. Refactor it and TapResult
+        if (diagnostic != null && ! diagnostic.isEmpty()) {
+            Object duration = diagnostic.get(DURATION_KEY);
+            if (duration != null) {
+                Float durationMS = Float.parseFloat(duration.toString());
+                return durationMS.floatValue();
+            }
+        }
+        return super.getDuration();
+    }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringWriter pw = new StringWriter();
+        pw.append(tapTestResult.getStatus().toString());
+        if (tapTestResult.getTestNumber() != null) {
+            pw.append(' ' + Integer.toString(tapTestResult.getTestNumber()));
+        }
+        if (StringUtils.isNotBlank(tapTestResult.getDescription())) {
+            pw.append(' ' + tapTestResult.getDescription());
+        }
+        if (tapTestResult.getDirective() != null) {
+            pw.append(" # "
+                    + tapTestResult.getDirective().getDirectiveValue().toString());
+            if (StringUtils.isNotBlank(tapTestResult.getDirective().getReason())) {
+                pw.append(' ' + tapTestResult.getDirective().getReason());
+            }
+        }
+        List<Comment> comments = tapTestResult.getComments();
+        if (comments.size() > 0) {
+            for(Comment comment : comments) {
+                if(comment.isInline()) {
+                    pw.append(' ');
+                    pw.append("# " + comment.getText());
+                } else {
+                    pw.append("\n");
+                    pw.append("# " + comment.getText());
+                }
+            }
+        }
+        return pw.toString();
+    }
 
 }

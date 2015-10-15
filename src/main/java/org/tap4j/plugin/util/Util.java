@@ -33,53 +33,53 @@ import org.tap4j.util.StatusValues;
  */
 public final class Util {
 
-	private Util() {}
-	
-	/**
-	 * Normalizes a folder path in relation to the workspace path.
-	 * <p>
-	 * A folder that is subdirectory of workspace will return only the difference.
-	 * It means that if the workspace is /home/workspace and the folder we want 
-	 * to normalize is /home/workspace/job-1/test.txt, then the return will be
-	 * job-1/test.txt.
-	 * 
-	 * @param workspace workspace path
-	 * @param relative relative path
-	 * @return normalized path
-	 */
-	public static String normalizeFolders(String workspace, String relative) {
-		workspace = workspace.replaceAll("\\\\", "\\/");
-		relative = relative.replaceAll("\\\\", "\\/");
-		if (relative.length() > workspace.length() && relative.contains(workspace)) {
-			String temp = relative.substring(workspace.length(), relative.length());
-			if (temp.startsWith("/") || temp.startsWith("\\"))
-				temp = temp.substring(1, temp.length());
-			return temp;
-		}
-		return relative;
-	}
-	
-	public static boolean isSkipped(TestResult testResult) {
-		boolean r = false;
-		Directive directive = testResult.getDirective();
-		if (directive != null
-				&& directive.getDirectiveValue() == DirectiveValues.SKIP) {
-			r = true;
-		}
-		return r;
-	}
+    private Util() {}
+    
+    /**
+     * Normalizes a folder path in relation to the workspace path.
+     * <p>
+     * A folder that is subdirectory of workspace will return only the difference.
+     * It means that if the workspace is /home/workspace and the folder we want 
+     * to normalize is /home/workspace/job-1/test.txt, then the return will be
+     * job-1/test.txt.
+     * 
+     * @param workspace workspace path
+     * @param relative relative path
+     * @return normalized path
+     */
+    public static String normalizeFolders(String workspace, String relative) {
+        workspace = workspace.replaceAll("\\\\", "\\/");
+        relative = relative.replaceAll("\\\\", "\\/");
+        if (relative.length() > workspace.length() && relative.contains(workspace)) {
+            String temp = relative.substring(workspace.length(), relative.length());
+            if (temp.startsWith("/") || temp.startsWith("\\"))
+                temp = temp.substring(1, temp.length());
+            return temp;
+        }
+        return relative;
+    }
+    
+    public static boolean isSkipped(TestResult testResult) {
+        boolean r = false;
+        Directive directive = testResult.getDirective();
+        if (directive != null
+                && directive.getDirectiveValue() == DirectiveValues.SKIP) {
+            r = true;
+        }
+        return r;
+    }
 
-	public static boolean isFailure(TestResult testResult, Boolean todoIsFailure) {
-		boolean r = false;
-		Directive directive = testResult.getDirective();
-		StatusValues status = testResult.getStatus();
-		if (directive != null) {
-			if(directive.getDirectiveValue() == DirectiveValues.TODO && todoIsFailure != null && true == todoIsFailure) {
-				r = true;
-			}
-		} else if (status != null && status == StatusValues.NOT_OK) {
-			r = true;
-		}
-		return r;
-	}
+    public static boolean isFailure(TestResult testResult, Boolean todoIsFailure) {
+        boolean r = false;
+        Directive directive = testResult.getDirective();
+        StatusValues status = testResult.getStatus();
+        if (directive != null) {
+            if(directive.getDirectiveValue() == DirectiveValues.TODO && todoIsFailure != null && true == todoIsFailure) {
+                r = true;
+            }
+        } else if (status != null && status == StatusValues.NOT_OK) {
+            r = true;
+        }
+        return r;
+    }
 }

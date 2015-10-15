@@ -33,32 +33,32 @@ import hudson.model.Action;
  */
 public class AbstractTapProjectAction implements Action {
 
-	public static final String URL_NAME = "tapResults";
-	public static final String ICON_NAME = "/plugin/tap/icons/tap-24.png";
-	
-	/* (non-Javadoc)
-	 * @see hudson.model.Action#getDisplayName()
-	 */
-	public String getDisplayName() {
-		return "TAP Extended Test Results";
-	}
+    public static final String URL_NAME = "tapResults";
+    public static final String ICON_NAME = "/plugin/tap/icons/tap-24.png";
+    
+    /* (non-Javadoc)
+     * @see hudson.model.Action#getDisplayName()
+     */
+    public String getDisplayName() {
+        return "TAP Extended Test Results";
+    }
 
-	/* (non-Javadoc)
-	 * @see hudson.model.Action#getIconFileName()
-	 */
-	public String getIconFileName() {
-		return ICON_NAME;
-	}
+    /* (non-Javadoc)
+     * @see hudson.model.Action#getIconFileName()
+     */
+    public String getIconFileName() {
+        return ICON_NAME;
+    }
 
-	/* (non-Javadoc)
-	 * @see hudson.model.Action#getUrlName()
-	 */
-	public String getUrlName() {
-		return URL_NAME;
-	}
-	
-	public String getSearchUrl() {
-		return URL_NAME;
-	}
-	
+    /* (non-Javadoc)
+     * @see hudson.model.Action#getUrlName()
+     */
+    public String getUrlName() {
+        return URL_NAME;
+    }
+    
+    public String getSearchUrl() {
+        return URL_NAME;
+    }
+    
 }
