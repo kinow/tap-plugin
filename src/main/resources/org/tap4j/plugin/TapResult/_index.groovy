@@ -18,7 +18,7 @@ l.layout(norefresh: "true", css: "/plugin/tap/css/tap.css") {
       table(width: "100%") {
         tr() {
           td(width: "5%", "${it.testSets.size()} files") 
-          td("${it.getTotal()} tests, ${it.passed} ok, ${it.failed} not ok, ${it.skipped} skipped, ${it.bailOuts} Bail Out!.") 
+          td("${it.getTotal()} tests, ${it.passed} ok, ${it.failed} not ok, ${it.skipped} skipped, ${it.toDo} ToDo, ${it.bailOuts} Bail Out!.")
         }
       }
       it.testSets.each() { map -> 

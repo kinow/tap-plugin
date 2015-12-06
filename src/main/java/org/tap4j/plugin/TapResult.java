@@ -74,6 +74,7 @@ public class TapResult implements ModelObject, Serializable {
     private int failed = 0;
     private int passed = 0;
     private int skipped = 0;
+    private int todo = 0;
     private int bailOuts = 0;
     private int total = 0;
     private float duration = 0.0f;
@@ -182,6 +183,7 @@ public class TapResult implements ModelObject, Serializable {
         failed = 0;
         passed = 0;
         skipped = 0;
+        todo = 0;
         bailOuts = 0;
         total = 0;
         duration = 0.0f;
@@ -202,6 +204,8 @@ public class TapResult implements ModelObject, Serializable {
                         skipped += 1;
                     } else if (Util.isFailure(testResult, todoIsFailure)) {
                         failed += 1;
+                    } else if (Util.isTodo(testResult)) {
+                        todo += 1;
                     } else {
                         passed += 1;
                     }
@@ -258,6 +262,10 @@ public class TapResult implements ModelObject, Serializable {
 
     public int getSkipped() {
         return this.skipped;
+    }
+
+    public int getToDo() {
+        return this.todo;
     }
 
     public int getPassed() {

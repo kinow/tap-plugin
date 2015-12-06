@@ -53,17 +53,20 @@ public class TapProjectAction extends AbstractTapProjectAction {
         public int numPassed;
         public int numFailed;
         public int numSkipped;
+        public int numToDo;
         
         public Result() {
             numPassed = 0;
             numFailed = 0;
             numSkipped = 0;
+            numToDo = 0;
         }
         
         public void add(Result r) {
           numPassed += r.numPassed;
           numFailed += r.numFailed;
           numSkipped += r.numSkipped;
+          numToDo += r.numToDo;
         }
     }
 
@@ -286,6 +289,7 @@ public class TapProjectAction extends AbstractTapProjectAction {
             dataset.add(r.numPassed, "Passed", label);
             dataset.add(r.numFailed, "Failed", label);
             dataset.add(r.numSkipped, "Skipped", label);
+            dataset.add(r.numToDo, "ToDo", label);
         }
     }
 
@@ -301,6 +305,7 @@ public class TapProjectAction extends AbstractTapProjectAction {
             r.numPassed = report.getPassed();
             r.numFailed = report.getFailed();
             r.numSkipped = report.getSkipped();
+            r.numToDo = report.getToDo();
         }
 
         return r;

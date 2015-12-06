@@ -139,6 +139,8 @@ public class GraphHelper
                      return String.valueOf(report.getPassed()) + " Pass";
                   case 2:
                      return String.valueOf(report.getSkipped()) + " Skip(s)";
+                  case 3:
+                     return String.valueOf(report.getToDo()) + " ToDo(s)";
                   default:
                      return "";
               }
@@ -150,6 +152,7 @@ public class GraphHelper
       ar.setSeriesPaint(0, ColorPalette.RED); // Failures
       ar.setSeriesPaint(1, ColorPalette.BLUE); // Pass
       ar.setSeriesPaint(2, ColorPalette.YELLOW); // Skips
+      ar.setSeriesPaint(3, Color.CYAN); // ToDo
 
       // crop extra space around the graph
       plot.setInsets(new RectangleInsets(0, 0, 0, 5.0));
@@ -224,6 +227,7 @@ public class GraphHelper
                 statusPaintMap.put("PASS", ColorPalette.BLUE);
                 statusPaintMap.put("SKIP", ColorPalette.YELLOW);
                 statusPaintMap.put("FAIL", ColorPalette.RED);
+                statusPaintMap.put("TODO", ColorPalette.GREY);
             }
 
             /**
