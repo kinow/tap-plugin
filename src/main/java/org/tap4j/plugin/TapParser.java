@@ -63,12 +63,13 @@ public class TapParser {
     private final Boolean validateNumberOfTests;
     private final Boolean planRequired;
     private final Boolean verbose;
+    private final Boolean stripSingleParents;
 
     private boolean hasFailedTests;
     private boolean parserErrors;
 
     public TapParser(Boolean outputTapToConsole, Boolean enableSubtests, Boolean todoIsFailure,
-            Boolean includeCommentDiagnostics, Boolean validateNumberOfTests, Boolean planRequired, Boolean verbose,
+            Boolean includeCommentDiagnostics, Boolean validateNumberOfTests, Boolean planRequired, Boolean verbose, Boolean stripSingleParents,
             PrintStream logger) {
         this.outputTapToConsole = outputTapToConsole;
         this.enableSubtests = enableSubtests;
@@ -78,6 +79,7 @@ public class TapParser {
         this.validateNumberOfTests = validateNumberOfTests;
         this.planRequired = planRequired;
         this.verbose = verbose;
+        this.stripSingleParents = stripSingleParents;
         this.logger = logger;
     }
 
@@ -95,6 +97,10 @@ public class TapParser {
 
     public boolean getParserErrors() {
         return parserErrors;
+    }
+
+    public boolean getStripSingleParents() {
+        return stripSingleParents;
     }
 
     public Boolean getIncludeCommentDiagnostics() {
@@ -150,7 +156,7 @@ public class TapParser {
                     log("Parsing TAP test result [" + tapFile + "].");
 
                     final Tap13Parser parser = new Tap13Parser("UTF-8", enableSubtests, planRequired);
-                    final TestSet testSet = parser.parseFile(tapFile);
+                    final TestSet testSet = stripSingleParentsAsRequired(parser.parseFile(tapFile));
 
                     if (containsNotOk(testSet) || testSet.containsBailOut()) {
                         this.hasFailedTests = Boolean.TRUE;
@@ -180,6 +186,37 @@ public class TapParser {
         final TapResult testResult = new TapResult("TAP Test Results", build, testSets, this.todoIsFailure,
                 this.includeCommentDiagnostics, this.validateNumberOfTests);
         return testResult;
+    }
+
+    private TestSet stripSingleParentsAsRequired(TestSet originalSet) {
+        if (!stripSingleParents) {
+            return originalSet;
+        } else {
+            TestSet result = originalSet;
+            while (hasSingleParent(result)) {
+                result = result.getTestResults().get(0).getSubtest();
+            }
+            return result;
+        }
+    }
+
+    private boolean hasSingleParent(TestSet testSet) {
+
+        if (testSet == null) {
+            return false;
+        }
+
+        if (testSet.getNumberOfTestResults() != 1) {
+            return false; // not a single test result
+        }
+
+        int planSpan = testSet.getPlan() != null ? (testSet.getPlan().getLastTestNumber() - testSet.getPlan().getInitialTestNumber()) : 0;
+
+        if (planSpan == 0) { // exactly one test
+            return testSet.getTestResults().get(0).getSubtest() != null; // which has a child(ern)
+        } else {
+            return false;
+        }
     }
 
     private void log(String str) {
