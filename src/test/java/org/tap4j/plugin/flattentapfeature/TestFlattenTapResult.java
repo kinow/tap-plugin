@@ -136,13 +136,21 @@ public class TestFlattenTapResult extends HudsonTestCase {
         final TestSet testSet = testResult.getTestSets().get(0).getTestSet();
         int testIndex = 0;
         for (TestResult result : testSet.getTestResults()) {
+
             final String description = result.getDescription();
+            int expectedTestNumber = testIndex +1;
+
+            assertEquals(result.getTestNumber().intValue(), expectedTestNumber);
+
             if (expectedDescriptions != null) {
-                assertEquals(description, expectedDescriptions[testIndex++]);
+                assertEquals(description, expectedDescriptions[testIndex]);
             }
+
             if (printDescriptions) {
                 System.out.println(description);
             }
+
+            testIndex ++;
         }
     }
 }

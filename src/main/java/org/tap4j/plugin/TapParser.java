@@ -213,14 +213,16 @@ public class TapParser {
         } else {
             TestSet result = new TestSet();
             final List<TestResult> resultsToProcess = originalSet.getTestResults();
+            int testIndex = 1;
             while (!resultsToProcess.isEmpty()) {
-                TestResult resultToProcess = resultsToProcess.remove(0);
-                TestSet subtests = resultToProcess.getSubtest();
+                final TestResult actualTestResult = resultsToProcess.remove(0);
+                TestSet subtests = actualTestResult.getSubtest();
                 if (subtests == null || subtests.getNumberOfTestResults() == 0) {
-                    result.addTestResult(resultToProcess);
+                    actualTestResult.setTestNumber(testIndex++);
+                    result.addTestResult(actualTestResult);
                 } else {
                     for (TestResult subtestResult : subtests.getTestResults()) {
-                        subtestResult.setDescription(resultToProcess.getDescription() + subtestResult.getDescription());
+                        subtestResult.setDescription(actualTestResult.getDescription() + subtestResult.getDescription());
                         resultsToProcess.add(subtestResult);
                     }
                 }
