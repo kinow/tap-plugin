@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2010 Bruno P. Kinoshita
+ * Copyright (c) 2010-2016 Bruno P. Kinoshita
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -64,12 +64,14 @@ public class TapParser {
     private final Boolean planRequired;
     private final Boolean verbose;
     private final Boolean stripSingleParents;
+    private final Boolean flattenTheTap;
 
     private boolean hasFailedTests;
     private boolean parserErrors;
 
     public TapParser(Boolean outputTapToConsole, Boolean enableSubtests, Boolean todoIsFailure,
-            Boolean includeCommentDiagnostics, Boolean validateNumberOfTests, Boolean planRequired, Boolean verbose, Boolean stripSingleParents,
+            Boolean includeCommentDiagnostics, Boolean validateNumberOfTests, Boolean planRequired, Boolean verbose,
+            Boolean stripSingleParents, Boolean flattenTheTap,
             PrintStream logger) {
         this.outputTapToConsole = outputTapToConsole;
         this.enableSubtests = enableSubtests;
@@ -80,6 +82,7 @@ public class TapParser {
         this.planRequired = planRequired;
         this.verbose = verbose;
         this.stripSingleParents = stripSingleParents;
+        this.flattenTheTap = flattenTheTap;
         this.logger = logger;
     }
 
@@ -127,6 +130,10 @@ public class TapParser {
         return verbose;
     }
 
+    public boolean getFlattenTheTap() {
+        return flattenTheTap;
+    }
+
     private boolean containsNotOk(TestSet testSet) {
         for (TestResult testResult : testSet.getTestResults()) {
             if (testResult.getStatus().equals(StatusValues.NOT_OK) && !(testResult.getDirective() != null
@@ -156,7 +163,7 @@ public class TapParser {
                     log("Parsing TAP test result [" + tapFile + "].");
 
                     final Tap13Parser parser = new Tap13Parser("UTF-8", enableSubtests, planRequired);
-                    final TestSet testSet = stripSingleParentsAsRequired(parser.parseFile(tapFile));
+                    final TestSet testSet = flattenTheSetAsRequired(stripSingleParentsAsRequired(parser.parseFile(tapFile)));
 
                     if (containsNotOk(testSet) || testSet.containsBailOut()) {
                         this.hasFailedTests = Boolean.TRUE;
@@ -195,6 +202,28 @@ public class TapParser {
             TestSet result = originalSet;
             while (hasSingleParent(result)) {
                 result = result.getTestResults().get(0).getSubtest();
+            }
+            return result;
+        }
+    }
+
+    private TestSet flattenTheSetAsRequired(TestSet originalSet) {
+        if (!flattenTheTap) {
+            return originalSet;
+        } else {
+            TestSet result = new TestSet();
+            final List<TestResult> resultsToProcess = originalSet.getTestResults();
+            while (!resultsToProcess.isEmpty()) {
+                TestResult resultToProcess = resultsToProcess.remove(0);
+                TestSet subtests = resultToProcess.getSubtest();
+                if (subtests == null || subtests.getNumberOfTestResults() == 0) {
+                    result.addTestResult(resultToProcess);
+                } else {
+                    for (TestResult subtestResult : subtests.getTestResults()) {
+                        subtestResult.setDescription(resultToProcess.getDescription() + subtestResult.getDescription());
+                        resultsToProcess.add(subtestResult);
+                    }
+                }
             }
             return result;
         }

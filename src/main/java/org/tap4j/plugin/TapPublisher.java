@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2010 Bruno P. Kinoshita
+ * Copyright (c) 2010-2016 Bruno P. Kinoshita
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -77,6 +77,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
     private final Boolean verbose;
     private final Boolean showOnlyFailures;
     private final Boolean stripSingleParents;
+    private final Boolean flattenTapResult;
 
     @Deprecated
     public TapPublisher(String testResults,
@@ -115,7 +116,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
                 Boolean.FALSE, Boolean.FALSE);
     }
 
-    @DataBoundConstructor
+    @Deprecated
     public TapPublisher(String testResults,
             Boolean failIfNoResults,
             Boolean failedTestsMarkBuildAsFailure,
@@ -129,6 +130,27 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
             Boolean verbose,
             Boolean showOnlyFailures,
             Boolean stripSingleParents) {
+        this(testResults, failIfNoResults, failedTestsMarkBuildAsFailure,
+                outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure,
+                includeCommentDiagnostics, validateNumberOfTests, planRequired, verbose,
+                Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
+    }
+
+    @DataBoundConstructor
+    public TapPublisher(String testResults,
+            Boolean failIfNoResults,
+            Boolean failedTestsMarkBuildAsFailure,
+            Boolean outputTapToConsole,
+            Boolean enableSubtests,
+            Boolean discardOldReports,
+            Boolean todoIsFailure,
+            Boolean includeCommentDiagnostics,
+            Boolean validateNumberOfTests,
+            Boolean planRequired,
+            Boolean verbose,
+            Boolean showOnlyFailures,
+            Boolean stripSingleParents,
+            Boolean flattenTapResult) {
 
         this.testResults = testResults;
         this.failIfNoResults = BooleanUtils.toBooleanDefaultIfNull(failIfNoResults, false);
@@ -143,6 +165,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
         this.verbose = BooleanUtils.toBooleanDefaultIfNull(verbose, true);
         this.showOnlyFailures = BooleanUtils.toBooleanDefaultIfNull(showOnlyFailures, false);
         this.stripSingleParents = BooleanUtils.toBooleanDefaultIfNull(stripSingleParents, false);
+        this.flattenTapResult = BooleanUtils.toBooleanDefaultIfNull(flattenTapResult, false);
     }
 
     public Object readResolve() {
@@ -234,6 +257,10 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
 
     public Boolean getVerbose() {
         return verbose;
+    }
+
+    public Boolean getFlattenTapResult() {
+        return flattenTapResult;
     }
 
     /**
@@ -385,7 +412,9 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
         TapResult tr = null;
         try {
             results = tapDir.list("**/*.*");
-            final TapParser parser = new TapParser(getOutputTapToConsole(), getEnableSubtests(), getTodoIsFailure(), getIncludeCommentDiagnostics(), getValidateNumberOfTests(), getPlanRequired(), getVerbose(), getStripSingleParents(), logger);
+            final TapParser parser = new TapParser(getOutputTapToConsole(), getEnableSubtests(), getTodoIsFailure(), getIncludeCommentDiagnostics(),
+                    getValidateNumberOfTests(), getPlanRequired(), getVerbose(), getStripSingleParents(), getFlattenTapResult(), logger);
+
             final TapResult result = parser.parse(results, owner);
             result.setOwner(owner);
             return result;
@@ -537,5 +566,4 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
         }
 
     }
-
 }
