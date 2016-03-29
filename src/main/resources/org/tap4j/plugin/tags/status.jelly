@@ -7,9 +7,9 @@
 		<j:when test="${attrs.testResult != null}">
 			<j:set var="testResult" value="${attrs.testResult}" />
 			<j:choose>
-			    <j:when test="${testResult.directive != null and testResult.directive.directiveValue.toString() == 'SKIP'}">
-                    <td class="yellow" width="5%"> </td>
-                </j:when>
+				<j:when test="${testResult.directive != null and testResult.directive.directiveValue.toString() == 'SKIP'}">
+					<td class="yellow" width="5%"> </td>
+				</j:when>
 				<j:when test="${testResult.status.toString() == 'ok'}">
 					<td class="green" width="5%"> </td>
 				</j:when>
