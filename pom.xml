@@ -29,7 +29,7 @@
 	<groupId>org.tap4j</groupId>
 	<artifactId>tap</artifactId>
 	<name>Jenkins TAP Plugin</name>
-	<version>1.25-SNAPSHOT</version>
+	<version>1.26-EVANDY</version>
 	<packaging>hpi</packaging>
 
 	<licenses>

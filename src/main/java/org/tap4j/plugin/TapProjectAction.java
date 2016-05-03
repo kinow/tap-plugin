@@ -59,6 +59,7 @@ public class TapProjectAction extends AbstractTapProjectAction {
     private transient Map<String, Integer> requestMap = new HashMap<String, Integer>();
 
     public TapProjectAction(AbstractProject<?, ?> project) {
+        super(project);
         this.project = project;
     }
 
