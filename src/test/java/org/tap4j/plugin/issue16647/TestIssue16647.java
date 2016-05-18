@@ -25,7 +25,7 @@ public class TestIssue16647 extends HudsonTestCase {
                 "ok 1 - Input file opened\n" +
                 "not ok 2 - First line of the input valid\n" +
                 "  ---\n" +
-                "    duration_ms: 100.66\n" +
+                "    duration_ms: 100660.00\n" +
                 "  ...\n";
 
         project.getBuildersList().add(new TestBuilder() {

@@ -262,7 +262,7 @@ public class TapTestResultResult extends TestResult {
             Object duration = diagnostic.get(DURATION_KEY);
             if (duration != null) {
                 Float durationMS = Float.parseFloat(duration.toString());
-                return durationMS.floatValue();
+                return durationMS.floatValue() / 1000;
             }
         }
         return super.getDuration();
