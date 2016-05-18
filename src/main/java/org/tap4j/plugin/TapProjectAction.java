@@ -26,6 +26,8 @@ package org.tap4j.plugin;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Run;
+import hudson.model.Job;
+import hudson.matrix.MatrixProject;
 import hudson.util.ChartUtil;
 import hudson.util.DataSetBuilder;
 import hudson.util.RunList;
@@ -50,6 +52,24 @@ import org.tap4j.plugin.util.GraphHelper;
 public class TapProjectAction extends AbstractTapProjectAction {
 
     private AbstractProject<?, ?> project;
+    
+    protected class Result {
+        public int numPassed;
+        public int numFailed;
+        public int numSkipped;
+        
+        public Result() {
+            numPassed = 0;
+            numFailed = 0;
+            numSkipped = 0;
+        }
+        
+        public void add(Result r) {
+          numPassed += r.numPassed;
+          numFailed += r.numFailed;
+          numSkipped += r.numSkipped;
+        }
+    }
 
     /**
      * Used to figure out if we need to regenerate the graphs or not. Only used
@@ -59,6 +79,7 @@ public class TapProjectAction extends AbstractTapProjectAction {
     private transient Map<String, Integer> requestMap = new HashMap<String, Integer>();
 
     public TapProjectAction(AbstractProject<?, ?> project) {
+        super(project);
         this.project = project;
     }
 
@@ -149,14 +170,36 @@ public class TapProjectAction extends AbstractTapProjectAction {
      */
     public boolean isGraphActive() {
         AbstractBuild<?, ?> build = getProject().getLastBuild();
+        AbstractProject<?,?> p = getProject();
         // in order to have a graph, we must have at least two points.
         int numPoints = 0;
         while (numPoints < 2) {
             if (build == null) {
                 return false;
             }
-            if (build.getAction(getBuildActionClass()) != null) {
-                numPoints++;
+            if( p instanceof MatrixProject )
+            {
+                MatrixProject mp = (MatrixProject) p;
+ 
+                for (Job j : mp.getAllJobs()) {
+                   if (j != mp) { //getAllJobs includes the parent job too, so skip that
+                       Run<?,?> sub = j.getBuild(build.getId());
+                       if(sub != null) {
+                           // Not all builds are on all sub-projects
+                           if (sub.getAction(getBuildActionClass()) != null) {
+                               //data for at least 1 sub-job on this build
+                               numPoints++;
+                               break; // go look at the next build now
+                           }
+                       }
+                   }
+                }
+            }
+            else
+            {
+                if (build.getAction(getBuildActionClass()) != null) {
+                    numPoints++;
+                }
             }
             build = build.getPreviousBuild();
         }
@@ -205,23 +248,54 @@ public class TapProjectAction extends AbstractTapProjectAction {
 
     protected void populateDataSetBuilder(DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel> dataset ) {
 
+        AbstractProject<?, ?> p = getProject();
+        
         for (Run<?, ?> build = getProject().getLastBuild(); build != null; build = build.getPreviousBuild()) {
             ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel((Run<?, ?>) build);
-            TapBuildAction action = build.getAction(getBuildActionClass());
-            if (action != null) {
-                TapResult report = action.getResult();
-                report.tally();
 
-                dataset.add(report.getPassed(), "Passed",
-                        label);
-                dataset.add(report.getFailed(), "Failed",
-                        label);
-                dataset.add(report.getSkipped(),
-                        "Skipped", label);
+            Result r = new Result();
+            
+            if( p instanceof MatrixProject )
+            {
+                MatrixProject mp = (MatrixProject) p;
+ 
+                for (Job j : mp.getAllJobs()) {
+                   if (j != mp) { //getAllJobs includes the parent job too, so skip that
+                       Run<?,?> sub = j.getBuild(build.getId());
+                       if(sub != null) {
+                           // Not all builds are on all sub-projects
+                           r.add(summarizeBuild(sub));
+                       }
+                   }
+                }
             }
+            else
+            {
+                r = summarizeBuild(build);
+            }
+            
+            dataset.add(r.numPassed, "Passed", label);
+            dataset.add(r.numFailed, "Failed", label);
+            dataset.add(r.numSkipped, "Skipped", label);
         }
     }
 
+    protected Result summarizeBuild(Run<?,?> b)
+    {
+        Result r = new Result();
+        
+        TapBuildAction action = b.getAction(getBuildActionClass());
+        if (action != null) {
+            TapResult report = action.getResult();
+            report.tally();
+
+            r.numPassed = report.getPassed();
+            r.numFailed = report.getFailed();
+            r.numSkipped = report.getSkipped();
+        }
+
+        return r;
+    }
     /**
      * Getter for property 'graphWidth'.
      * 

@@ -23,7 +23,9 @@
  */
 package org.tap4j.plugin;
 
+import hudson.model.AbstractProject;
 import hudson.model.Action;
+import hudson.tasks.test.TestResultProjectAction;
 
 /**
  * Base class for TAP Project action.
@@ -31,7 +33,11 @@ import hudson.model.Action;
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
-public class AbstractTapProjectAction implements Action {
+public class AbstractTapProjectAction extends TestResultProjectAction implements Action {
+
+    public AbstractTapProjectAction(AbstractProject<?, ?> project) {
+        super(project); 
+    }
 
     public static final String URL_NAME = "tapResults";
     public static final String ICON_NAME = "/plugin/tap/icons/tap-24.png";
