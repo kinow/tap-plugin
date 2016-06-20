@@ -56,6 +56,7 @@ import org.tap4j.plugin.util.Util;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.ModelObject;
+import hudson.tasks.test.TestObject;
 
 /**
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
@@ -307,7 +308,8 @@ public class TapResult implements ModelObject, Serializable {
         String f = request.getParameter("f");
         String key = request.getParameter("key");
         try {
-            FilePath tapDir = new FilePath(new FilePath(new File(build.getRootDir(), Constants.TAP_DIR_NAME)), f);
+            FilePath parent = new FilePath(new File(build.getRootDir(), Constants.TAP_DIR_NAME));
+            FilePath tapDir = parent.child(TestObject.safe(f));
             ServletOutputStream sos = response.getOutputStream();
             if(tapDir.exists()) {
                 String tapStream = tapDir.readToString();
