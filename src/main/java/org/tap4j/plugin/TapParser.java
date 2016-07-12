@@ -42,6 +42,7 @@ import org.tap4j.util.StatusValues;
 
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
+import org.tap4j.model.Plan;
 
 /**
  * Executes remote TAP Stream retrieval and execution.
@@ -221,9 +222,32 @@ public class TapParser {
                     actualTestResult.setTestNumber(testIndex++);
                     result.addTestResult(actualTestResult);
                 } else {
-                    for (TestResult subtestResult : subtests.getTestResults()) {
+                    final List<TestResult> subtestResults = subtests.getTestResults();
+                    for (TestResult subtestResult : subtestResults) {
                         subtestResult.setDescription(actualTestResult.getDescription() + subtestResult.getDescription());
                         resultsToProcess.add(subtestResult);
+                    }
+
+                    final Plan subtestPlan = subtests.getPlan();
+                    final boolean planIsPresent = subtestPlan != null;
+                    final int subtestCountAsPlanned = planIsPresent ?
+                            subtestPlan.getLastTestNumber() - subtestPlan.getInitialTestNumber() + 1
+                            : -1;
+
+                    final boolean subtestCountDiffersFromPlan = planIsPresent &&  subtestCountAsPlanned != subtestResults.size();
+
+                    if (subtestCountDiffersFromPlan) {
+
+                        final int missingTestCount =
+                                subtestCountAsPlanned - subtestResults.size();
+
+                        final TestResult timeoutTestResult = new TestResult();
+                        timeoutTestResult.setStatus(StatusValues.NOT_OK);
+                        timeoutTestResult.setDescription(
+                                String.format("%s %s %d %s",
+                                        actualTestResult.getDescription(), "failed:", missingTestCount, "subtest(s) missing"));
+
+                        resultsToProcess.add(timeoutTestResult);
                     }
                 }
             }

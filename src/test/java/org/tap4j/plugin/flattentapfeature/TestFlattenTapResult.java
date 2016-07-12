@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ExecutionException;
+import org.junit.Ignore;
 
 import org.jvnet.hudson.test.HudsonTestCase;
 import org.jvnet.hudson.test.TestBuilder;
@@ -64,13 +65,13 @@ public class TestFlattenTapResult extends HudsonTestCase {
                 "ok 1 1\n" +
                 "  1..2\n" +
                 "  ok 1 .1\n" +
-                "    1..3\n" +
+                "    1..4\n" +
                 "    ok 1 .1\n" +
                 "    ok 2 .2\n" +
                 "    ok 3 .3\n" +
                 "    ok 4 .4\n" +
                 "  ok 2 .2\n" +
-                "    1..2\n" +
+                "    1..3\n" +
                 "    ok 1 .1\n" +
                 "    ok 2 .2\n" +
                 "    ok 3 .3\n";
@@ -79,6 +80,49 @@ public class TestFlattenTapResult extends HudsonTestCase {
                 new String[] {
                     "1.1.1", "1.1.2", "1.1.3", "1.1.4",
                     "1.2.1", "1.2.2", "1.2.3"}, false);
+    }
+
+    public void testStripSecondLevelIncompleteResult1() throws IOException, InterruptedException, ExecutionException {
+
+        final String tap =
+                "1..1\n" +
+                "ok 1 1\n" +
+                "  1..2\n" +
+                "  ok 1 .1\n" +
+                "    1..4\n" +
+                "    ok 1 .1\n" +
+                "    ok 2 .2\n" +
+                "    ok 3 .3\n" +
+                "  ok 2 .2\n" +
+                "    1..3\n" +
+                "    ok 1 .1\n" +
+                "    ok 2 .2\n" +
+                "    ok 3 .3\n";
+
+        _test(tap, 7,
+                new String[] {
+                    "1.1.1", "1.1.2", "1.1.3", "1.1 failed: 1 subtest(s) missing",
+                    "1.2.1", "1.2.2", "1.2.3"}, true);
+    }
+
+    public void testStripSecondLevelIncompleteResult2() throws IOException, InterruptedException, ExecutionException {
+        final String tap2 =
+                "1..1\n" +
+                "ok 1 1\n" +
+                "  1..2\n" +
+                "  ok 1 .1\n" +
+                "    1..4\n" +
+                "    ok 1 .1\n" +
+                "    ok 2 .2\n" +
+                "    ok 3 .3\n" +
+                "  ok 2 .2\n" +
+                "    1..3\n" +
+                "    ok 1 .1\n";
+
+        _test(tap2, 6,
+                new String[] {
+                    "1.1.1", "1.1.2", "1.1.3", "1.1 failed: 1 subtest(s) missing",
+                    "1.2.1", "1.2 failed: 2 subtest(s) missing"}, true);
     }
 
     public void testARealTapOuptut() throws Exception {
@@ -131,24 +175,27 @@ public class TestFlattenTapResult extends HudsonTestCase {
         TapTestResultAction action = build.getAction(TapTestResultAction.class);
         TapResult testResult = action.getTapResult();
 
-        assertEquals(expectedTotal, testResult.getPassed());
+        assertEquals(expectedTotal, testResult.getTotal());
 
         final TestSet testSet = testResult.getTestSets().get(0).getTestSet();
         int testIndex = 0;
         for (TestResult result : testSet.getTestResults()) {
 
             final String description = result.getDescription();
+            final int testNumber = result.getTestNumber();
+
             int expectedTestNumber = testIndex +1;
 
-            assertEquals(result.getTestNumber().intValue(), expectedTestNumber);
+            if (printDescriptions) {
+                System.out.printf("%d: %s\n", testNumber, description);
+            }
+
+            assertEquals(expectedTestNumber, testNumber);
 
             if (expectedDescriptions != null) {
-                assertEquals(description, expectedDescriptions[testIndex]);
+                assertEquals(expectedDescriptions[testIndex], description);
             }
 
-            if (printDescriptions) {
-                System.out.println(description);
-            }
 
             testIndex ++;
         }
