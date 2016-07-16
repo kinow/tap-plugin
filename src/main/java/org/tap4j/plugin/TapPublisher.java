@@ -23,20 +23,6 @@
  */
 package org.tap4j.plugin;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.commons.lang.BooleanUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.tap4j.model.Plan;
-import org.tap4j.model.TestSet;
-import org.tap4j.plugin.model.TestSetMap;
-import org.tap4j.plugin.util.Constants;
-
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -45,16 +31,32 @@ import hudson.Util;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
 import hudson.matrix.MatrixBuild;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.tasks.test.TestResultAggregator;
+import jenkins.tasks.SimpleBuildStep;
+import org.apache.commons.lang.BooleanUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.tap4j.model.Plan;
+import org.tap4j.model.TestSet;
+import org.tap4j.plugin.model.TestSetMap;
+import org.tap4j.plugin.util.Constants;
+
+import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Publishes TAP results in Jenkins builds.
@@ -62,7 +64,7 @@ import hudson.tasks.test.TestResultAggregator;
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
-public class TapPublisher extends Recorder implements MatrixAggregatable {
+public class TapPublisher extends Recorder implements MatrixAggregatable, SimpleBuildStep {
     
     private final String testResults;
     private final Boolean failIfNoResults;
@@ -120,6 +122,10 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
         this.planRequired = BooleanUtils.toBooleanDefaultIfNull(planRequired, true); // true is the old behaviour
         this.verbose = BooleanUtils.toBooleanDefaultIfNull(verbose, true);
         this.showOnlyFailures = BooleanUtils.toBooleanDefaultIfNull(showOnlyFailures, false);
+    }
+
+    public TapPublisher(String testResults) {
+        this(testResults, true, true, true, true, false, false, true, true, true, false, false);
     }
 
     public Object readResolve() {
@@ -216,7 +222,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
      * @param build Jenkins build
      * @return virtual directory (FilePath)
      */
-    public static FilePath getReportsDirectory(AbstractBuild<?, ?> build) {
+    public static FilePath getReportsDirectory(Run build) {
         return new FilePath(new File(build.getRootDir().getAbsolutePath())).child(Constants.TAP_DIR_NAME);
     }
 
@@ -232,25 +238,27 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
         return new TapProjectAction(project);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * hudson.tasks.BuildStepCompatibilityLayer#perform(hudson.model.AbstractBuild
-     * , hudson.Launcher, hudson.model.BuildListener)
-     */
-    @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,
-            BuildListener listener) throws InterruptedException, IOException {
 
+    @Override
+    public void perform(
+            @Nonnull Run run,
+            @Nonnull FilePath workspace,
+            @Nonnull Launcher launcher,
+            @Nonnull TaskListener listener)
+            throws InterruptedException, IOException {
+
+        performImpl(run, workspace, listener);
+    }
+
+    private boolean performImpl(Run build, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
         PrintStream logger = listener.getLogger();
         logger.println("TAP Reports Processing: START");
 
         EnvVars envVars = build.getEnvironment(listener);
         String antPattern = Util.replaceMacro(this.testResults, envVars);
         logger.println("Looking for TAP results report in workspace using pattern: " + antPattern);
-        
-        FilePath[] reports = locateReports(build.getWorkspace(), antPattern);
+
+        FilePath[] reports = locateReports(workspace, antPattern);
 
         /*
          * filter out the reports based on timestamps. See JENKINS-12187
@@ -258,7 +266,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
         if (this.getDiscardOldReports()) {
             reports = checkReports(build, reports, logger);
         }
-        
+
         if (reports.length == 0) {
             if(this.getFailIfNoResults()) {
                 logger.println("Did not find any matching files. Setting build result to FAILURE.");
@@ -271,13 +279,13 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
             }
         }
 
-        boolean filesSaved = saveReports(build.getWorkspace(), TapPublisher.getReportsDirectory(build), reports, logger);
+        boolean filesSaved = saveReports(workspace, TapPublisher.getReportsDirectory(build), reports, logger);
         if (!filesSaved) {
             logger.println("Failed to save TAP reports");
             return Boolean.TRUE;
         }
 
-        TapResult testResult = null; 
+        TapResult testResult = null;
         try {
             testResult = loadResults(build, logger);
             testResult.setShowOnlyFailures(this.getShowOnlyFailures());
@@ -291,7 +299,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
         }
 
         build.addAction(new TapTestResultAction(build, testResult));
-        
+
         if (testResult.getTestSets().size() > 0 || testResult.getParseErrorTestSets().size() > 0) {
             // create an individual report for all of the results and add it to
             // the build
@@ -346,11 +354,11 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
     }
 
     /**
-     * @param build
+     * @param owner
      * @param logger
      * @return
      */
-    private TapResult loadResults(AbstractBuild<?, ?> owner, PrintStream logger) {
+    private TapResult loadResults(Run owner, PrintStream logger) {
         final FilePath tapDir = TapPublisher.getReportsDirectory(owner);
         FilePath[] results = null;
         TapResult tr = null;
@@ -424,7 +432,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
      * @param logger
      * @return
      */
-    private FilePath[] checkReports(AbstractBuild<?, ?> build,
+    private FilePath[] checkReports(Run build,
             FilePath[] reports, PrintStream logger) {
         List<FilePath> filePathList = new ArrayList<FilePath>(reports.length);
 
@@ -486,7 +494,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable {
         return new TestResultAggregator(build, launcher, listener);
     }
 
-    @Extension(ordinal = 1000.0)
+    @Extension
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         public DescriptorImpl() {
             super(TapPublisher.class);
