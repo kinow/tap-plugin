@@ -113,7 +113,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         this.testResults = testResults;
         this.failIfNoResults = BooleanUtils.toBooleanDefaultIfNull(failIfNoResults, false);
         this.failedTestsMarkBuildAsFailure = BooleanUtils.toBooleanDefaultIfNull(failedTestsMarkBuildAsFailure, false);
-        this.outputTapToConsole = outputTapToConsole;
+        this.outputTapToConsole = BooleanUtils.toBooleanDefaultIfNull(outputTapToConsole, true);
         this.enableSubtests = BooleanUtils.toBooleanDefaultIfNull(enableSubtests, true);
         this.discardOldReports = BooleanUtils.toBooleanDefaultIfNull(discardOldReports, false);
         this.todoIsFailure = BooleanUtils.toBooleanDefaultIfNull(todoIsFailure, true);
@@ -122,10 +122,6 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         this.planRequired = BooleanUtils.toBooleanDefaultIfNull(planRequired, true); // true is the old behaviour
         this.verbose = BooleanUtils.toBooleanDefaultIfNull(verbose, true);
         this.showOnlyFailures = BooleanUtils.toBooleanDefaultIfNull(showOnlyFailures, false);
-    }
-
-    public TapPublisher(String testResults) {
-        this(testResults, true, true, true, true, false, false, true, true, true, false, false);
     }
 
     public Object readResolve() {
