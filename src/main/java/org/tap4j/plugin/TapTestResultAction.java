@@ -27,7 +27,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.Run;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
-import hudson.tasks.test.TestResult;
 import org.kohsuke.stapler.StaplerProxy;
 import org.kohsuke.stapler.export.Exported;
 import org.tap4j.plugin.model.TapStreamResult;
@@ -42,7 +41,7 @@ import java.util.List;
  */
 public class TapTestResultAction extends AbstractTestResultAction<AbstractTestResultAction<?>> implements StaplerProxy {
 
-    private final TapResult tapResult;
+    private TapResult tapResult;
     
     /**
      * @param owner
@@ -118,7 +117,7 @@ public class TapTestResultAction extends AbstractTestResultAction<AbstractTestRe
      * @see hudson.tasks.test.AbstractTestResultAction#getResult()
      */
     @Override
-    public TestResult getResult() {
+    public TapStreamResult getResult() {
         return new TapStreamResult(owner, tapResult);
     }
 
@@ -139,6 +138,15 @@ public class TapTestResultAction extends AbstractTestResultAction<AbstractTestRe
         return "TAP Test Results";
     }
 
+    void mergeResult(TapResult additionalResult) {
+        TapStreamResult original = getResult();
+        original.merge(additionalResult);
+        setFromTapStreamResult(original);
+    }
+
+    private void setFromTapStreamResult(TapStreamResult result) {
+        this.tapResult = result.getTapResult();
+    }
 }
 
 class EmptyTapTestResultAction extends TapTestResultAction { 
@@ -227,5 +235,4 @@ class EmptyTapTestResultAction extends TapTestResultAction {
     public String getDisplayName() {
         return "TAP Test Results";
     }
-    
 }

@@ -42,7 +42,7 @@ public class TapBuildAction implements Action, Serializable, StaplerProxy {
     public static final String ICON_NAME = "/plugin/tap/icons/tap-24.png";
     public static final String DISPLAY_NAME = "TAP Extended Test Results";
 
-    private Run build;
+    private final Run build;
 
     private TapResult result;
 
@@ -124,4 +124,8 @@ public class TapBuildAction implements Action, Serializable, StaplerProxy {
         return previousAction;
     }
 
+    public void mergeResult(TapResult other) {
+        result = result.copyWithExtraTestSets(other.getTestSets());
+        result.tally();
+    }
 }

@@ -94,7 +94,21 @@ public class TapResult implements ModelObject, Serializable {
         this.includeCommentDiagnostics= includeCommentDiagnostics;
         this.validateNumberOfTests = validateNumberOfTests;
     }
-    
+
+    public TapResult copyWithExtraTestSets(List<TestSetMap> testSets) {
+        List<TestSetMap> mergedTestSets = new ArrayList<TestSetMap>(getTestSets());
+        mergedTestSets.addAll(testSets);
+
+        return new TapResult(
+            this.getName(),
+            this.getOwner(),
+            mergedTestSets,
+            this.getTodoIsFailure(),
+            this.getIncludeCommentDiagnostics(),
+            this.getValidateNumberOfTests()
+        );
+    }
+
     public Boolean getShowOnlyFailures() {
         return BooleanUtils.toBooleanDefaultIfNull(showOnlyFailures, Boolean.FALSE);
     }
@@ -385,5 +399,4 @@ public class TapResult implements ModelObject, Serializable {
         }
         return null;
     }
-
 }

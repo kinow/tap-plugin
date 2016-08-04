@@ -51,13 +51,14 @@ public class TapPublisherTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
     private FreeStyleProject project;
-    private TapPublisher archiver;
+    private TapPublisher archiver1;
+    private TapPublisher archiver2;
 
     @Before
     public void setUp() throws Exception {
         project = j.createFreeStyleProject("tap");
-        archiver = new TapPublisher(
-                "*.tap",
+        archiver1 = new TapPublisher(
+                "**/sample.tap",
                 true,
                 true,
                 false,
@@ -70,7 +71,21 @@ public class TapPublisherTest {
                 false,
                 false
         );
-        project.getPublishersList().add(archiver);
+        archiver2 = new TapPublisher(
+                "**/more.tap",
+                true,
+                true,
+                false,
+                true,
+                true,
+                false,
+                true,
+                true,
+                true,
+                false,
+                false
+        );
+        project.getPublishersList().add(archiver1);
 
         project.getBuildersList().add(new TouchBuilder());
     }
@@ -81,9 +96,43 @@ public class TapPublisherTest {
     public void basic() throws Exception {
         FreeStyleBuild build = project.scheduleBuild2(0).get(1000, TimeUnit.SECONDS);
 
-        assertTestResults(build);
+        assertTestResultsBasic(build);
 
         JenkinsRule.WebClient wc = j.new WebClient();
+
+        // Check that we can access project page.
+        wc.getPage(project);
+
+        // Check that we can access current build page.
+        wc.getPage(build);
+
+        // Check that we can access TAP report page.
+        wc.getPage(build, "tapTestReport");
+
+        // Check that we can access green and red test links from "All Tests" table.
+        wc.getPage(build, "tapTestReport/" + getNthResultPathFromAllTestsTable(build, 0)); // green
+        wc.getPage(build, "tapTestReport/" + getNthResultPathFromAllTestsTable(build, 1)); // red
+
+        // Check that we can access link from "Failed Tests" table.
+        wc.getPage(getNthResultPathFromFailedTestsTable(build, 0));
+    }
+
+    @SuppressWarnings("deprecated")
+    @LocalData
+    @Test
+    public void merged() throws Exception {
+
+        project.getPublishersList().add(archiver2);
+
+        FreeStyleBuild build = project.scheduleBuild2(0).get(1000, TimeUnit.SECONDS);
+
+        assertEquals(1, build.getActions(TapTestResultAction.class).size());
+        assertEquals(1, build.getActions(TapBuildAction.class).size());
+
+        assertTestResultsMerged(build);
+
+        JenkinsRule.WebClient wc = j.new WebClient();
+
 
         // Check that we can access project page.
         wc.getPage(project);
@@ -159,18 +208,29 @@ public class TapPublisherTest {
         basic();
     }
 
-    private void assertTestResults(FreeStyleBuild build) {
+    private void assertTestResultsBasic(FreeStyleBuild build) {
+        assertTestResults(build, 3, 1, 1);
+    }
+
+    private void assertTestResultsMerged(FreeStyleBuild build) {
+        assertTestResults(build, 5, 2, 1);
+    }
+
+    private void assertTestResults(FreeStyleBuild build, int total, int failed, int skipped) {
         TapTestResultAction testResultAction = build.getAction(TapTestResultAction.class);
         assertNotNull("no TestResultAction", testResultAction);
 
         TestResult result = testResultAction.getResult();
         assertNotNull("no TestResult", result);
 
-        assertEquals("should have 1 failing test", 1, testResultAction.getFailCount());
-        assertEquals("should have 1 failing test", 1, result.getFailCount());
+        assertEquals(String.format("should have %d failing test", failed), failed, testResultAction.getFailCount());
+        assertEquals(String.format("should have %d failing test", failed), failed, result.getFailCount());
 
-        assertEquals("should have 3 total tests", 3, testResultAction.getTotalCount());
-        assertEquals("should have 3 total tests", 3, result.getTotalCount());
+        assertEquals(String.format("should have %d total tests", total), total, testResultAction.getTotalCount());
+        assertEquals(String.format("should have %d total tests", total), total, result.getTotalCount());
+
+        assertEquals(String.format("should have %d skipped test", skipped), skipped, testResultAction.getSkipCount());
+        assertEquals(String.format("should have %d skipped test", skipped), skipped, result.getSkipCount());
     }
 
     @LocalData
@@ -182,7 +242,7 @@ public class TapPublisherTest {
 
         FreeStyleBuild build = project.getBuildByNumber(1);
 
-        assertTestResults(build);
+        assertTestResultsBasic(build);
     }
 
     private void reloadJenkins() throws Exception {
@@ -193,7 +253,7 @@ public class TapPublisherTest {
     @Test
     public void emptyDirectory() throws Exception {
         FreeStyleProject freeStyleProject = j.createFreeStyleProject();
-        freeStyleProject.getPublishersList().add(archiver);
+        freeStyleProject.getPublishersList().add(archiver1);
         j.assertBuildStatus(Result.FAILURE, freeStyleProject.scheduleBuild2(0).get());
     }
 }

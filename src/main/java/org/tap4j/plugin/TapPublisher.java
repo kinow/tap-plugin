@@ -283,7 +283,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
 
         TapResult testResult = null;
         try {
-            testResult = loadResults(build, logger);
+            testResult = loadResults(antPattern, build, logger);
             testResult.setShowOnlyFailures(this.getShowOnlyFailures());
             testResult.tally();
         } catch (Throwable t) {
@@ -294,13 +294,34 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
             t.printStackTrace(logger);
         }
 
-        build.addAction(new TapTestResultAction(build, testResult));
+        TapTestResultAction trAction = build.getAction(TapTestResultAction.class);
+        boolean appending;
+
+        if (trAction == null) {
+            appending = false;
+            trAction = new TapTestResultAction(build, testResult);
+        } else {
+            appending = true;
+            trAction.mergeResult(testResult);
+        }
+
+        if (!appending) {
+            build.addAction(trAction);
+        }
 
         if (testResult.getTestSets().size() > 0 || testResult.getParseErrorTestSets().size() > 0) {
             // create an individual report for all of the results and add it to
             // the build
-            TapBuildAction action = new TapBuildAction(build, testResult);
-            build.addAction(action);
+
+            TapBuildAction action = build.getAction(TapBuildAction.class);
+            if (action == null) {
+                action = new TapBuildAction(build, testResult);
+                build.addAction(action);
+            } else {
+                appending = true;
+                action.mergeResult(testResult);
+            }
+
             if (testResult.hasParseErrors()) {
                 listener.getLogger().println("TAP parse errors found in the build. Marking build as UNSTABLE");
                 build.setResult(Result.UNSTABLE);
@@ -320,6 +341,11 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
                     build.setResult(Result.UNSTABLE);
                 }
             }
+
+            if (appending) {
+                build.save();
+            }
+
         } else {
             logger.println("Found matching files but did not find any TAP results.");
             return Boolean.TRUE;
@@ -354,12 +380,12 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
      * @param logger
      * @return
      */
-    private TapResult loadResults(Run owner, PrintStream logger) {
+    private TapResult loadResults(String antPattern, Run owner, PrintStream logger) {
         final FilePath tapDir = TapPublisher.getReportsDirectory(owner);
-        FilePath[] results = null;
-        TapResult tr = null;
+        FilePath[] results;
+        TapResult tr;
         try {
-            results = tapDir.list("**/*.*");
+            results = tapDir.list(antPattern);
 
             final TapParser parser = new TapParser(getOutputTapToConsole(), getEnableSubtests(), getTodoIsFailure(), getIncludeCommentDiagnostics(), getValidateNumberOfTests(), getPlanRequired(), getVerbose(), logger);
             final TapResult result = parser.parse(results, owner);

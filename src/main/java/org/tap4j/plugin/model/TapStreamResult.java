@@ -28,18 +28,17 @@ import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.TabulatedResult;
 import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
 import org.tap4j.model.TestSet;
 import org.tap4j.plugin.TapResult;
 import org.tap4j.util.StatusValues;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A tabulated TAP Stream result.
@@ -51,18 +50,13 @@ public class TapStreamResult extends TabulatedResult {
 
     private static final long serialVersionUID = 8337146933697574082L;
     private final AbstractBuild<?, ?> owner;
-    private final List<TestResult> children = new ArrayList<TestResult>();
-    private final TapResult tapResult;
+    private List<TestResult> children = new ArrayList<TestResult>();
+    private TapResult tapResult;
 
     public TapStreamResult(AbstractBuild<?, ?> owner, TapResult tapResult) {
         this.owner = owner;
-        for(TestSetMap tsm : tapResult.getTestSets()) {
-            TestSet ts = tsm.getTestSet();
-            for(org.tap4j.model.TestResult tr : ts.getTestResults()) {
-                this.children.add(new TapTestResultResult(owner, tsm, tr, tapResult.getTodoIsFailure(), tapResult.getIncludeCommentDiagnostics(), tapResult.getValidateNumberOfTests()));
-            }
-        }
         this.tapResult = tapResult;
+        setChildrenInfo();
     }
     
     /* (non-Javadoc)
@@ -178,6 +172,10 @@ public class TapStreamResult extends TabulatedResult {
         }
     }
 
+    public TapResult getTapResult() {
+        return this.tapResult;
+    }
+
     /**
      * @param name
      * @return
@@ -213,4 +211,21 @@ public class TapStreamResult extends TabulatedResult {
         return null; // ops, something went wrong
     }
 
+    public void merge(TapResult other) {
+
+        tapResult = tapResult.copyWithExtraTestSets(other.getTestSets());
+        tapResult.tally();
+        children = new ArrayList<TestResult>();
+
+        setChildrenInfo();
+    }
+
+    private void setChildrenInfo() {
+        for(TestSetMap tsm : tapResult.getTestSets()) {
+            TestSet ts = tsm.getTestSet();
+            for(org.tap4j.model.TestResult tr : ts.getTestResults()) {
+                this.children.add(new TapTestResultResult(owner, tsm, tr, tapResult.getTodoIsFailure(), tapResult.getIncludeCommentDiagnostics(), tapResult.getValidateNumberOfTests()));
+            }
+        }
+    }
 }
