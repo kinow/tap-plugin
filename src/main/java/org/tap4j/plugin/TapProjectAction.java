@@ -23,25 +23,24 @@
  */
 package org.tap4j.plugin;
 
+import hudson.matrix.MatrixProject;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Run;
 import hudson.model.Job;
-import hudson.matrix.MatrixProject;
+import hudson.model.Run;
 import hudson.util.ChartUtil;
 import hudson.util.DataSetBuilder;
 import hudson.util.RunList;
+import org.jfree.chart.JFreeChart;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
+import org.tap4j.plugin.util.GraphHelper;
 
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import org.jfree.chart.JFreeChart;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
-import org.tap4j.plugin.util.GraphHelper;
 
 /**
  * A TAP Project action, with a graph and a list of builds.
@@ -51,8 +50,6 @@ import org.tap4j.plugin.util.GraphHelper;
  */
 public class TapProjectAction extends AbstractTapProjectAction {
 
-    private AbstractProject<?, ?> project;
-    
     protected class Result {
         public int numPassed;
         public int numFailed;
@@ -80,7 +77,10 @@ public class TapProjectAction extends AbstractTapProjectAction {
 
     public TapProjectAction(AbstractProject<?, ?> project) {
         super(project);
-        this.project = project;
+    }
+
+    public TapProjectAction(Job<?, ?> job) {
+        super(job);
     }
 
     public AbstractProject<?, ?> getProject() {

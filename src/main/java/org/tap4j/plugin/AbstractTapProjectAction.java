@@ -25,7 +25,7 @@ package org.tap4j.plugin;
 
 import hudson.model.AbstractProject;
 import hudson.model.Action;
-import hudson.tasks.test.TestResultProjectAction;
+import hudson.model.Job;
 
 /**
  * Base class for TAP Project action.
@@ -33,10 +33,20 @@ import hudson.tasks.test.TestResultProjectAction;
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
-public class AbstractTapProjectAction extends TestResultProjectAction implements Action {
+public class AbstractTapProjectAction implements Action {
+
+    public final Job<?,?> job;
+
+    @Deprecated
+    public final AbstractProject<?,?> project;
+
+    public AbstractTapProjectAction(Job<?,?> job) {
+        this.job = job;
+        project = job instanceof AbstractProject ? (AbstractProject) job : null;
+    }
 
     public AbstractTapProjectAction(AbstractProject<?, ?> project) {
-        super(project); 
+        this((Job) project);
     }
 
     public static final String URL_NAME = "tapResults";
