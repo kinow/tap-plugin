@@ -23,16 +23,10 @@
  */
 package org.tap4j.plugin;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
-
-import javax.servlet.ServletOutputStream;
-
+import hudson.FilePath;
+import hudson.model.ModelObject;
+import hudson.model.Run;
+import hudson.tasks.test.TestObject;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
@@ -53,10 +47,14 @@ import org.tap4j.plugin.util.Constants;
 import org.tap4j.plugin.util.DiagnosticUtil;
 import org.tap4j.plugin.util.Util;
 
-import hudson.FilePath;
-import hudson.model.AbstractBuild;
-import hudson.model.ModelObject;
-import hudson.tasks.test.TestObject;
+import javax.servlet.ServletOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
@@ -70,7 +68,7 @@ public class TapResult implements ModelObject, Serializable {
     
     private static final String DURATION_KEY = "duration_ms";
 
-    private AbstractBuild<?, ?> build;
+    private Run build;
     private List<TestSetMap> testSets;
     private List<TestSetMap> parseErrorTestSets;
     private int failed = 0;
@@ -85,7 +83,7 @@ public class TapResult implements ModelObject, Serializable {
     private Boolean validateNumberOfTests;
     private Boolean showOnlyFailures = Boolean.FALSE;
 
-    public TapResult(String name, AbstractBuild<?, ?> owner,
+    public TapResult(String name, Run owner,
             List<TestSetMap> testSets, Boolean todoIsFailure, Boolean includeCommentDiagnostics ,
             Boolean validateNumberOfTests) {
         this.name = name;
@@ -96,7 +94,21 @@ public class TapResult implements ModelObject, Serializable {
         this.includeCommentDiagnostics= includeCommentDiagnostics;
         this.validateNumberOfTests = validateNumberOfTests;
     }
-    
+
+    public TapResult copyWithExtraTestSets(List<TestSetMap> testSets) {
+        List<TestSetMap> mergedTestSets = new ArrayList<TestSetMap>(getTestSets());
+        mergedTestSets.addAll(testSets);
+
+        return new TapResult(
+            this.getName(),
+            this.getOwner(),
+            mergedTestSets,
+            this.getTodoIsFailure(),
+            this.getIncludeCommentDiagnostics(),
+            this.getValidateNumberOfTests()
+        );
+    }
+
     public Boolean getShowOnlyFailures() {
         return BooleanUtils.toBooleanDefaultIfNull(showOnlyFailures, Boolean.FALSE);
     }
@@ -209,7 +221,7 @@ public class TapResult implements ModelObject, Serializable {
         }
     }
 
-    public AbstractBuild<?, ?> getOwner() {
+    public Run getOwner() {
         return this.build;
     }
 
@@ -217,7 +229,7 @@ public class TapResult implements ModelObject, Serializable {
      * @param owner
      *            the owner to set
      */
-    public void setOwner(AbstractBuild<?, ?> owner) {
+    public void setOwner(Run owner) {
         this.build = owner;
     }
 
@@ -387,5 +399,4 @@ public class TapResult implements ModelObject, Serializable {
         }
         return null;
     }
-
 }

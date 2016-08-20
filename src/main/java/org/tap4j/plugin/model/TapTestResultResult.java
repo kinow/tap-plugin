@@ -23,14 +23,13 @@
  */
 package org.tap4j.plugin.model;
 
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
-
+import hudson.Functions;
+import hudson.model.AbstractBuild;
+import hudson.model.Item;
+import hudson.tasks.test.AbstractTestResultAction;
+import hudson.tasks.test.TestObject;
+import hudson.tasks.test.TestResult;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
@@ -41,13 +40,13 @@ import org.tap4j.plugin.TapResult;
 import org.tap4j.plugin.util.Util;
 import org.tap4j.util.DirectiveValues;
 
-import hudson.Functions;
-import hudson.model.AbstractBuild;
-import hudson.model.Item;
-import hudson.tasks.test.AbstractTestResultAction;
-import hudson.tasks.test.TestObject;
-import hudson.tasks.test.TestResult;
-import jenkins.model.Jenkins;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -180,8 +179,12 @@ public class TapTestResultResult extends TestResult {
         // and accumulating a relative url as I go
         while (next!=null && it!=next) {
             cur = next;
-            buf.insert(0,'/');
-            buf.insert(0,cur.getSafeName());
+            String safeName = cur.getSafeName();
+
+            if (!"(empty)".equals(safeName)) {
+                buf.insert(0, '/');
+                buf.insert(0, safeName);
+            }
             next = cur.getParent();
         }
         if (it==next) {

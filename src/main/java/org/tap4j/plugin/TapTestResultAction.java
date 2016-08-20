@@ -23,6 +23,14 @@
  */
 package org.tap4j.plugin;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import org.kohsuke.stapler.StaplerProxy;
+import org.kohsuke.stapler.export.Exported;
+import org.tap4j.plugin.model.TapStreamResult;
+
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
@@ -30,15 +38,8 @@ import hudson.model.Job;
 import hudson.model.Run;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
-import hudson.tasks.test.TestResult;
 import jenkins.tasks.SimpleBuildStep;
-import org.kohsuke.stapler.StaplerProxy;
-import org.kohsuke.stapler.export.Exported;
-import org.tap4j.plugin.model.TapStreamResult;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * 
@@ -125,7 +126,7 @@ public class TapTestResultAction
      * @see hudson.tasks.test.AbstractTestResultAction#getResult()
      */
     @Override
-    public TestResult getResult() {
+    public TapStreamResult getResult() {
         return new TapStreamResult(owner, tapResult);
     }
 
@@ -145,7 +146,11 @@ public class TapTestResultAction
     public String getDisplayName() {
         return "TAP Test Results";
     }
-
+    
+    /*
+     * (non-Javadoc)
+     * @see jenkins.tasks.SimpleBuildStep#getProjectActions()
+     */
     @Override
     public Collection<? extends Action> getProjectActions() {
         Job<?,?> job = run.getParent();
@@ -153,6 +158,90 @@ public class TapTestResultAction
             return Collections.emptySet();
         }
         return Collections.singleton(new TapProjectAction(job));
+    }
+
+    void mergeResult(TapResult additionalResult) {
+        TapStreamResult original = getResult();
+        original.merge(additionalResult);
+        setFromTapStreamResult(original);
+    }
+
+    private void setFromTapStreamResult(TapStreamResult result) {
+        this.tapResult = result.getTapResult();
+    }
+}
+
+class EmptyTapTestResultAction extends TapTestResultAction { 
+    
+    private final AbstractBuild<?, ?> owner;
+    
+    /**
+     * @param owner
+     */
+    protected EmptyTapTestResultAction(AbstractBuild<?, ?> owner) {
+        super(owner, null);
+        this.owner = owner;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.tap4j.plugin.TapTestResultAction#getOwner()
+     */
+    public AbstractBuild<?, ?> getOwner() {
+        return owner;
+    }
+    
+    /* (non-Javadoc)
+     * @see hudson.tasks.test.AbstractTestResultAction#getFailCount()
+     */
+    @Override
+    @Exported(visibility = 2)
+    public int getFailCount() {
+        return 0;
+    }
+
+    /* (non-Javadoc)
+     * @see hudson.tasks.test.AbstractTestResultAction#getTotalCount()
+     */
+    @Override
+    @Exported(visibility = 2)
+    public int getTotalCount() {
+        return 0;
+    }
+    
+    /* (non-Javadoc)
+     * @see hudson.tasks.test.AbstractTestResultAction#getSkipCount()
+     */
+    @Override
+    @Exported(visibility = 2)
+    public int getSkipCount() {
+        return 0;
+    }
+
+    /* (non-Javadoc)
+     * @see hudson.tasks.test.AbstractTestResultAction#getFailedTests()
+     */
+    @Override
+    public List<CaseResult> getFailedTests() {
+        //throw new AssertionError("Not supposed to be called");
+        return Collections.emptyList();
+    }
+    
+    /* (non-Javadoc)
+     * @see hudson.tasks.test.AbstractTestResultAction#getUrlName()
+     */
+    @Override
+    @Exported(visibility = 2)
+    public String getUrlName() {
+        return "tapTestReport";
+    }
+
+    /* (non-Javadoc)
+     * @see hudson.tasks.test.AbstractTestResultAction#getDisplayName()
+     */
+    @Override
+    public String getDisplayName() {
+        return "TAP Test Results";
     }
 }
 

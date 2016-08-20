@@ -23,13 +23,8 @@
  */
 package org.tap4j.plugin;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.logging.Logger;
-
+import hudson.FilePath;
+import hudson.model.Run;
 import org.apache.commons.io.FileUtils;
 import org.tap4j.model.TestResult;
 import org.tap4j.model.TestSet;
@@ -40,8 +35,12 @@ import org.tap4j.plugin.model.TestSetMap;
 import org.tap4j.util.DirectiveValues;
 import org.tap4j.util.StatusValues;
 
-import hudson.FilePath;
-import hudson.model.AbstractBuild;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Executes remote TAP Stream retrieval and execution.
@@ -131,7 +130,7 @@ public class TapParser {
         return false;
     }
 
-    public TapResult parse(FilePath[] results, AbstractBuild<?, ?> build) {
+    public TapResult parse(FilePath[] results, Run build) {
         this.parserErrors = Boolean.FALSE;
         this.hasFailedTests = Boolean.FALSE;
         final List<TestSetMap> testSets = new LinkedList<TestSetMap>();
