@@ -1,18 +1,18 @@
-/* 
+/*
  * The MIT License
- * 
- * Copyright (c) 2010 Bruno P. Kinoshita
- * 
+ *
+ * Copyright (c) 2010-2016 Bruno P. Kinoshita
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,6 +22,22 @@
  * THE SOFTWARE.
  */
 package org.tap4j.plugin;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.annotation.Nonnull;
+
+import org.apache.commons.lang.BooleanUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.tap4j.model.Plan;
+import org.tap4j.model.TestSet;
+import org.tap4j.plugin.model.TestSetMap;
+import org.tap4j.plugin.util.Constants;
 
 import hudson.EnvVars;
 import hudson.Extension;
@@ -43,24 +59,10 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.tasks.test.TestResultAggregator;
 import jenkins.tasks.SimpleBuildStep;
-import org.apache.commons.lang.BooleanUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.tap4j.model.Plan;
-import org.tap4j.model.TestSet;
-import org.tap4j.plugin.model.TestSetMap;
-import org.tap4j.plugin.util.Constants;
-
-import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Publishes TAP results in Jenkins builds.
- * 
+ *
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
@@ -78,31 +80,33 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
     private final Boolean planRequired;
     private final Boolean verbose;
     private final Boolean showOnlyFailures;
+    private final Boolean stripSingleParents;
+    private final Boolean flattenTapResult;
 
     @Deprecated
     public TapPublisher(String testResults,
-            Boolean failIfNoResults, 
-            Boolean failedTestsMarkBuildAsFailure, 
+            Boolean failIfNoResults,
+            Boolean failedTestsMarkBuildAsFailure,
             Boolean outputTapToConsole,
-            Boolean enableSubtests, 
+            Boolean enableSubtests,
             Boolean discardOldReports,
             Boolean todoIsFailure,
             Boolean includeCommentDiagnostics,
             Boolean validateNumberOfTests,
             Boolean planRequired,
             Boolean verbose) {
-        this(testResults, failIfNoResults, failedTestsMarkBuildAsFailure, 
+        this(testResults, failIfNoResults, failedTestsMarkBuildAsFailure,
                 outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure,
                 includeCommentDiagnostics, validateNumberOfTests, planRequired, verbose,
                 Boolean.FALSE);
     }
-    
-    @DataBoundConstructor
+
+    @Deprecated
     public TapPublisher(String testResults,
-            Boolean failIfNoResults, 
-            Boolean failedTestsMarkBuildAsFailure, 
+            Boolean failIfNoResults,
+            Boolean failedTestsMarkBuildAsFailure,
             Boolean outputTapToConsole,
-            Boolean enableSubtests, 
+            Boolean enableSubtests,
             Boolean discardOldReports,
             Boolean todoIsFailure,
             Boolean includeCommentDiagnostics,
@@ -110,6 +114,48 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
             Boolean planRequired,
             Boolean verbose,
             Boolean showOnlyFailures) {
+        this(testResults, failIfNoResults, failedTestsMarkBuildAsFailure,
+                outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure,
+                includeCommentDiagnostics, validateNumberOfTests, planRequired, verbose,
+                Boolean.FALSE, Boolean.FALSE);
+    }
+
+    @Deprecated
+    public TapPublisher(String testResults,
+            Boolean failIfNoResults,
+            Boolean failedTestsMarkBuildAsFailure,
+            Boolean outputTapToConsole,
+            Boolean enableSubtests,
+            Boolean discardOldReports,
+            Boolean todoIsFailure,
+            Boolean includeCommentDiagnostics,
+            Boolean validateNumberOfTests,
+            Boolean planRequired,
+            Boolean verbose,
+            Boolean showOnlyFailures,
+            Boolean stripSingleParents) {
+        this(testResults, failIfNoResults, failedTestsMarkBuildAsFailure,
+                outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure,
+                includeCommentDiagnostics, validateNumberOfTests, planRequired, verbose,
+                Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
+    }
+
+    @DataBoundConstructor
+    public TapPublisher(String testResults,
+            Boolean failIfNoResults,
+            Boolean failedTestsMarkBuildAsFailure,
+            Boolean outputTapToConsole,
+            Boolean enableSubtests,
+            Boolean discardOldReports,
+            Boolean todoIsFailure,
+            Boolean includeCommentDiagnostics,
+            Boolean validateNumberOfTests,
+            Boolean planRequired,
+            Boolean verbose,
+            Boolean showOnlyFailures,
+            Boolean stripSingleParents,
+            Boolean flattenTapResult) {
+
         this.testResults = testResults;
         this.failIfNoResults = BooleanUtils.toBooleanDefaultIfNull(failIfNoResults, false);
         this.failedTestsMarkBuildAsFailure = BooleanUtils.toBooleanDefaultIfNull(failedTestsMarkBuildAsFailure, false);
@@ -122,26 +168,49 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         this.planRequired = BooleanUtils.toBooleanDefaultIfNull(planRequired, true); // true is the old behaviour
         this.verbose = BooleanUtils.toBooleanDefaultIfNull(verbose, true);
         this.showOnlyFailures = BooleanUtils.toBooleanDefaultIfNull(showOnlyFailures, false);
+        this.stripSingleParents = BooleanUtils.toBooleanDefaultIfNull(stripSingleParents, false);
+        this.flattenTapResult = BooleanUtils.toBooleanDefaultIfNull(flattenTapResult, false);
     }
 
     public Object readResolve() {
-        String testResults = this.getTestResults();
-        Boolean failIfNoResults = BooleanUtils.toBooleanDefaultIfNull(this.getFailIfNoResults(), false);
-        Boolean failedTestsMarkBuildAsFailure = BooleanUtils.toBooleanDefaultIfNull(this.getFailedTestsMarkBuildAsFailure(), false);
-        Boolean outputTapToConsole = BooleanUtils.toBooleanDefaultIfNull(this.getOutputTapToConsole(), false);
-        Boolean enableSubtests = BooleanUtils.toBooleanDefaultIfNull(this.getEnableSubtests(), true);
-        Boolean discardOldReports = BooleanUtils.toBooleanDefaultIfNull(this.getDiscardOldReports(), false);
-        Boolean todoIsFailure = BooleanUtils.toBooleanDefaultIfNull(this.getTodoIsFailure(), true);
-        Boolean includeCommentDiagnostics = BooleanUtils.toBooleanDefaultIfNull(this.getIncludeCommentDiagnostics(), true);
-        Boolean validateNumberOfTests = BooleanUtils.toBooleanDefaultIfNull(this.getValidateNumberOfTests(), false);
-        Boolean planRequired = BooleanUtils.toBooleanDefaultIfNull(this.getPlanRequired(), true);
-        Boolean verbose = BooleanUtils.toBooleanDefaultIfNull(this.getVerbose(), true);
-        Boolean showOnlyFailures = BooleanUtils.toBooleanDefaultIfNull(this.getShowOnlyFailures(), false);
-        return new TapPublisher(testResults, failIfNoResults, failedTestsMarkBuildAsFailure, outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure, includeCommentDiagnostics, validateNumberOfTests, planRequired, verbose, showOnlyFailures);
+        final String _testResults = this.getTestResults();
+        final Boolean _failIfNoResults = BooleanUtils.toBooleanDefaultIfNull(this.getFailIfNoResults(), false);
+        final Boolean _failedTestsMarkBuildAsFailure = BooleanUtils.toBooleanDefaultIfNull(this.getFailedTestsMarkBuildAsFailure(), false);
+        final Boolean _outputTapToConsole = BooleanUtils.toBooleanDefaultIfNull(this.getOutputTapToConsole(), false);
+        final Boolean _enableSubtests = BooleanUtils.toBooleanDefaultIfNull(this.getEnableSubtests(), true);
+        final Boolean _discardOldReports = BooleanUtils.toBooleanDefaultIfNull(this.getDiscardOldReports(), false);
+        final Boolean _todoIsFailure = BooleanUtils.toBooleanDefaultIfNull(this.getTodoIsFailure(), true);
+        final Boolean _includeCommentDiagnostics = BooleanUtils.toBooleanDefaultIfNull(this.getIncludeCommentDiagnostics(), true);
+        final Boolean _validateNumberOfTests = BooleanUtils.toBooleanDefaultIfNull(this.getValidateNumberOfTests(), false);
+        final Boolean _planRequired = BooleanUtils.toBooleanDefaultIfNull(this.getPlanRequired(), true);
+        final Boolean _verbose = BooleanUtils.toBooleanDefaultIfNull(this.getVerbose(), true);
+        final Boolean _showOnlyFailures = BooleanUtils.toBooleanDefaultIfNull(this.getShowOnlyFailures(), false);
+        final Boolean _stripSingleParents = BooleanUtils.toBooleanDefaultIfNull(this.getStripSingleParents(), false);
+        final Boolean _flattenTapResult = BooleanUtils.toBooleanDefaultIfNull(this.getFlattenTapResult(), false);
+
+        return new TapPublisher(
+                _testResults,
+                _failIfNoResults,
+                _failedTestsMarkBuildAsFailure,
+                _outputTapToConsole,
+                _enableSubtests,
+                _discardOldReports,
+                _todoIsFailure,
+                _includeCommentDiagnostics,
+                _validateNumberOfTests,
+                _planRequired,
+                _verbose,
+                _showOnlyFailures,
+                _stripSingleParents,
+                _flattenTapResult);
     }
 
     public Boolean getShowOnlyFailures() {
         return this.showOnlyFailures;
+    }
+
+    public Boolean getStripSingleParents() {
+        return this.stripSingleParents;
     }
 
     /**
@@ -150,7 +219,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
     public Boolean getFailIfNoResults() {
         return failIfNoResults;
     }
-    
+
     /**
      * @return the testResults
      */
@@ -168,45 +237,49 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
     public Boolean getOutputTapToConsole() {
         return outputTapToConsole;
     }
-    
+
     /**
      * @return the enableSubtests
      */
     public Boolean getEnableSubtests() {
         return enableSubtests;
     }
-    
+
     /**
      * @return the discardOldReports
      */
     public Boolean getDiscardOldReports() {
         return discardOldReports;
     }
-    
+
     /**
      * @return the todoIsFailure
      */
     public Boolean getTodoIsFailure() {
         return todoIsFailure;
     }
-    
+
     /**
      * @return the includeCommentDiagnostics
      */
     public Boolean getIncludeCommentDiagnostics() {
         return includeCommentDiagnostics;
     }
-    
+
     public Boolean getValidateNumberOfTests() {
         return validateNumberOfTests;
     }
-    
+
     public Boolean getPlanRequired() {
         return planRequired;
     }
-    
+
     public Boolean getVerbose() {
         return verbose;
+    }
+
+    public Boolean getFlattenTapResult() {
+        return flattenTapResult;
     }
 
     /**
@@ -214,7 +287,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
      * displaying in the UI.
      * <p>
      * Adapted from JUnit Attachments Plug-in.
-     * 
+     *
      * @param build Jenkins build
      * @return virtual directory (FilePath)
      */
@@ -224,7 +297,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * hudson.tasks.BuildStepCompatibilityLayer#getProjectAction(hudson.model
      * .AbstractProject)
@@ -234,7 +307,13 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         return new TapProjectAction(project);
     }
 
-
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * hudson.tasks.BuildStepCompatibilityLayer#perform(hudson.model.AbstractBuild
+     * , hudson.Launcher, hudson.model.BuildListener)
+     */
     @Override
     public void perform(
             @Nonnull Run run,
@@ -355,9 +434,9 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
     }
 
     /**
-     * Iterates through the list of test sets and validates its plans and 
+     * Iterates through the list of test sets and validates its plans and
      * test results.
-     * 
+     *
      * @param testSets
      * @return <true> if there are any test case that doesn't follow the plan
      */
@@ -365,7 +444,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         for (TestSetMap testSetMap : testSets) {
             TestSet testSet = testSetMap.getTestSet();
             Plan plan = testSet.getPlan();
-            if (plan != null) { 
+            if (plan != null) {
                 int planned = plan.getLastTestNumber();
                 int numberOfTests = testSet.getTestResults().size();
                 if (planned != numberOfTests)
@@ -386,8 +465,8 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         TapResult tr;
         try {
             results = tapDir.list(antPattern);
+            final TapParser parser = new TapParser(getOutputTapToConsole(), getEnableSubtests(), getTodoIsFailure(), getIncludeCommentDiagnostics(), getValidateNumberOfTests(), getPlanRequired(), getVerbose(), getStripSingleParents(), getFlattenTapResult(), logger);
 
-            final TapParser parser = new TapParser(getOutputTapToConsole(), getEnableSubtests(), getTodoIsFailure(), getIncludeCommentDiagnostics(), getValidateNumberOfTests(), getPlanRequired(), getVerbose(), logger);
             final TapResult result = parser.parse(results, owner);
             result.setOwner(owner);
             return result;
@@ -401,7 +480,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
     }
 
     /**
-     * @param workspace 
+     * @param workspace
      * @param tapDir
      * @param reports
      * @param logger
@@ -423,10 +502,10 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         }
         return true;
     }
-    
+
     /**
      * Used to maintain the directory structure when persisting to the tap-reports dir.
-     * 
+     *
      * @param workspace Jenkins WS
      * @param tapDir tap reports dir
      * @param orig original directory
@@ -448,7 +527,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
 
     /**
      * Checks that there are new report files.
-     * 
+     *
      * @param build
      * @param reports
      * @param logger
@@ -462,7 +541,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
             /*
              * Check that the file was created as part of this build and is not
              * something left over from before.
-             * 
+             *
              * Checks that the last modified time of file is greater than the
              * start time of the build
              */
@@ -500,15 +579,15 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hudson.tasks.BuildStep#getRequiredMonitorService()
      */
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
     }
-    
+
     // matrix jobs and test result aggregation support
-    
+
     /* (non-Javadoc)
      * @see hudson.matrix.MatrixAggregatable#createAggregator(hudson.matrix.MatrixBuild, hudson.Launcher, hudson.model.BuildListener)
      */
@@ -530,7 +609,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see hudson.tasks.BuildStepDescriptor#isApplicable(java.lang.Class)
          */
         @Override
@@ -539,5 +618,4 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         }
 
     }
-
 }

@@ -37,5 +37,11 @@
       <f:entry title="Show only failures">
           <f:checkbox name="TapPublisher.showOnlyFailures" value="${instance.showOnlyFailures}" checked="${instance.showOnlyFailures}" default="false" />
       </f:entry>
+      <f:entry title="Strip single parents">
+          <f:checkbox name="TapPublisher.stripSingleParents" value="${instance.stripSingleParents}" checked="${instance.stripSingleParents}" default="false" />
+      </f:entry>
+      <f:entry title="Flatten TAP result">
+          <f:checkbox name="TapPublisher.flattenTapResult" value="${instance.flattenTapResult}" checked="${instance.flattenTapResult}" default="false" />
+      </f:entry>
   </f:advanced>
 </j:jelly>
