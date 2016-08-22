@@ -26,7 +26,7 @@ package org.tap4j.plugin.model;
 import hudson.Functions;
 import hudson.model.AbstractBuild;
 import hudson.model.Item;
-import hudson.tasks.test.AbstractTestResultAction;
+import hudson.model.Run;
 import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
 import jenkins.model.Jenkins;
@@ -37,6 +37,7 @@ import org.tap4j.model.Comment;
 import org.tap4j.model.Directive;
 import org.tap4j.model.TestSet;
 import org.tap4j.plugin.TapResult;
+import org.tap4j.plugin.TapTestResultAction;
 import org.tap4j.plugin.util.Util;
 import org.tap4j.util.DirectiveValues;
 
@@ -60,14 +61,14 @@ public class TapTestResultResult extends TestResult {
     private static final long serialVersionUID = -4499261655602135921L;
     private static final Logger LOGGER = Logger.getLogger(TapTestResultResult.class.getName());
     
-    private final AbstractBuild<?, ?> owner;
+    private final Run<?, ?> owner;
     private final org.tap4j.model.TestResult tapTestResult;
     private final TestSetMap testSetMap;
     private final Boolean todoIsFailure;
     private final Boolean includeCommentDiagnostics;
     private final Boolean validateNumberOfTests;
     
-    public TapTestResultResult(AbstractBuild<?, ?> owner, TestSetMap testSetMap, org.tap4j.model.TestResult tapTestResult, 
+    public TapTestResultResult(Run<?, ?> owner, TestSetMap testSetMap, org.tap4j.model.TestResult tapTestResult,
             Boolean todoIsFailure, Boolean includeCommentDiagnostics, Boolean validateNumberOfTests) {
         this.owner = owner;
         this.testSetMap = testSetMap;
@@ -88,7 +89,7 @@ public class TapTestResultResult extends TestResult {
      * @see hudson.tasks.test.TestObject#getOwner()
      */
     @Override
-    public AbstractBuild<?, ?> getOwner() {
+    public Run<?, ?> getRun() {
         return owner;
     }
 
@@ -192,7 +193,7 @@ public class TapTestResultResult extends TestResult {
 
             // Start with the test result action
             @SuppressWarnings("rawtypes")
-            AbstractTestResultAction action = getTestResultAction();
+            TapTestResultAction action = getTestResultActionDiverged();
             if (action==null) {
                 //LOGGER.warning("trying to get relative path, but we can't determine the action that owns this result.");
                 return ""; // this won't take us to the right place, but it also won't 404.
@@ -304,4 +305,19 @@ public class TapTestResultResult extends TestResult {
         return pw.toString();
     }
 
+    /**
+     * This is mostly a verbatim from {@link TestObject#getTestResultAction()}, with the only difference in a return
+     * type.
+     *
+     * @return associated TAP test result action object
+     */
+    private TapTestResultAction getTestResultActionDiverged() {
+        Run<?, ?> owner = getRun();
+        if (owner != null) {
+            return owner.getAction(TapTestResultAction.class);
+        } else {
+            LOGGER.warning("owner is null when trying to getTestResultActionDiverged.");
+            return null;
+        }
+    }
 }

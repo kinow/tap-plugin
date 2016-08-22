@@ -26,11 +26,15 @@ package org.tap4j.plugin;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
+import hudson.model.HealthReport;
+import hudson.model.HealthReportingAction;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.tasks.junit.CaseResult;
-import hudson.tasks.test.AbstractTestResultAction;
+import hudson.tasks.test.Messages;
+import jenkins.model.RunAction2;
 import jenkins.tasks.SimpleBuildStep;
+import org.jvnet.localizer.Localizable;
 import org.kohsuke.stapler.StaplerProxy;
 import org.kohsuke.stapler.export.Exported;
 import org.tap4j.plugin.model.TapStreamResult;
@@ -46,26 +50,31 @@ import java.util.List;
  * @since 0.1
  */
 public class TapTestResultAction
-        extends AbstractTestResultAction<AbstractTestResultAction<?>>
-        implements StaplerProxy, SimpleBuildStep.LastBuildAction {
+        implements StaplerProxy, SimpleBuildStep.LastBuildAction, HealthReportingAction, RunAction2 {
+
+    public transient Run<?,?> run;
+    @Deprecated
+    public transient AbstractBuild<?,?> owner;
 
     private TapResult tapResult;
-    
+
+
     /**
-     * @param owner
+     * @param r
      * @param tapResult
      */
     @Deprecated
     protected TapTestResultAction(AbstractBuild<?, ?> owner, TapResult tapResult) {
         this((Run) owner, tapResult);
     }
-    
+
     /**
-     * @param owner
+     * @param r
      * @param tapResult
      */
-    protected TapTestResultAction(Run owner, TapResult tapResult) {
-        super(owner);
+    protected TapTestResultAction(Run r, TapResult tapResult) {
+        setRunAndOwner(r);
+
         this.tapResult = tapResult;
     }
 
@@ -79,7 +88,6 @@ public class TapTestResultAction
     /* (non-Javadoc)
      * @see hudson.tasks.test.AbstractTestResultAction#getFailCount()
      */
-    @Override
     @Exported(visibility = 2)
     public int getFailCount() {
         return tapResult.getFailed();
@@ -88,7 +96,6 @@ public class TapTestResultAction
     /* (non-Javadoc)
      * @see hudson.tasks.test.AbstractTestResultAction#getTotalCount()
      */
-    @Override
     @Exported(visibility = 2)
     public int getTotalCount() {
         return tapResult.getTotal();
@@ -97,7 +104,6 @@ public class TapTestResultAction
     /* (non-Javadoc)
      * @see hudson.tasks.test.AbstractTestResultAction#getSkipCount()
      */
-    @Override
     @Exported(visibility = 2)
     public int getSkipCount() {
         return tapResult.getSkipped();
@@ -106,9 +112,7 @@ public class TapTestResultAction
     /* (non-Javadoc)
      * @see hudson.tasks.test.AbstractTestResultAction#getFailedTests()
      */
-    @Override
     public List<CaseResult> getFailedTests() {
-        //throw new AssertionError("Not supposed to be called");
         return Collections.emptyList();
     }
     
@@ -120,11 +124,6 @@ public class TapTestResultAction
         return getResult();
     }
     
-    /*
-     * (non-Javadoc)
-     * @see hudson.tasks.test.AbstractTestResultAction#getResult()
-     */
-    @Override
     public TapStreamResult getResult() {
         return new TapStreamResult(owner, tapResult);
     }
@@ -138,9 +137,15 @@ public class TapTestResultAction
         return "tapTestReport";
     }
 
+
+    @Override
+    public String getIconFileName() {
+        return "clipboard.png";
+    }
+
     /* (non-Javadoc)
-     * @see hudson.tasks.test.AbstractTestResultAction#getDisplayName()
-     */
+         * @see hudson.tasks.test.AbstractTestResultAction#getDisplayName()
+         */
     @Override
     public String getDisplayName() {
         return "TAP Test Results";
@@ -157,6 +162,38 @@ public class TapTestResultAction
             return Collections.emptySet();
         }
         return Collections.singleton(new TapProjectAction(job));
+    }
+
+    @Override
+    public HealthReport getBuildHealth() {
+        final double scaleFactor = 1.0;
+        final int totalCount = getTotalCount();
+        final int failCount = getFailCount();
+        int score = (totalCount == 0)
+                ? 100
+                : (int) (100.0 * Math.max(0.0, Math.min(1.0, 1.0 - (scaleFactor * failCount) / totalCount)));
+        Localizable description, displayName = Messages._AbstractTestResultAction_getDisplayName();
+        if (totalCount == 0) {
+            description = Messages._AbstractTestResultAction_zeroTestDescription(displayName);
+        } else {
+            description = Messages._AbstractTestResultAction_TestsDescription(displayName, failCount, totalCount);
+        }
+        return new HealthReport(score, description);
+    }
+
+    @Override
+    public void onAttached(Run<?, ?> r) {
+        setRunAndOwner(r);
+    }
+
+    @Override
+    public void onLoad(Run<?, ?> r) {
+        setRunAndOwner(r);
+    }
+
+    private void setRunAndOwner(Run<?, ?> r) {
+        this.run = r;
+        this.owner = r instanceof AbstractBuild ? (AbstractBuild<?,?>) r : null;
     }
 
     void mergeResult(TapResult additionalResult) {

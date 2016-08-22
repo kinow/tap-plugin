@@ -24,7 +24,6 @@
 package org.tap4j.plugin;
 
 import hudson.matrix.MatrixProject;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Job;
 import hudson.model.Run;
@@ -93,7 +92,7 @@ public class TapProjectAction extends AbstractTapProjectAction {
 
     public TapBuildAction getLastBuildAction() {
         TapBuildAction action = null;
-        final AbstractBuild<?, ?> lastBuild = this.getLastBuildWithTap();
+        final Run<?, ?> lastBuild = this.getLastBuildWithTap();
 
         if (lastBuild != null) {
             action = lastBuild.getAction(TapBuildAction.class);
@@ -105,8 +104,8 @@ public class TapProjectAction extends AbstractTapProjectAction {
     /**
      * @return
      */
-    private AbstractBuild<?, ?> getLastBuildWithTap() {
-        AbstractBuild<?, ?> lastBuild = this.project.getLastBuild();
+    private Run<?, ?> getLastBuildWithTap() {
+        Run<?, ?> lastBuild = this.job.getLastBuild();
         while (lastBuild != null && lastBuild.getAction(TapBuildAction.class) == null) {
             lastBuild = lastBuild.getPreviousBuild();
         }
@@ -115,7 +114,7 @@ public class TapProjectAction extends AbstractTapProjectAction {
 
     public void doIndex( final StaplerRequest request,
             final StaplerResponse response ) throws IOException {
-        AbstractBuild<?, ?> lastBuild = this.getLastBuildWithTap();
+        Run<?, ?> lastBuild = this.getLastBuildWithTap();
         if (lastBuild == null) {
             response.sendRedirect2("nodata");
         } else {
@@ -169,17 +168,16 @@ public class TapProjectAction extends AbstractTapProjectAction {
      * @return value for property 'graphAvailable'
      */
     public boolean isGraphActive() {
-        AbstractBuild<?, ?> build = getProject().getLastBuild();
-        AbstractProject<?,?> p = getProject();
+        Run<?, ?> build = this.job.getLastBuild();
         // in order to have a graph, we must have at least two points.
         int numPoints = 0;
         while (numPoints < 2) {
             if (build == null) {
                 return false;
             }
-            if( p instanceof MatrixProject )
+            if( this.job instanceof MatrixProject )
             {
-                MatrixProject mp = (MatrixProject) p;
+                MatrixProject mp = (MatrixProject) this.job;
  
                 for (Job j : mp.getAllJobs()) {
                    if (j != mp) { //getAllJobs includes the parent job too, so skip that
@@ -215,10 +213,10 @@ public class TapProjectAction extends AbstractTapProjectAction {
      * @return true, if new image does NOT need to be generated, false otherwise
      */
     private boolean newGraphNotNeeded( final StaplerRequest req, StaplerResponse rsp ) {
-        Calendar t = getProject().getLastCompletedBuild().getTimestamp();
+        Calendar t = this.job.getLastCompletedBuild().getTimestamp();
         Integer prevNumBuilds = requestMap.get(req.getRequestURI());
         int numBuilds = 0;
-        RunList<?> builds = getProject().getBuilds();
+        RunList<?> builds = this.job.getBuilds();
         Iterator<?> it = builds.iterator();
         while (it.hasNext()) {
             it.next();
@@ -248,10 +246,10 @@ public class TapProjectAction extends AbstractTapProjectAction {
 
     protected void populateDataSetBuilder(DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel> dataset ) {
 
-        AbstractProject<?, ?> p = getProject();
+        Job<?, ?> p = this.job;
         
-        for (Run<?, ?> build = getProject().getLastBuild(); build != null; build = build.getPreviousBuild()) {
-            ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel((Run<?, ?>) build);
+        for (Run<?, ?> build = this.job.getLastBuild(); build != null; build = build.getPreviousBuild()) {
+            ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel((Run) build);
 
             Result r = new Result();
             

@@ -121,14 +121,14 @@ public class GraphHelper
         @Override
         public String generateURL(CategoryDataset dataset, int row, int column) {
             NumberOnlyBuildLabel label = (NumberOnlyBuildLabel) dataset.getColumnKey(column);
-            return  label.build.getNumber() + "/" + AbstractTapProjectAction.URL_NAME + "/";
+            return  label.getRun().getNumber() + "/" + AbstractTapProjectAction.URL_NAME + "/";
         }
 
           @Override
         public String generateToolTip(CategoryDataset dataset, int row, int column) 
         {
               NumberOnlyBuildLabel label = (NumberOnlyBuildLabel) dataset.getColumnKey(column);
-              TapBuildAction build = label.build.getAction(TapBuildAction.class);
+              TapBuildAction build = label.getRun().getAction(TapBuildAction.class);
               TapResult report = build.getResult();
               report.tally();
 
@@ -276,7 +276,7 @@ public class GraphHelper
                     return null;
                 }
                 // return label.build.getUpUrl() + label.build.getNumber() + "/" + PluginImpl.URL + "/" + methodUrl;
-                return label.build.getUpUrl() + label.build.getNumber() + "/tap/" + methodUrl;
+                return label.build.getUpUrl() + label.getRun().getNumber() + "/tap/" + methodUrl;
             }
         });
 
