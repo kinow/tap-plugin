@@ -23,14 +23,6 @@
  */
 package org.tap4j.plugin;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import org.kohsuke.stapler.StaplerProxy;
-import org.kohsuke.stapler.export.Exported;
-import org.tap4j.plugin.model.TapStreamResult;
-
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
@@ -39,6 +31,13 @@ import hudson.model.Run;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
 import jenkins.tasks.SimpleBuildStep;
+import org.kohsuke.stapler.StaplerProxy;
+import org.kohsuke.stapler.export.Exported;
+import org.tap4j.plugin.model.TapStreamResult;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 
 /**
@@ -170,78 +169,3 @@ public class TapTestResultAction
         this.tapResult = result.getTapResult();
     }
 }
-
-class EmptyTapTestResultAction extends TapTestResultAction { 
-    
-    private final AbstractBuild<?, ?> owner;
-    
-    /**
-     * @param owner
-     */
-    protected EmptyTapTestResultAction(AbstractBuild<?, ?> owner) {
-        super(owner, null);
-        this.owner = owner;
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see org.tap4j.plugin.TapTestResultAction#getOwner()
-     */
-    public AbstractBuild<?, ?> getOwner() {
-        return owner;
-    }
-    
-    /* (non-Javadoc)
-     * @see hudson.tasks.test.AbstractTestResultAction#getFailCount()
-     */
-    @Override
-    @Exported(visibility = 2)
-    public int getFailCount() {
-        return 0;
-    }
-
-    /* (non-Javadoc)
-     * @see hudson.tasks.test.AbstractTestResultAction#getTotalCount()
-     */
-    @Override
-    @Exported(visibility = 2)
-    public int getTotalCount() {
-        return 0;
-    }
-    
-    /* (non-Javadoc)
-     * @see hudson.tasks.test.AbstractTestResultAction#getSkipCount()
-     */
-    @Override
-    @Exported(visibility = 2)
-    public int getSkipCount() {
-        return 0;
-    }
-
-    /* (non-Javadoc)
-     * @see hudson.tasks.test.AbstractTestResultAction#getFailedTests()
-     */
-    @Override
-    public List<CaseResult> getFailedTests() {
-        //throw new AssertionError("Not supposed to be called");
-        return Collections.emptyList();
-    }
-    
-    /* (non-Javadoc)
-     * @see hudson.tasks.test.AbstractTestResultAction#getUrlName()
-     */
-    @Override
-    @Exported(visibility = 2)
-    public String getUrlName() {
-        return "tapTestReport";
-    }
-
-    /* (non-Javadoc)
-     * @see hudson.tasks.test.AbstractTestResultAction#getDisplayName()
-     */
-    @Override
-    public String getDisplayName() {
-        return "TAP Test Results";
-    }
-}
-
