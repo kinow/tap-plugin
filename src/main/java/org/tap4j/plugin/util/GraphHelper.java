@@ -27,13 +27,6 @@ import hudson.util.ChartUtil.NumberOnlyBuildLabel;
 import hudson.util.ColorPalette;
 import hudson.util.ShiftedCategoryAxis;
 import hudson.util.StackedAreaRenderer2;
-
-import java.awt.Color;
-import java.awt.Paint;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
@@ -54,6 +47,11 @@ import org.kohsuke.stapler.StaplerResponse;
 import org.tap4j.plugin.AbstractTapProjectAction;
 import org.tap4j.plugin.TapBuildAction;
 import org.tap4j.plugin.TapResult;
+
+import java.awt.*;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Helper class for trend graph generation. 
