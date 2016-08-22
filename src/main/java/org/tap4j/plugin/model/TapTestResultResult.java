@@ -101,11 +101,9 @@ public class TapTestResultResult extends TestResult {
         TestSet testSet = this.tapTestResult.getSubtest();
         if(testSet != null) {
             TestSetMap subTest = new TestSetMap(testSetMap.getFileName(), testSet);
-            if(subTest != null) {
-                List<TestSetMap> list = new ArrayList<TestSetMap>();
-                list.add(subTest);
-                parent = new TapStreamResult(owner, new TapResult("TAP Test Results", owner, list, todoIsFailure, includeCommentDiagnostics, validateNumberOfTests));
-            }
+            List<TestSetMap> list = new ArrayList<TestSetMap>();
+            list.add(subTest);
+            parent = new TapStreamResult(owner, new TapResult("TAP Test Results", owner, list, todoIsFailure, includeCommentDiagnostics, validateNumberOfTests));
         }
         return parent;
     }
@@ -279,16 +277,16 @@ public class TapTestResultResult extends TestResult {
         StringWriter pw = new StringWriter();
         pw.append(tapTestResult.getStatus().toString());
         if (tapTestResult.getTestNumber() != null) {
-            pw.append(' ' + Integer.toString(tapTestResult.getTestNumber()));
+            pw.append(' ').append(Integer.toString(tapTestResult.getTestNumber()));
         }
         if (StringUtils.isNotBlank(tapTestResult.getDescription())) {
-            pw.append(' ' + tapTestResult.getDescription());
+            pw.append(' ').append(tapTestResult.getDescription());
         }
         if (tapTestResult.getDirective() != null) {
-            pw.append(" # "
-                    + tapTestResult.getDirective().getDirectiveValue().toString());
+            pw.append(" # ").append(
+                    tapTestResult.getDirective().getDirectiveValue().toString());
             if (StringUtils.isNotBlank(tapTestResult.getDirective().getReason())) {
-                pw.append(' ' + tapTestResult.getDirective().getReason());
+                pw.append(' ').append(tapTestResult.getDirective().getReason());
             }
         }
         List<Comment> comments = tapTestResult.getComments();
@@ -296,10 +294,10 @@ public class TapTestResultResult extends TestResult {
             for(Comment comment : comments) {
                 if(comment.isInline()) {
                     pw.append(' ');
-                    pw.append("# " + comment.getText());
+                    pw.append("# ").append(comment.getText());
                 } else {
                     pw.append("\n");
-                    pw.append("# " + comment.getText());
+                    pw.append("# ").append(comment.getText());
                 }
             }
         }
