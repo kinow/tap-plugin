@@ -249,6 +249,17 @@ public class TapProjectAction extends AbstractTapProjectAction {
         Job<?, ?> p = this.job;
         
         for (Run<?, ?> build = this.job.getLastBuild(); build != null; build = build.getPreviousBuild()) {
+
+            /*
+             * The build has most likely failed before any TAP data was recorded.
+             *
+             * If we don't exclude such builds, we'd have to account for that in GraphHelper. Besides that, it's not
+             * consistent with JUnit graph behaviour where builds without test results are not included in graph.
+             */
+            if (build.getAction(TapBuildAction.class) == null) {
+                continue;
+            }
+
             ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel((Run) build);
 
             Result r = new Result();
