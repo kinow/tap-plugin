@@ -68,10 +68,25 @@ import jenkins.tasks.SimpleBuildStep;
  */
 public class TapPublisher extends Recorder implements MatrixAggregatable, SimpleBuildStep {
 
+    /**
+     * TAP ant-pattern to find reports
+     */
     private final String testResults;
+    /**
+     * Fail the job, if there are no files matching the ant-pattern
+     */
     private final Boolean failIfNoResults;
+    /**
+     * If there is a failed test, the build is marked as failure.
+     */
     private final Boolean failedTestsMarkBuildAsFailure;
+    /**
+     * Output the TAP streams found, to the build console
+     */
     private final Boolean outputTapToConsole;
+    /**
+     * Enable subtests (experimental, WIP)
+     */
     private final Boolean enableSubtests;
     private final Boolean discardOldReports;
     private final Boolean todoIsFailure;
@@ -82,6 +97,9 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
     private final Boolean showOnlyFailures;
     private final Boolean stripSingleParents;
     private final Boolean flattenTapResult;
+    /**
+     * Skip the publisher if the build status is not OK (worse than unstable)
+     */
     private final Boolean skipIfBuildNotOk;
 
     @Deprecated
