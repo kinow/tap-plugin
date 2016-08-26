@@ -7,8 +7,8 @@
       <f:checkbox name="TapPublisher.verbose" value="${instance.verbose}" checked="${instance.verbose}" default="true" />
   </f:entry>
   <f:advanced>
-      <f:entry title="Fail the build if no test results are present">
-          <f:checkbox name="TapPublisher.failIfNoResults" value="${instance.failIfNoResults}" checked="${instance.failIfNoResults}" />
+      <f:entry title="Fail the build if no test results (files) are found" help="/plugin/tap/help/TapPublisher/help-failIfNoResults.html">
+          <f:checkbox name="TapPublisher.failIfNoResults" value="${instance.failIfNoResults}" checked="${instance.failIfNoResults}"/>
       </f:entry>
       <f:entry title="Failed tests mark build as failure">
           <f:checkbox name="TapPublisher.failedTestsMarkBuildAsFailure" value="${instance.failedTestsMarkBuildAsFailure}" checked="${instance.failedTestsMarkBuildAsFailure}" />
