@@ -67,7 +67,7 @@ import jenkins.tasks.SimpleBuildStep;
  * @since 1.0
  */
 public class TapPublisher extends Recorder implements MatrixAggregatable, SimpleBuildStep {
-    
+
     private final String testResults;
     private final Boolean failIfNoResults;
     private final Boolean failedTestsMarkBuildAsFailure;
@@ -82,6 +82,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
     private final Boolean showOnlyFailures;
     private final Boolean stripSingleParents;
     private final Boolean flattenTapResult;
+    private final Boolean skipIfBuildNotOk;
 
     @Deprecated
     public TapPublisher(String testResults,
@@ -140,7 +141,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
                 Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
     }
 
-    @DataBoundConstructor
+    @Deprecated
     public TapPublisher(String testResults,
             Boolean failIfNoResults,
             Boolean failedTestsMarkBuildAsFailure,
@@ -155,6 +156,28 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
             Boolean showOnlyFailures,
             Boolean stripSingleParents,
             Boolean flattenTapResult) {
+        this(testResults, failIfNoResults, failedTestsMarkBuildAsFailure,
+                outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure,
+                includeCommentDiagnostics, validateNumberOfTests, planRequired, verbose,
+                showOnlyFailures, stripSingleParents, flattenTapResult, Boolean.FALSE);
+    }
+
+    @DataBoundConstructor
+    public TapPublisher(String testResults,
+            Boolean failIfNoResults,
+            Boolean failedTestsMarkBuildAsFailure,
+            Boolean outputTapToConsole,
+            Boolean enableSubtests,
+            Boolean discardOldReports,
+            Boolean todoIsFailure,
+            Boolean includeCommentDiagnostics,
+            Boolean validateNumberOfTests,
+            Boolean planRequired,
+            Boolean verbose,
+            Boolean showOnlyFailures,
+            Boolean stripSingleParents,
+            Boolean flattenTapResult,
+            Boolean skipIfBuildNotOk) {
 
         this.testResults = testResults;
         this.failIfNoResults = BooleanUtils.toBooleanDefaultIfNull(failIfNoResults, false);
@@ -170,6 +193,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         this.showOnlyFailures = BooleanUtils.toBooleanDefaultIfNull(showOnlyFailures, false);
         this.stripSingleParents = BooleanUtils.toBooleanDefaultIfNull(stripSingleParents, false);
         this.flattenTapResult = BooleanUtils.toBooleanDefaultIfNull(flattenTapResult, false);
+        this.skipIfBuildNotOk = BooleanUtils.toBooleanDefaultIfNull(skipIfBuildNotOk, false);
     }
 
     public Object readResolve() {
@@ -282,6 +306,10 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         return flattenTapResult;
     }
 
+    public Boolean getSkipIfBuildNotOk() {
+        return skipIfBuildNotOk;
+    }
+
     /**
      * Gets the directory where the plug-in saves its TAP streams before processing them and
      * displaying in the UI.
@@ -316,7 +344,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
      */
     @Override
     public void perform(
-            @Nonnull Run run,
+            @Nonnull Run<?, ?> run,
             @Nonnull FilePath workspace,
             @Nonnull Launcher launcher,
             @Nonnull TaskListener listener)
@@ -325,112 +353,136 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         performImpl(run, workspace, listener);
     }
 
-    private boolean performImpl(Run build, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
-        PrintStream logger = listener.getLogger();
-        logger.println("TAP Reports Processing: START");
-
-        EnvVars envVars = build.getEnvironment(listener);
-        String antPattern = Util.replaceMacro(this.testResults, envVars);
-        logger.println("Looking for TAP results report in workspace using pattern: " + antPattern);
-
-        FilePath[] reports = locateReports(workspace, antPattern);
-
-        /*
-         * filter out the reports based on timestamps. See JENKINS-12187
-         */
-        if (this.getDiscardOldReports()) {
-            reports = checkReports(build, reports, logger);
-        }
-
-        if (reports.length == 0) {
-            if(this.getFailIfNoResults()) {
-                logger.println("Did not find any matching files. Setting build result to FAILURE.");
-                build.setResult(Result.FAILURE);
-                return Boolean.FALSE;
-            } else {
-                logger.println("Did not find any matching files.");
-                // build can still continue
+    private boolean performImpl(Run<?, ?> build, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
+        final PrintStream logger = listener.getLogger();
+        if (isPerformPublisher(build)) {
+            logger.println("TAP Reports Processing: START");
+    
+            EnvVars envVars = build.getEnvironment(listener);
+            String antPattern = Util.replaceMacro(this.testResults, envVars);
+            logger.println("Looking for TAP results report in workspace using pattern: " + antPattern);
+    
+            FilePath[] reports = locateReports(workspace, antPattern);
+    
+            /*
+             * filter out the reports based on timestamps. See JENKINS-12187
+             */
+            if (this.getDiscardOldReports()) {
+                reports = checkReports(build, reports, logger);
+            }
+    
+            if (reports.length == 0) {
+                if(this.getFailIfNoResults()) {
+                    logger.println("Did not find any matching files. Setting build result to FAILURE.");
+                    build.setResult(Result.FAILURE);
+                    return Boolean.FALSE;
+                } else {
+                    logger.println("Did not find any matching files.");
+                    // build can still continue
+                    return Boolean.TRUE;
+                }
+            }
+    
+            boolean filesSaved = saveReports(workspace, TapPublisher.getReportsDirectory(build), reports, logger);
+            if (!filesSaved) {
+                logger.println("Failed to save TAP reports");
                 return Boolean.TRUE;
             }
-        }
-
-        boolean filesSaved = saveReports(workspace, TapPublisher.getReportsDirectory(build), reports, logger);
-        if (!filesSaved) {
-            logger.println("Failed to save TAP reports");
-            return Boolean.TRUE;
-        }
-
-        TapResult testResult = null;
-        try {
-            testResult = loadResults(antPattern, build, logger);
-            testResult.setShowOnlyFailures(this.getShowOnlyFailures());
-            testResult.tally();
-        } catch (Throwable t) {
-            /*
-             * don't fail build if TAP parser barfs. only print out the
-             * exception to console.
-             */
-            t.printStackTrace(logger);
-        }
-
-        TapTestResultAction trAction = build.getAction(TapTestResultAction.class);
-        boolean appending;
-
-        if (trAction == null) {
-            appending = false;
-            trAction = new TapTestResultAction(build, testResult);
-        } else {
-            appending = true;
-            trAction.mergeResult(testResult);
-        }
-
-        if (!appending) {
-            build.addAction(trAction);
-        }
-
-        if (testResult.getTestSets().size() > 0 || testResult.getParseErrorTestSets().size() > 0) {
-            // create an individual report for all of the results and add it to
-            // the build
-
-            TapBuildAction action = build.getAction(TapBuildAction.class);
-            if (action == null) {
-                action = new TapBuildAction(build, testResult);
-                build.addAction(action);
+    
+            TapResult testResult = null;
+            try {
+                testResult = loadResults(antPattern, build, logger);
+                testResult.setShowOnlyFailures(this.getShowOnlyFailures());
+                testResult.tally();
+            } catch (Throwable t) {
+                /*
+                 * don't fail build if TAP parser barfs. only print out the
+                 * exception to console.
+                 */
+                t.printStackTrace(logger);
+            }
+    
+            TapTestResultAction trAction = build.getAction(TapTestResultAction.class);
+            boolean appending;
+    
+            if (trAction == null) {
+                appending = false;
+                trAction = new TapTestResultAction(build, testResult);
             } else {
                 appending = true;
-                action.mergeResult(testResult);
+                trAction.mergeResult(testResult);
             }
-
-            if (testResult.hasParseErrors()) {
-                listener.getLogger().println("TAP parse errors found in the build. Marking build as UNSTABLE");
-                build.setResult(Result.UNSTABLE);
+    
+            if (!appending) {
+                build.addAction(trAction);
             }
-            if (this.getValidateNumberOfTests()) {
-                if (!this.validateNumberOfTests(testResult.getTestSets())) {
-                    listener.getLogger().println("Not all test cases were executed according to the test set plan. Marking build as UNSTABLE");
-                    build.setResult(Result.UNSTABLE);
-                }
-            }
-            if (testResult.getFailed() > 0) {
-                if(this.getFailedTestsMarkBuildAsFailure()) {
-                    listener.getLogger().println("There are failed test cases and the job is configured to mark the build as failure. Marking build as FAILURE");
-                    build.setResult(Result.FAILURE);
+    
+            if (testResult.getTestSets().size() > 0 || testResult.getParseErrorTestSets().size() > 0) {
+                // create an individual report for all of the results and add it to
+                // the build
+    
+                TapBuildAction action = build.getAction(TapBuildAction.class);
+                if (action == null) {
+                    action = new TapBuildAction(build, testResult);
+                    build.addAction(action);
                 } else {
-                    listener.getLogger().println("There are failed test cases. Marking build as UNSTABLE");
+                    appending = true;
+                    action.mergeResult(testResult);
+                }
+    
+                if (testResult.hasParseErrors()) {
+                    listener.getLogger().println("TAP parse errors found in the build. Marking build as UNSTABLE");
                     build.setResult(Result.UNSTABLE);
                 }
+                if (this.getValidateNumberOfTests()) {
+                    if (!this.validateNumberOfTests(testResult.getTestSets())) {
+                        listener.getLogger().println("Not all test cases were executed according to the test set plan. Marking build as UNSTABLE");
+                        build.setResult(Result.UNSTABLE);
+                    }
+                }
+                if (testResult.getFailed() > 0) {
+                    if(this.getFailedTestsMarkBuildAsFailure()) {
+                        listener.getLogger().println("There are failed test cases and the job is configured to mark the build as failure. Marking build as FAILURE");
+                        build.setResult(Result.FAILURE);
+                    } else {
+                        listener.getLogger().println("There are failed test cases. Marking build as UNSTABLE");
+                        build.setResult(Result.UNSTABLE);
+                    }
+                }
+    
+                if (appending) {
+                    build.save();
+                }
+    
+            } else {
+                logger.println("Found matching files but did not find any TAP results.");
+                return Boolean.TRUE;
             }
-
-            if (appending) {
-                build.save();
-            }
-
+            logger.println("TAP Reports Processing: FINISH");
         } else {
-            logger.println("Found matching files but did not find any TAP results.");
-            return Boolean.TRUE;
+            logger.println("Build result is not better or equal unstable. Skipping TAP publisher.");
         }
-        logger.println("TAP Reports Processing: FINISH");
         return Boolean.TRUE;
+    }
+
+    /**
+     * Return {@code true} if the build is ongoing, if the user did not ask to fail when
+     * failed, or otherwise if the build result is not better or equal to unstable.
+     * @param build Run
+     * @return whether to perform the publisher or not, based on user provided configuration
+     */
+    private boolean isPerformPublisher(Run<?, ?> build) {
+        Result result = build.getResult();
+        // may be null if build is ongoing
+        if (result == null) {
+            return true;
+        }
+
+        if (!getSkipIfBuildNotOk()) {
+            return true;
+        }
+
+        return result.isBetterOrEqualTo(Result.UNSTABLE);
     }
 
     /**
