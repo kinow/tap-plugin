@@ -77,7 +77,7 @@
             <id>kinow</id>
             <name>Bruno P. Kinoshita</name>
             <email>brunodepaulak@yahoo.com.br</email>
-            <timezone>-3</timezone>
+            <timezone>+12</timezone>
             <roles>
                 <role>Developer</role>
             </roles>
