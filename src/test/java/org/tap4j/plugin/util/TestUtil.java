@@ -23,7 +23,7 @@
  */
 package org.tap4j.plugin.util;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 

@@ -166,7 +166,8 @@ public class TestFlattenTapResult extends HudsonTestCase {
                 false, // verbose
                 true,  // showOnlyFailures
                 false, // stripSingleParents
-                true); // flattenTapResult
+                true, // flattenTapResult
+                false); //skipIfBuildNotOk
 
         project.getPublishersList().add(publisher);
         project.save();

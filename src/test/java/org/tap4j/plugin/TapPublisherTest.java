@@ -69,6 +69,7 @@ public class TapPublisherTest {
                 true,
                 true,
                 false,
+                false,
                 false
         );
         archiver2 = new TapPublisher(
@@ -82,6 +83,7 @@ public class TapPublisherTest {
                 true,
                 true,
                 true,
+                false,
                 false,
                 false
         );
