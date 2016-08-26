@@ -55,6 +55,8 @@
         <jdk.target>1.7</jdk.target>
         <jdk.debug>true</jdk.debug>
         <jdk.optimize>false</jdk.optimize>
+        <tap4j.version>4.2.0</tap4j.version>
+        <junit.plugin.version>1.6</junit.plugin.version>
     </properties>
 
     <issueManagement>
@@ -90,21 +92,25 @@
     </scm>
 
     <dependencies>
+        <!-- The TAP parser -->
         <dependency>
             <groupId>org.tap4j</groupId>
             <artifactId>tap4j</artifactId>
-            <version>4.2.0</version>
+            <version>${tap4j.version}</version>
         </dependency>
+        <!-- For handling matrix jobs -->
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>matrix-project</artifactId>
             <version>1.4</version>
         </dependency>
+        <!-- For JUnit test results UI compatibility -->
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>junit</artifactId>
-            <version>1.6</version>
+            <version>${junit.plugin.version}</version>
         </dependency>
+        <!-- Test -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
