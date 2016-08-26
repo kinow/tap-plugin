@@ -43,5 +43,8 @@
       <f:entry title="Flatten TAP result">
           <f:checkbox name="TapPublisher.flattenTapResult" value="${instance.flattenTapResult}" checked="${instance.flattenTapResult}" default="false" />
       </f:entry>
+      <f:entry title="Skip if build not successful" help="/plugin/tap/help/TapPublisher/help-skipIfBuildNotOk.html">
+          <f:checkbox name="TapPublisher.skipIfBuildNotOk" value="${instance.skipIfBuildNotOk}" checked="${instance.skipIfBuildNotOk}" default="false" />
+      </f:entry>
   </f:advanced>
 </j:jelly>
