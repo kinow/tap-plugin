@@ -60,7 +60,7 @@ public class TapTestResultAction
 
 
     /**
-     * @param r
+     * @param owner
      * @param tapResult
      */
     @Deprecated

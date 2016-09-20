@@ -41,6 +41,7 @@ import org.tap4j.plugin.TapTestResultAction;
 import org.tap4j.plugin.util.Util;
 import org.tap4j.util.DirectiveValues;
 
+import javax.annotation.CheckForNull;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -311,6 +312,7 @@ public class TapTestResultResult extends TestResult {
      *
      * @return associated TAP test result action object
      */
+    @CheckForNull
     private TapTestResultAction getTestResultActionDiverged() {
         Run<?, ?> owner = getRun();
         if (owner != null) {

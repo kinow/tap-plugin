@@ -20,8 +20,8 @@
 	<parent>
 		<groupId>org.jenkins-ci.plugins</groupId>
 		<artifactId>plugin</artifactId>
-		<version>1.637</version><!-- which version of Jenkins is this plugin
-			built against? -->
+		<!-- First LTS which includes OptionalJobProperty. -->
+		<version>1.642.1</version>
 	</parent>
 
 	<inceptionYear>2011</inceptionYear>
