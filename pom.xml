@@ -62,7 +62,7 @@
         <jdk.target>1.7</jdk.target>
         <jdk.debug>true</jdk.debug>
         <jdk.optimize>false</jdk.optimize>
-        <tap4j.version>4.2.0</tap4j.version>
+        <tap4j.version>4.2.1</tap4j.version>
         <junit.plugin.version>1.6</junit.plugin.version>
     </properties>
 
