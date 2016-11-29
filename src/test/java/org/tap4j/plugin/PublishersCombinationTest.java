@@ -25,7 +25,7 @@ package org.tap4j.plugin;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import hudson.model.Project;
-import org.junit.Before;
+import hudson.model.TopLevelItem;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
@@ -37,18 +37,13 @@ public class PublishersCombinationTest {
 
     @Rule
     public JenkinsRule rule = new JenkinsRule();
-    private Project project;
-
-    @Before
-    public void setUp() throws Exception {
-
-        project = (Project) rule.jenkins.getItem("multiPublish");
-    }
 
     @Issue("JENKINS-29649")
     @LocalData
     @Test
-    public void combinedWithJunit() throws Exception {
+    public void combinedWithJunitBasic() throws Exception {
+
+        Project project = (Project) rule.jenkins.getItem("multiPublish");
 
         // Validate that there are test results where I expect them to be:
         JenkinsRule.WebClient wc = rule.createWebClient();
@@ -56,11 +51,28 @@ public class PublishersCombinationTest {
         // On the project page:
         HtmlPage projectPage = wc.getPage(project);
 
-        assertJunitPart(projectPage);
-        assertTapPart(projectPage);
+        assertJunitPart(projectPage, 3, 4);
+        assertTapPart(projectPage, 3);
     }
 
-    private void assertJunitPart(HtmlPage page) {
+    @Issue("JENKINS-29649")
+    @LocalData
+    @Test
+    public void combinedWithJunitPipeline() throws Exception {
+
+        TopLevelItem project = rule.jenkins.getItem("testPipeline");
+
+        // Validate that there are test results where I expect them to be:
+        JenkinsRule.WebClient wc = rule.createWebClient();
+
+        // On the project page:
+        HtmlPage projectPage = wc.getPage(project);
+
+        assertJunitPart(projectPage, 15, 7);
+        assertTapPart(projectPage, 15);
+    }
+
+    private void assertJunitPart(HtmlPage page, int buildNumber, int testsTotal) {
 
         //      we should have a link that reads "Latest Test Result"
         //      that link should go to http://localhost:8080/job/breakable/lastBuild/testReport/
@@ -72,15 +84,18 @@ public class PublishersCombinationTest {
         rule.assertXPath(page, "//img[@src='test/trend']");
 
         //      superficially assert that the number of tests was correct
-        rule.assertXPath(page, "//area[@title='#3: 4 tests' and @href='3/testReport/']");
+        rule.assertXPath(
+                page,
+                String.format("//area[@title='#%1$s: %2$s tests' and @href='%1$s/testReport/']", buildNumber, testsTotal)
+        );
     }
 
-    private void assertTapPart(HtmlPage page) {
+    private void assertTapPart(HtmlPage page, int buildNumber) {
 
         //      there should be a TAP result trend graph
         rule.assertXPath(page, "//img[@src='tapResults/graph']");
 
         //      superficially assert that the number of tests was correct
-        rule.assertXPath(page, "//area[@title='1 Skip(s)' and @href='3/tapResults/']");
+        rule.assertXPath(page, String.format("//area[@title='1 Skip(s)' and @href='%s/tapResults/']", buildNumber));
     }
 }

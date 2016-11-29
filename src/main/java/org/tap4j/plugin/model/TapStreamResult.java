@@ -23,7 +23,7 @@
  */
 package org.tap4j.plugin.model;
 
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.TabulatedResult;
 import hudson.tasks.test.TestObject;
@@ -49,11 +49,11 @@ import java.util.List;
 public class TapStreamResult extends TabulatedResult {
 
     private static final long serialVersionUID = 8337146933697574082L;
-    private final AbstractBuild<?, ?> owner;
+    private final Run<?, ?> owner;
     private List<TestResult> children = new ArrayList<TestResult>();
     private TapResult tapResult;
 
-    public TapStreamResult(AbstractBuild<?, ?> owner, TapResult tapResult) {
+    public TapStreamResult(Run<?, ?> owner, TapResult tapResult) {
         this.owner = owner;
         this.tapResult = tapResult;
         setChildrenInfo();
@@ -70,7 +70,7 @@ public class TapStreamResult extends TabulatedResult {
      * @see hudson.tasks.test.TestObject#getOwner()
      */
     @Override
-    public AbstractBuild<?, ?> getOwner() {
+    public Run<?, ?> getRun() {
         return owner;
     }
 
