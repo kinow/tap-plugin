@@ -69,6 +69,16 @@ public final class Util {
         return r;
     }
 
+    public static boolean isTodo(TestResult testResult) {
+        boolean r = false;
+        Directive directive = testResult.getDirective();
+        if (directive != null
+                && directive.getDirectiveValue() == DirectiveValues.TODO) {
+            r = true;
+        }
+        return r;
+    }
+
     public static boolean isFailure(TestResult testResult, Boolean todoIsFailure) {
         boolean r = false;
         Directive directive = testResult.getDirective();

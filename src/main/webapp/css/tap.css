@@ -1,5 +1,7 @@
 /* TAP Plug-in CSS styles */
 
+.cyan { background-color: #00FFFF; }
+.cyan_text { color: #00FFFF; }
 .green { background-color: #97f477; }
 .green_text { color: #97f477; }
 .red { background-color: #f88676; }

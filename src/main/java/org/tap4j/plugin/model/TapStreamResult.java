@@ -133,6 +133,10 @@ public class TapStreamResult extends TabulatedResult {
         return tapResult.getSkipped();
     }
 
+    public int getToDoCount() {
+        return tapResult.getToDo();
+    }
+
     /* (non-Javadoc)
      * @see hudson.tasks.test.AbstractTestResultAction#getFailedTests()
      */
