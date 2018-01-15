@@ -1,0 +1,13 @@
+# Whitelists safe classes from https://github.com/tupilabs/tap4j
+# TODO: patch the library?
+org.tap4j.model.BailOut
+org.tap4j.model.Comment
+org.tap4j.model.Directive
+org.tap4j.model.Footer
+org.tap4j.model.Header
+org.tap4j.model.Plan
+org.tap4j.model.SkipPlan
+org.tap4j.model.TapElement
+org.tap4j.model.TapResult
+org.tap4j.model.TestResult
+org.tap4j.model.TestSet
