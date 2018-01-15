@@ -23,28 +23,27 @@
  */
 package org.tap4j.plugin.model;
 
-
 /**
  * A test set map that failed to parse.
- * 
+ *
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.2.8
  */
 public class ParseErrorTestSetMap extends TestSetMap {
 
     private static final long serialVersionUID = 6433486962160499201L;
-    
+
     private final Throwable cause;
-    
+
     /**
-     * @param fileName
-     * @param testSet
+     * @param fileName TAP file name
+     * @param cause {@link Throwable} that caused the TAP parse error
      */
     public ParseErrorTestSetMap(String fileName, Throwable cause) {
         super(fileName, null);
         this.cause = cause;
     }
-    
+
     /**
      * @return the cause
      */

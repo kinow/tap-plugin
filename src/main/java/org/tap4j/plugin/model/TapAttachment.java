@@ -26,7 +26,6 @@ package org.tap4j.plugin.model;
 import java.util.Map;
 
 /**
- * 
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 0.1
  */
@@ -38,25 +37,22 @@ public class TapAttachment {
     private final String fileType;
 
     /**
-     * @param fileName
-     * @param content
-     * @param size
-     * @param fileType
+     * @param fileName TAP file name
+     * @param content byte content
+     * @param size attachment size
+     * @param fileType file mime type
      */
-    public TapAttachment(String fileName, byte[] content, int size,
-            String fileType) {
+    public TapAttachment(String fileName, byte[] content, int size, String fileType) {
         super();
         this.fileName = fileName;
         this.content = content;
         this.size = size;
         this.fileType = fileType;
     }
-    
+
     /**
-     * @param fileName
-     * @param content
-     * @param size
-     * @param fileType
+     * @param content byte content
+     * @param diagnostics TAP diagnostics
      */
     public TapAttachment(byte[] content, Map<String, Object> diagnostics) {
         super();
@@ -64,17 +60,18 @@ public class TapAttachment {
         int size = -1;
         String fileType = "";
         String fileName = "tapAttachment";
-        for(String key : diagnostics.keySet()) {
-            if(diagnostics.get(key) instanceof Map<?, ?> == Boolean.FALSE) {
-                if(key.equalsIgnoreCase("file-size")) {
+        for (String key : diagnostics.keySet()) {
+            if (diagnostics.get(key) instanceof Map<?, ?> == Boolean.FALSE) {
+                if (key.equalsIgnoreCase("file-size")) {
                     try {
-                        size = (int) Long.parseLong(diagnostics.get(key).toString());
-                    } catch(NumberFormatException nfe) {
+                        size = (int) Long.parseLong(diagnostics.get(key)
+                                .toString());
+                    } catch (NumberFormatException nfe) {
                         // Do nothing
                     }
-                } else if(key.equalsIgnoreCase("file-type")) {
+                } else if (key.equalsIgnoreCase("file-type")) {
                     fileType = (String) diagnostics.get(key);
-                } else if(key.equalsIgnoreCase("file-name")) {
+                } else if (key.equalsIgnoreCase("file-name")) {
                     fileName = (String) diagnostics.get(key);
                 }
             }
