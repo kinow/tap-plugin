@@ -193,7 +193,6 @@ public class TapTestResultResult extends TestResult {
             // Keep adding on to the string we've built so far
 
             // Start with the test result action
-            @SuppressWarnings("rawtypes")
             TapTestResultAction action = getTestResultActionDiverged();
             if (action==null) {
                 //LOGGER.warning("trying to get relative path, but we can't determine the action that owns this result.");

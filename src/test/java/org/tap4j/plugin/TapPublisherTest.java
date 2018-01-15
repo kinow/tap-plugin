@@ -92,7 +92,6 @@ public class TapPublisherTest {
         project.getBuildersList().add(new TouchBuilder());
     }
 
-    @SuppressWarnings("deprecated")
     @LocalData
     @Test
     public void basic() throws Exception {
@@ -119,7 +118,6 @@ public class TapPublisherTest {
         wc.getPage(getNthResultPathFromFailedTestsTable(build, 0));
     }
 
-    @SuppressWarnings("deprecated")
     @LocalData
     @Test
     public void merged() throws Exception {
@@ -177,7 +175,6 @@ public class TapPublisherTest {
      * @param testNumber row number (zero based).
      * @return absolute URL.
      */
-    @SuppressWarnings("unchecked")
     private String getNthResultPathFromFailedTestsTable(FreeStyleBuild build, int testNumber) {
 
         TapStreamResult testObject = (TapStreamResult) build
