@@ -1,27 +1,36 @@
 package org.tap4j.plugin.issue16964;
 
 import hudson.Launcher;
+
 import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.AbstractBuild;
 import hudson.model.FreeStyleProject;
+
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 import javax.servlet.ServletException;
 
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
 import org.tap4j.plugin.TapPublisher;
 import org.tap4j.plugin.TapResult;
 import org.tap4j.plugin.TapTestResultAction;
 
 
-public class TestIssue16964 extends HudsonTestCase {
+public class TestIssue16964 {
 
+    @Rule
+    public JenkinsRule jenkins = new JenkinsRule();
+
+    @Test
     public void testFailTestEmptyResultsAndOldReports() throws IOException, ServletException, InterruptedException, ExecutionException {
-        FreeStyleProject project = this.hudson.createProject(FreeStyleProject.class, "tap-bug-16964");
+        FreeStyleProject project = jenkins.createProject(FreeStyleProject.class, "tap-bug-16964");
         
         final String tap = "1..4\n" + 
                 "ok 1 - Input file opened\n" + 

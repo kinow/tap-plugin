@@ -6,20 +6,28 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.AbstractBuild;
 import hudson.model.FreeStyleProject;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
 import org.tap4j.plugin.TapPublisher;
 import org.tap4j.plugin.TapTestResultAction;
 import org.tap4j.plugin.model.TapStreamResult;
 import org.tap4j.plugin.model.TapTestResultResult;
 
-public class TestIssue16647 extends HudsonTestCase {
+public class TestIssue16647 {
 
+    @Rule
+    public JenkinsRule jenkins = new JenkinsRule();
+
+    @Test
     public void testDurationMs() throws IOException, InterruptedException, ExecutionException {
-        FreeStyleProject project = this.hudson.createProject(FreeStyleProject.class, "tap-bug-16647");
+        FreeStyleProject project = jenkins.createProject(FreeStyleProject.class, "tap-bug-16647");
 
         final String tap = "1..2\n" +
                 "ok 1 - Input file opened\n" +
@@ -61,7 +69,7 @@ public class TestIssue16647 extends HudsonTestCase {
         TapStreamResult result = (TapStreamResult) action.getResult();
 
         TapTestResultResult[] results = result.getChildren().toArray(new TapTestResultResult[0]);
-        assertEquals(100.66f, results[1].getDuration());
+        assertEquals(100.66f, results[1].getDuration(), /* delta */ 0.0001f);
     }
 
 }

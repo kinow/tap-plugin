@@ -6,10 +6,14 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.AbstractBuild;
 import hudson.model.FreeStyleProject;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
 import org.tap4j.plugin.TapPublisher;
 import org.tap4j.plugin.TapResult;
@@ -20,8 +24,12 @@ import org.tap4j.plugin.TapTestResultAction;
  *
  * @author Jakub Podlesak
  */
-public class TestStripSingleParent extends HudsonTestCase {
+public class TestStripSingleParent {
 
+    @Rule
+    public JenkinsRule jenkins = new JenkinsRule();
+
+    @Test
     public void testNoEffect() throws IOException, InterruptedException, ExecutionException {
 
         final String tap = "1..2\n" +
@@ -35,6 +43,7 @@ public class TestStripSingleParent extends HudsonTestCase {
         _test(tap, 2);
     }
 
+    @Test
     public void testStripFirstLevel() throws IOException, InterruptedException, ExecutionException {
 
         final String tap = "1..1\n" +
@@ -47,6 +56,7 @@ public class TestStripSingleParent extends HudsonTestCase {
         _test(tap, 3);
     }
 
+    @Test
     public void testStripSecondLevel() throws IOException, InterruptedException, ExecutionException {
 
         final String tap =
@@ -63,7 +73,7 @@ public class TestStripSingleParent extends HudsonTestCase {
     }
 
     private void _test(final String tap, int expectedTotal) throws IOException, InterruptedException, ExecutionException {
-        FreeStyleProject project = this.hudson.createProject(FreeStyleProject.class, "strip-single-parents");
+        FreeStyleProject project = jenkins.createProject(FreeStyleProject.class, "strip-single-parents");
 
         project.getBuildersList().add(new TestBuilder() {
             @Override

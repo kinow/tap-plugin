@@ -5,13 +5,18 @@ import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.AbstractBuild;
 import hudson.model.FreeStyleProject;
+
+import static org.junit.Assert.assertEquals;
+
 import java.io.ByteArrayOutputStream;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ExecutionException;
 
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
 import org.tap4j.model.TestResult;
 import org.tap4j.model.TestSet;
@@ -24,8 +29,12 @@ import org.tap4j.plugin.TapTestResultAction;
  *
  * @author Jakub Podlesak
  */
-public class TestFlattenTapResult extends HudsonTestCase {
+public class TestFlattenTapResult {
 
+    @Rule
+    public JenkinsRule jenkins = new JenkinsRule();
+
+    @Test
     public void testMixedLevels() throws IOException, InterruptedException, ExecutionException {
 
         final String tap = "1..2\n" +
@@ -39,6 +48,7 @@ public class TestFlattenTapResult extends HudsonTestCase {
         _test(tap, 4, null, false);
     }
 
+    @Test
     public void testStripFirstLevel() throws IOException, InterruptedException, ExecutionException {
 
         final String tap = "1..2\n" +
@@ -57,6 +67,7 @@ public class TestFlattenTapResult extends HudsonTestCase {
             "2.1", "2.2", "2.3"}, false);
     }
 
+    @Test
     public void testStripSecondLevel() throws IOException, InterruptedException, ExecutionException {
 
         final String tap =
@@ -81,6 +92,7 @@ public class TestFlattenTapResult extends HudsonTestCase {
                     "1.2.1", "1.2.2", "1.2.3"}, false);
     }
 
+    @Test
     public void testStripSecondLevelIncompleteResult1() throws IOException, InterruptedException, ExecutionException {
 
         final String tap =
@@ -104,6 +116,7 @@ public class TestFlattenTapResult extends HudsonTestCase {
                     "1.2.1", "1.2.2", "1.2.3"}, true);
     }
 
+    @Test
     public void testStripSecondLevelIncompleteResult2() throws IOException, InterruptedException, ExecutionException {
         final String tap2 =
                 "1..1\n" +
@@ -124,6 +137,7 @@ public class TestFlattenTapResult extends HudsonTestCase {
                     "1.2.1", "1.2 failed: 2 subtest(s) missing"}, true);
     }
 
+    @Test
     public void testARealTapOuptut() throws Exception {
         final String tap = _is2String(TestFlattenTapResult.class.getResourceAsStream("/org/tap4j/plugin/tap-master-files/subtest-sample.tap"));
         _test(tap, 48, null, true);
@@ -140,7 +154,7 @@ public class TestFlattenTapResult extends HudsonTestCase {
     }
 
     private void _test(final String tap, int expectedTotal, String[] expectedDescriptions, boolean printDescriptions) throws IOException, InterruptedException, ExecutionException {
-        FreeStyleProject project = this.hudson.createProject(FreeStyleProject.class, "flatten-the-file");
+        FreeStyleProject project = jenkins.createProject(FreeStyleProject.class, "flatten-the-file");
 
         project.getBuildersList().add(new TestBuilder() {
             @Override
