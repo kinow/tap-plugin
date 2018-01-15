@@ -33,7 +33,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.RandomlyFails;
 import org.jvnet.hudson.test.TouchBuilder;
 import org.jvnet.hudson.test.recipes.LocalData;
 import org.tap4j.plugin.model.TapStreamResult;
@@ -70,6 +69,8 @@ public class TapPublisherTest {
                 true,
                 false,
                 false,
+                false,
+                false,
                 false
         );
         archiver2 = new TapPublisher(
@@ -83,6 +84,8 @@ public class TapPublisherTest {
                 true,
                 true,
                 true,
+                false,
+                false,
                 false,
                 false,
                 false
@@ -116,6 +119,7 @@ public class TapPublisherTest {
 
         // Check that we can access link from "Failed Tests" table.
         wc.getPage(getNthResultPathFromFailedTestsTable(build, 0));
+        wc.close();
     }
 
     @LocalData
@@ -133,7 +137,6 @@ public class TapPublisherTest {
 
         JenkinsRule.WebClient wc = j.new WebClient();
 
-
         // Check that we can access project page.
         wc.getPage(project);
 
@@ -149,6 +152,7 @@ public class TapPublisherTest {
 
         // Check that we can access link from "Failed Tests" table.
         wc.getPage(getNthResultPathFromFailedTestsTable(build, 0));
+        wc.close();
     }
 
     @SuppressWarnings("unchecked")
@@ -191,7 +195,6 @@ public class TapPublisherTest {
         return result.getRelativePathFrom(testObject);
     }
 
-    @RandomlyFails("TimeoutException from basic")
     @LocalData
     @Test
     public void slave() throws Exception {

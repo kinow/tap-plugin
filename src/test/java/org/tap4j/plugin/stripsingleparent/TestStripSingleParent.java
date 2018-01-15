@@ -88,7 +88,8 @@ public class TestStripSingleParent extends HudsonTestCase {
                 false, // verbose
                 true,  // showOnlyFailures
                 true,  // stripSingleParents
-                false); // flattenTapResult
+                false, // flattenTapResult
+                false);
 
         project.getPublishersList().add(publisher);
         project.save();

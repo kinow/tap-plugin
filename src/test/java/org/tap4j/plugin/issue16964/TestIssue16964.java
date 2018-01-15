@@ -55,7 +55,11 @@ public class TestIssue16964 extends HudsonTestCase {
                 true,
                 true,
                 false,
-                true);
+                true,
+                false,
+                false,
+                false,
+                false);
         project.getPublishersList().add(publisher);
         project.save();
         FreeStyleBuild build = (FreeStyleBuild) project.scheduleBuild2(0).get();
