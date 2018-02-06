@@ -11,3 +11,4 @@ org.tap4j.model.TapElement
 org.tap4j.model.TapResult
 org.tap4j.model.TestResult
 org.tap4j.model.TestSet
+org.tap4j.model.Text
