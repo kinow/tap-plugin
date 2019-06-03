@@ -33,11 +33,11 @@ public class TestStripSingleParent {
     public void testNoEffect() throws IOException, InterruptedException, ExecutionException {
 
         final String tap = "1..2\n" +
-                "ok 1 - 1\n" +
                 "  1..3\n" +
                 "  ok 1 1.1\n" +
                 "  ok 2 1.2\n" +
                 "  ok 3 1.3\n" +
+                "ok 1 - 1\n" +
                 "ok 2 - 1\n";
 
         _test(tap, 2);
@@ -47,11 +47,11 @@ public class TestStripSingleParent {
     public void testStripFirstLevel() throws IOException, InterruptedException, ExecutionException {
 
         final String tap = "1..1\n" +
-                "ok 1 - 1\n" +
                 "  1..3\n" +
                 "  ok 1 1.1\n" +
                 "  ok 2 1.2\n" +
-                "  ok 3 1.3\n";
+                "  ok 3 1.3\n" +
+                "ok 1 - 1\n";
 
         _test(tap, 3);
     }
@@ -61,13 +61,13 @@ public class TestStripSingleParent {
 
         final String tap =
                 "1..1\n" +
-                "ok 1 - 1\n" +
                 "  1..1\n" +
-                "  ok 1.1 - 1\n" +
                 "    1..3\n" +
                 "    ok 1 1.1.1\n" +
                 "    ok 2 1.1.2\n" +
-                "    ok 3 1.1.3\n";
+                "    ok 3 1.1.3\n" +
+                "  ok 1.1 - 1\n" +
+                "ok 1 - 1\n";
 
         _test(tap, 3);
     }

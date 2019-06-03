@@ -38,11 +38,11 @@ public class TestFlattenTapResult {
     public void testMixedLevels() throws IOException, InterruptedException, ExecutionException {
 
         final String tap = "1..2\n" +
-                "ok 1 1\n" +
                 "  1..3\n" +
                 "  ok 1 1.1\n" +
                 "  ok 2 1.2\n" +
                 "  ok 3 1.3\n" +
+                "ok 1 1\n" +
                 "ok 2 2\n";
 
         _test(tap, 4, null, false);
@@ -52,15 +52,15 @@ public class TestFlattenTapResult {
     public void testStripFirstLevel() throws IOException, InterruptedException, ExecutionException {
 
         final String tap = "1..2\n" +
-                "ok 1 1\n" +
                 "  1..2\n" +
                 "  ok 1 .1\n" +
                 "  ok 2 .2\n" +
-                "ok 2 2\n" +
+                "ok 1 1\n" +
                 "  1..3\n" +
                 "  ok 1 .1\n" +
                 "  ok 2 .2\n" +
-                "  ok 3 .3\n";
+                "  ok 3 .3\n" +
+                "ok 2 2\n";
 
         _test(tap, 5, new String[] {
             "1.1", "1.2",
@@ -72,19 +72,19 @@ public class TestFlattenTapResult {
 
         final String tap =
                 "1..1\n" +
-                "ok 1 1\n" +
                 "  1..2\n" +
-                "  ok 1 .1\n" +
                 "    1..4\n" +
                 "    ok 1 .1\n" +
                 "    ok 2 .2\n" +
                 "    ok 3 .3\n" +
                 "    ok 4 .4\n" +
-                "  ok 2 .2\n" +
+                "  ok 1 .1\n" +
                 "    1..3\n" +
                 "    ok 1 .1\n" +
                 "    ok 2 .2\n" +
-                "    ok 3 .3\n";
+                "    ok 3 .3\n" +
+                "  ok 2 .2\n" +
+                "ok 1 1\n";
 
         _test(tap, 7,
                 new String[] {
@@ -97,18 +97,18 @@ public class TestFlattenTapResult {
 
         final String tap =
                 "1..1\n" +
-                "ok 1 1\n" +
                 "  1..2\n" +
-                "  ok 1 .1\n" +
                 "    1..4\n" +
                 "    ok 1 .1\n" +
                 "    ok 2 .2\n" +
                 "    ok 3 .3\n" +
-                "  ok 2 .2\n" +
+                "  ok 1 .1\n" +
                 "    1..3\n" +
                 "    ok 1 .1\n" +
                 "    ok 2 .2\n" +
-                "    ok 3 .3\n";
+                "    ok 3 .3\n" +
+                "  ok 2 .2\n" +
+                "ok 1 1\n";
 
         _test(tap, 7,
                 new String[] {
@@ -120,16 +120,16 @@ public class TestFlattenTapResult {
     public void testStripSecondLevelIncompleteResult2() throws IOException, InterruptedException, ExecutionException {
         final String tap2 =
                 "1..1\n" +
-                "ok 1 1\n" +
                 "  1..2\n" +
-                "  ok 1 .1\n" +
                 "    1..4\n" +
                 "    ok 1 .1\n" +
                 "    ok 2 .2\n" +
                 "    ok 3 .3\n" +
-                "  ok 2 .2\n" +
+                "  ok 1 .1\n" +
                 "    1..3\n" +
-                "    ok 1 .1\n";
+                "    ok 1 .1\n" +
+                "  ok 2 .2\n" +
+                "ok 1 1\n";
 
         _test(tap2, 6,
                 new String[] {
