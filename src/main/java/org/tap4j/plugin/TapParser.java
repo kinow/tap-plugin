@@ -66,13 +66,14 @@ public class TapParser {
     private final Boolean verbose;
     private final Boolean stripSingleParents;
     private final Boolean flattenTheTap;
+    private final Boolean removeYamlIfCorrupted;
 
     private boolean hasFailedTests;
     private boolean parserErrors;
 
     public TapParser(Boolean outputTapToConsole, Boolean enableSubtests, Boolean todoIsFailure,
             Boolean includeCommentDiagnostics, Boolean validateNumberOfTests, Boolean planRequired, Boolean verbose,
-            Boolean stripSingleParents, Boolean flattenTheTap,
+            Boolean stripSingleParents, Boolean flattenTheTap, Boolean removeYamlIfCorrupted,
             PrintStream logger) {
         this.outputTapToConsole = outputTapToConsole;
         this.enableSubtests = enableSubtests;
@@ -84,6 +85,7 @@ public class TapParser {
         this.verbose = verbose;
         this.stripSingleParents = stripSingleParents;
         this.flattenTheTap = flattenTheTap;
+        this.removeYamlIfCorrupted = removeYamlIfCorrupted;
         this.logger = logger;
     }
 
@@ -135,6 +137,10 @@ public class TapParser {
         return flattenTheTap;
     }
 
+    public Boolean getRemoveYamlIfCorrupted() {
+        return enableSubtests;
+    }
+
     private boolean containsNotOk(TestSet testSet) {
         for (TestResult testResult : testSet.getTestResults()) {
             if (testResult.getStatus().equals(StatusValues.NOT_OK) && !(testResult.getDirective() != null
@@ -148,7 +154,7 @@ public class TapParser {
     public TapResult parse(FilePath[] results, Run build) {
         this.parserErrors = Boolean.FALSE;
         this.hasFailedTests = Boolean.FALSE;
-        final List<TestSetMap> testSets = new LinkedList<TestSetMap>();
+        final List<TestSetMap> testSets = new LinkedList<>();
         if (null == results) {
             log("File paths not specified. paths var is null. Returning empty test results.");
         } else {
@@ -163,7 +169,7 @@ public class TapParser {
                 try {
                     log("Parsing TAP test result [" + tapFile + "].");
 
-                    final Tap13Parser parser = new Tap13Parser("UTF-8", enableSubtests, planRequired);
+                    final Tap13Parser parser = new Tap13Parser("UTF-8", enableSubtests, planRequired, removeYamlIfCorrupted);
                     final TestSet testSet = flattenTheSetAsRequired(stripSingleParentsAsRequired(parser.parseFile(tapFile)));
 
                     if (containsNotOk(testSet) || testSet.containsBailOut()) {

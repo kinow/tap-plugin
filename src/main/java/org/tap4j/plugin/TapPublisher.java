@@ -97,6 +97,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
     private final Boolean showOnlyFailures;
     private final Boolean stripSingleParents;
     private final Boolean flattenTapResult;
+    private final Boolean removeYamlIfCorrupted;
     /**
      * Skip the publisher if the build status is not OK (worse than unstable)
      */
@@ -180,6 +181,28 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
                 showOnlyFailures, stripSingleParents, flattenTapResult, Boolean.FALSE);
     }
 
+    @Deprecated
+    public TapPublisher(String testResults,
+            Boolean failIfNoResults,
+            Boolean failedTestsMarkBuildAsFailure,
+            Boolean outputTapToConsole,
+            Boolean enableSubtests,
+            Boolean discardOldReports,
+            Boolean todoIsFailure,
+            Boolean includeCommentDiagnostics,
+            Boolean validateNumberOfTests,
+            Boolean planRequired,
+            Boolean verbose,
+            Boolean showOnlyFailures,
+            Boolean stripSingleParents,
+            Boolean flattenTapResult,
+            Boolean skipIfBuildNotOk) {
+        this(testResults, failIfNoResults, failedTestsMarkBuildAsFailure,
+                outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure,
+                includeCommentDiagnostics, validateNumberOfTests, planRequired, verbose,
+                showOnlyFailures, stripSingleParents, flattenTapResult, Boolean.FALSE, skipIfBuildNotOk);
+    }
+
     @DataBoundConstructor
     public TapPublisher(String testResults,
             Boolean failIfNoResults,
@@ -195,6 +218,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
             Boolean showOnlyFailures,
             Boolean stripSingleParents,
             Boolean flattenTapResult,
+            Boolean removeYamlIfCorrupted,
             Boolean skipIfBuildNotOk) {
 
         this.testResults = testResults;
@@ -211,6 +235,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         this.showOnlyFailures = BooleanUtils.toBooleanDefaultIfNull(showOnlyFailures, false);
         this.stripSingleParents = BooleanUtils.toBooleanDefaultIfNull(stripSingleParents, false);
         this.flattenTapResult = BooleanUtils.toBooleanDefaultIfNull(flattenTapResult, false);
+        this.removeYamlIfCorrupted = BooleanUtils.toBooleanDefaultIfNull(removeYamlIfCorrupted, false);
         this.skipIfBuildNotOk = BooleanUtils.toBooleanDefaultIfNull(skipIfBuildNotOk, false);
     }
 
@@ -229,6 +254,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         final Boolean _showOnlyFailures = BooleanUtils.toBooleanDefaultIfNull(this.getShowOnlyFailures(), false);
         final Boolean _stripSingleParents = BooleanUtils.toBooleanDefaultIfNull(this.getStripSingleParents(), false);
         final Boolean _flattenTapResult = BooleanUtils.toBooleanDefaultIfNull(this.getFlattenTapResult(), false);
+        final Boolean _removeYamlIfCorrupted = BooleanUtils.toBooleanDefaultIfNull(this.getRemoveYamlIfCorrupted(), false);
 
         return new TapPublisher(
                 _testResults,
@@ -244,7 +270,9 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
                 _verbose,
                 _showOnlyFailures,
                 _stripSingleParents,
-                _flattenTapResult);
+                _flattenTapResult,
+                _removeYamlIfCorrupted
+        );
     }
 
     public Boolean getShowOnlyFailures() {
@@ -324,6 +352,10 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         return flattenTapResult;
     }
 
+    public Boolean getRemoveYamlIfCorrupted() {
+        return removeYamlIfCorrupted;
+    }
+
     public Boolean getSkipIfBuildNotOk() {
         return skipIfBuildNotOk;
     }
@@ -375,20 +407,20 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         final PrintStream logger = listener.getLogger();
         if (isPerformPublisher(build)) {
             logger.println("TAP Reports Processing: START");
-    
+
             EnvVars envVars = build.getEnvironment(listener);
             String antPattern = Util.replaceMacro(this.testResults, envVars);
             logger.println("Looking for TAP results report in workspace using pattern: " + antPattern);
-    
+
             FilePath[] reports = locateReports(workspace, antPattern);
-    
+
             /*
              * filter out the reports based on timestamps. See JENKINS-12187
              */
             if (this.getDiscardOldReports()) {
                 reports = checkReports(build, reports, logger);
             }
-    
+
             if (reports.length == 0) {
                 if(this.getFailIfNoResults()) {
                     logger.println("Did not find any matching files. Setting build result to FAILURE.");
@@ -400,13 +432,13 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
                     return Boolean.TRUE;
                 }
             }
-    
+
             boolean filesSaved = saveReports(workspace, TapPublisher.getReportsDirectory(build), reports, logger);
             if (!filesSaved) {
                 logger.println("Failed to save TAP reports");
                 return Boolean.TRUE;
             }
-    
+
             TapResult testResult = null;
             try {
                 testResult = loadResults(antPattern, build, logger);
@@ -419,10 +451,10 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
                  */
                 t.printStackTrace(logger);
             }
-    
+
             TapTestResultAction trAction = build.getAction(TapTestResultAction.class);
             boolean appending;
-    
+
             if (trAction == null) {
                 appending = false;
                 trAction = new TapTestResultAction(build, testResult);
@@ -430,15 +462,15 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
                 appending = true;
                 trAction.mergeResult(testResult);
             }
-    
+
             if (!appending) {
                 build.addAction(trAction);
             }
-    
+
             if (testResult.getTestSets().size() > 0 || testResult.getParseErrorTestSets().size() > 0) {
                 // create an individual report for all of the results and add it to
                 // the build
-    
+
                 TapBuildAction action = build.getAction(TapBuildAction.class);
                 if (action == null) {
                     action = new TapBuildAction(build, testResult);
@@ -447,7 +479,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
                     appending = true;
                     action.mergeResult(testResult);
                 }
-    
+
                 if (testResult.hasParseErrors()) {
                     listener.getLogger().println("TAP parse errors found in the build. Marking build as UNSTABLE");
                     build.setResult(Result.UNSTABLE);
@@ -467,11 +499,11 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
                         build.setResult(Result.UNSTABLE);
                     }
                 }
-    
+
                 if (appending) {
                     build.save();
                 }
-    
+
             } else {
                 logger.println("Found matching files but did not find any TAP results.");
                 return Boolean.TRUE;
@@ -535,8 +567,8 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         TapResult tr;
         try {
             results = tapDir.list(antPattern);
-            final TapParser parser = new TapParser(getOutputTapToConsole(), getEnableSubtests(), getTodoIsFailure(), getIncludeCommentDiagnostics(), getValidateNumberOfTests(), getPlanRequired(), getVerbose(), getStripSingleParents(), getFlattenTapResult(), logger);
-
+            final TapParser parser = new TapParser(getOutputTapToConsole(), getEnableSubtests(), getTodoIsFailure(), getIncludeCommentDiagnostics(),
+                    getValidateNumberOfTests(), getPlanRequired(), getVerbose(), getStripSingleParents(), getFlattenTapResult(), getRemoveYamlIfCorrupted(), logger);
             final TapResult result = parser.parse(results, owner);
             result.setOwner(owner);
             return result;

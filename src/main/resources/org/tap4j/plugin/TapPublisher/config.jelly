@@ -44,6 +44,9 @@
           <f:checkbox title="Flatten TAP result" name="TapPublisher.flattenTapResult" value="${instance.flattenTapResult}" checked="${instance.flattenTapResult}" default="false" />
       </f:entry>
       <f:entry>
+          <f:checkbox title="Remove corrupted YAML" name="TapPublisher.removeYamlIfCorrupted" value="${instance.removeYamlIfCorrupted}" checked="${instance.removeYamlIfCorrupted}" default="false" />
+      </f:entry>
+      <f:entry>
           <f:checkbox title="Skip if build not successful" help="/plugin/tap/help/TapPublisher/help-skipIfBuildNotOk.html" name="TapPublisher.skipIfBuildNotOk" value="${instance.skipIfBuildNotOk}" checked="${instance.skipIfBuildNotOk}" default="false" />
       </f:entry>
   </f:advanced>
