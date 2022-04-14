@@ -39,10 +39,10 @@ THE SOFTWARE.
       <t:actions actions="${it.testActions}" />
 
       <j:if test="${it.owner.previousBuild!=null}">
-        <l:task icon="images/24x24/previous.png" href="${buildUrl.previousBuildUrl}" title="${%Previous Build}" />
+        <l:task icon="icon-previous icon-md" href="${buildUrl.previousBuildUrl}" title="${%Previous Build}" />
       </j:if>
       <j:if test="${it.owner.nextBuild!=null}">
-        <l:task icon="images/24x24/next.png" href="${buildUrl.nextBuildUrl}" title="${%Next Build}" />
+        <l:task icon="icon-next icon-md" href="${buildUrl.nextBuildUrl}" title="${%Next Build}" />
       </j:if>
     </l:tasks>
   </l:side-panel>
