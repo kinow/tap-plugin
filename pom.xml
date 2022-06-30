@@ -54,7 +54,7 @@
 		<java.level>8</java.level>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<tap4j.version>4.4.2</tap4j.version>
-		<junit.plugin.version>1.6</junit.plugin.version>
+		<junit.plugin.version>1.24</junit.plugin.version>
 		<!-- TODO: remove once FindBugs issues are fixed -->
 		<findbugs.failOnError>false</findbugs.failOnError>
 	</properties>
