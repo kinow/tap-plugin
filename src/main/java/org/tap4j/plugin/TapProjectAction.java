@@ -75,7 +75,7 @@ public class TapProjectAction extends AbstractTapProjectAction {
      * in newGraphNotNeeded() method. Key is the request URI and value is the
      * number of builds for the project.
      */
-    private transient Map<String, Integer> requestMap = new HashMap<String, Integer>();
+    private transient final Map<String, Integer> requestMap = new HashMap<String, Integer>();
 
     public TapProjectAction(AbstractProject<?, ?> project) {
         super(project);
@@ -186,7 +186,7 @@ public class TapProjectAction extends AbstractTapProjectAction {
                    if (j != mp) { //getAllJobs includes the parent job too, so skip that
                        Run<?,?> sub = j.getBuild(build.getId());
                        if(sub != null) {
-                           // Not all builds are on all sub-projects
+                           // Not all builds are on all subprojects
                            if (sub.getAction(getBuildActionClass()) != null) {
                                //data for at least 1 sub-job on this build
                                numPoints++;
@@ -256,7 +256,7 @@ public class TapProjectAction extends AbstractTapProjectAction {
             /*
              * The build has most likely failed before any TAP data was recorded.
              *
-             * If we don't exclude such builds, we'd have to account for that in GraphHelper. Besides that, it's not
+             * If we don't exclude such builds, we'd have to account for that in GraphHelper. Besides, that, it's not
              * consistent with JUnit graph behaviour where builds without test results are not included in graph.
              */
             if (build.getAction(TapBuildAction.class) == null) {
@@ -275,7 +275,7 @@ public class TapProjectAction extends AbstractTapProjectAction {
                    if (j != mp) { //getAllJobs includes the parent job too, so skip that
                        Run<?,?> sub = j.getBuild(build.getId());
                        if(sub != null) {
-                           // Not all builds are on all sub-projects
+                           // Not all builds are on all subprojects
                            r.add(summarizeBuild(sub));
                        }
                    }

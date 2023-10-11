@@ -171,7 +171,7 @@ public class GraphHelper
      * @param dataset
      *            data set to be displayed on the graph
      * @param statusMap
-     *            a map with build as key and the test methods execution status
+     *            a map with build as key and the test method's execution status
      *            (result) as the value
      * @param methodUrl
      *            URL to get to the method from a build test result page
@@ -221,7 +221,7 @@ public class GraphHelper
         {
 
             private static final long serialVersionUID = 961671076462240008L;
-            Map<String, Paint> statusPaintMap = new HashMap<String, Paint>();
+            final Map<String, Paint> statusPaintMap = new HashMap<String, Paint>();
 
             {
                 statusPaintMap.put("PASS", ColorPalette.BLUE);

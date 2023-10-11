@@ -468,7 +468,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
             }
 
             if (testResult.getTestSets().size() > 0 || testResult.getParseErrorTestSets().size() > 0) {
-                // create an individual report for all of the results and add it to
+                // create an individual report for all the results and add it to
                 // the build
 
                 TapBuildAction action = build.getAction(TapBuildAction.class);
