@@ -69,8 +69,8 @@ public class TapResult implements ModelObject, Serializable {
     private static final String DURATION_KEY = "duration_ms";
 
     private Run build;
-    private List<TestSetMap> testSets;
-    private List<TestSetMap> parseErrorTestSets;
+    private final  List<TestSetMap> testSets;
+    private final  List<TestSetMap> parseErrorTestSets;
     private int failed = 0;
     private int passed = 0;
     private int skipped = 0;
@@ -78,10 +78,10 @@ public class TapResult implements ModelObject, Serializable {
     private int bailOuts = 0;
     private int total = 0;
     private float duration = 0.0f;
-    private String name;
-    private Boolean todoIsFailure;
-    private Boolean includeCommentDiagnostics;
-    private Boolean validateNumberOfTests;
+    private final String name;
+    private final Boolean todoIsFailure;
+    private final Boolean includeCommentDiagnostics;
+    private final Boolean validateNumberOfTests;
     private Boolean showOnlyFailures = Boolean.FALSE;
 
     public TapResult(String name, Run owner, List<TestSetMap> testSets, Boolean todoIsFailure,
@@ -130,7 +130,7 @@ public class TapResult implements ModelObject, Serializable {
     }
 
     /**
-     * @param testSets Untiltered test sets
+     * @param testSets Unfiltered test sets
      * @return Test sets that failed to parse
      */
     private List<TestSetMap> filterParseErrorTestSets(List<TestSetMap> testSets) {
@@ -380,9 +380,9 @@ public class TapResult implements ModelObject, Serializable {
         for (TestResult tr : ts.getTestResults()) {
             Map<String, Object> diagnostics = tr.getDiagnostic();
             if (diagnostics != null && diagnostics.size() > 0) {
-                TapAttachment attachement = recursivelySearch(diagnostics, null, key);
-                if (attachement != null) {
-                    return attachement;
+                TapAttachment attachment = recursivelySearch(diagnostics, null, key);
+                if (attachment != null) {
+                    return attachment;
                 }
             }
         }

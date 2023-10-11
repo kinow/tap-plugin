@@ -175,7 +175,7 @@ public class TapTestResultResult extends TestResult {
         StringBuilder buf = new StringBuilder();
         TestObject next = this;
         TestObject cur = this;  
-        // Walk up my ancesotors from leaf to root, looking for "it"
+        // Walk up my ancestors from leaf to root, looking for "it"
         // and accumulating a relative url as I go
         while (next!=null && it!=next) {
             cur = next;
