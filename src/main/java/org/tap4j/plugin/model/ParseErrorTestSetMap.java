@@ -26,7 +26,6 @@ package org.tap4j.plugin.model;
 /**
  * A test set map that failed to parse.
  *
- * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.2.8
  */
 public class ParseErrorTestSetMap extends TestSetMap {

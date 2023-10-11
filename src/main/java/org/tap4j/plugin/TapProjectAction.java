@@ -38,18 +38,16 @@ import org.tap4j.plugin.util.GraphHelper;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
  * A TAP Project action, with a graph and a list of builds.
  * 
- * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
 public class TapProjectAction extends AbstractTapProjectAction {
 
-    protected class Result {
+    protected static class Result {
         public int numPassed;
         public int numFailed;
         public int numSkipped;
@@ -75,7 +73,7 @@ public class TapProjectAction extends AbstractTapProjectAction {
      * in newGraphNotNeeded() method. Key is the request URI and value is the
      * number of builds for the project.
      */
-    private transient final Map<String, Integer> requestMap = new HashMap<String, Integer>();
+    private transient final Map<String, Integer> requestMap = new HashMap<>();
 
     public TapProjectAction(AbstractProject<?, ?> project) {
         super(project);
@@ -104,9 +102,6 @@ public class TapProjectAction extends AbstractTapProjectAction {
         return action;
     }
 
-    /**
-     * @return
-     */
     private Run<?, ?> getLastBuildWithTap() {
         Run<?, ?> lastBuild = this.job.getLastBuild();
         while (lastBuild != null && lastBuild.getAction(TapBuildAction.class) == null) {
@@ -154,7 +149,7 @@ public class TapProjectAction extends AbstractTapProjectAction {
             return;
         }
 
-        final DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel>();
+        final DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<>();
 
         // TODO: optimize by using cache
         populateDataSetBuilder(dataSetBuilder);
@@ -182,7 +177,7 @@ public class TapProjectAction extends AbstractTapProjectAction {
             {
                 MatrixProject mp = (MatrixProject) this.job;
  
-                for (Job j : mp.getAllJobs()) {
+                for (Job<?, ?> j : mp.getAllJobs()) {
                    if (j != mp) { //getAllJobs includes the parent job too, so skip that
                        Run<?,?> sub = j.getBuild(build.getId());
                        if(sub != null) {
@@ -220,9 +215,7 @@ public class TapProjectAction extends AbstractTapProjectAction {
         Integer prevNumBuilds = requestMap.get(req.getRequestURI());
         int numBuilds = 0;
         RunList<?> builds = this.job.getBuilds();
-        Iterator<?> it = builds.iterator();
-        while (it.hasNext()) {
-            it.next();
+        for (Run<?, ?> ignored : builds) {
             numBuilds += 1;
         }
 
@@ -236,15 +229,11 @@ public class TapProjectAction extends AbstractTapProjectAction {
             requestMap.clear();
         }
 
-        if (prevNumBuilds == numBuilds && req.checkIfModified(t, rsp)) {
-            /*
-             * checkIfModified() is after '&&' because we want it evaluated only
-             * if number of builds is different
-             */
-            return true;
-        }
-
-        return false;
+        /*
+         * checkIfModified() is after '&&' because we want it evaluated only
+         * if number of builds is different
+         */
+        return prevNumBuilds == numBuilds && req.checkIfModified(t, rsp);
     }
 
     protected void populateDataSetBuilder(DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel> dataset ) {
@@ -263,7 +252,7 @@ public class TapProjectAction extends AbstractTapProjectAction {
                 continue;
             }
 
-            ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel((Run) build);
+            ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(build);
 
             Result r = new Result();
             
@@ -271,7 +260,7 @@ public class TapProjectAction extends AbstractTapProjectAction {
             {
                 MatrixProject mp = (MatrixProject) p;
  
-                for (Job j : mp.getAllJobs()) {
+                for (Job<?, ?> j : mp.getAllJobs()) {
                    if (j != mp) { //getAllJobs includes the parent job too, so skip that
                        Run<?,?> sub = j.getBuild(build.getId());
                        if(sub != null) {

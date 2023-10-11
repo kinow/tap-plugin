@@ -32,7 +32,6 @@ import java.io.Serializable;
 /**
  * TAP Build action with TAP results.
  * 
- * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
 public class TapBuildAction implements Action, Serializable, StaplerProxy {
@@ -42,11 +41,11 @@ public class TapBuildAction implements Action, Serializable, StaplerProxy {
     public static final String ICON_NAME = "/plugin/tap/icons/tap-24.png";
     public static final String DISPLAY_NAME = "TAP Extended Test Results";
 
-    private final Run build;
+    private final Run<?, ?> build;
 
     private TapResult result;
 
-    public TapBuildAction(Run build, TapResult result) {
+    public TapBuildAction(Run<?, ?> build, TapResult result) {
         super();
         this.build = build;
         this.result = result;
@@ -91,7 +90,7 @@ public class TapBuildAction implements Action, Serializable, StaplerProxy {
     /**
      * @return the build
      */
-    public Run getBuild() {
+    public Run<?, ?> getBuild() {
         return this.build;
     }
 
@@ -115,7 +114,7 @@ public class TapBuildAction implements Action, Serializable, StaplerProxy {
         TapBuildAction previousAction = null;
 
         if (this.build != null) {
-            Run previousBuild = this.build.getPreviousBuild();
+            Run<?, ?> previousBuild = this.build.getPreviousBuild();
             if (previousBuild != null) {
                 previousAction = previousBuild.getAction(TapBuildAction.class);
             }

@@ -43,14 +43,13 @@ import java.util.List;
 /**
  * A tabulated TAP Stream result.
  *
- * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 0.1
  */
 public class TapStreamResult extends TabulatedResult {
 
     private static final long serialVersionUID = 8337146933697574082L;
     private final Run<?, ?> owner;
-    private List<TestResult> children = new ArrayList<TestResult>();
+    private List<TestResult> children = new ArrayList<>();
     private TapResult tapResult;
 
     public TapStreamResult(Run<?, ?> owner, TapResult tapResult) {
@@ -148,7 +147,7 @@ public class TapStreamResult extends TabulatedResult {
     
     // FIXME: use the getFailedTests, or explain why it's not used
     public List<TestResult> getFailedTests2() {
-        List<TestResult> failedTests = new ArrayList<TestResult>();
+        List<TestResult> failedTests = new ArrayList<>();
         if(tapResult != null && tapResult.getTestSets().size() > 0) {
             for(TestSetMap tsm : tapResult.getTestSets()) {
                 TestSet ts = tsm.getTestSet();
@@ -164,7 +163,7 @@ public class TapStreamResult extends TabulatedResult {
 
     public float getDuration() {
         return this.tapResult.getDuration();
-    };
+    }
 
     @Override
     public Object getDynamic(String name, StaplerRequest req, StaplerResponse rsp) {
@@ -180,10 +179,6 @@ public class TapStreamResult extends TabulatedResult {
         return this.tapResult;
     }
 
-    /**
-     * @param name
-     * @return
-     */
     private TapTestResultResult getTapTestResultResult(String name) {
         if (name == null)
             return null; // we don't allow null, nay!
@@ -219,7 +214,7 @@ public class TapStreamResult extends TabulatedResult {
 
         tapResult = tapResult.copyWithExtraTestSets(other.getTestSets());
         tapResult.tally();
-        children = new ArrayList<TestResult>();
+        children = new ArrayList<>();
 
         setChildrenInfo();
     }

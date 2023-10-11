@@ -52,7 +52,6 @@ import java.util.logging.Logger;
 
 /**
  * 
- * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 0.1
  */
 public class TapTestResultResult extends TestResult {
@@ -103,7 +102,7 @@ public class TapTestResultResult extends TestResult {
         TestSet testSet = this.tapTestResult.getSubtest();
         if(testSet != null) {
             TestSetMap subTest = new TestSetMap(testSetMap.getFileName(), testSet);
-            List<TestSetMap> list = new ArrayList<TestSetMap>();
+            List<TestSetMap> list = new ArrayList<>();
             list.add(subTest);
             parent = new TapStreamResult(owner, new TapResult("TAP Test Results", owner, list, todoIsFailure, includeCommentDiagnostics, validateNumberOfTests));
         }
@@ -263,8 +262,8 @@ public class TapTestResultResult extends TestResult {
         if (diagnostic != null && ! diagnostic.isEmpty()) {
             Object duration = diagnostic.get(DURATION_KEY);
             if (duration != null) {
-                Float durationMS = Float.parseFloat(duration.toString());
-                return durationMS.floatValue() / 1000;
+                float durationMS = Float.parseFloat(duration.toString());
+                return durationMS / 1000;
             }
         }
         return super.getDuration();
