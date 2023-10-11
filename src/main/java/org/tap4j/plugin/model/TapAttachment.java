@@ -26,7 +26,6 @@ package org.tap4j.plugin.model;
 import java.util.Map;
 
 /**
- * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 0.1
  */
 public class TapAttachment {
