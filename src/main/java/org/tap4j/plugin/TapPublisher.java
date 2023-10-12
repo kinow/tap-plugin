@@ -29,8 +29,10 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -443,11 +445,10 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         try {
             tapDir.mkdirs();
             for (FilePath report : reports) {
-                //FilePath dst = tapDir.child(report.getName());
-                FilePath dst = getDistDir(workspace, tapDir, report);
+                FilePath dst = Objects.requireNonNull(getDistDir(workspace, tapDir, report));
                 report.copyTo(dst);
             }
-        } catch (Exception e) {
+        } catch (IOException|InterruptedException e) {
             e.printStackTrace(logger);
             return false;
         }
@@ -462,11 +463,15 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
      * @param orig original directory
      * @return persisted directory virtual structure
      */
+    @Nullable
     private FilePath getDistDir(FilePath workspace, FilePath tapDir, FilePath orig) {
         if(orig == null)
             return null;
         StringBuilder difference = new StringBuilder();
         FilePath parent = orig.getParent();
+        if (parent == null) {
+            return null;
+        }
         do {
             if(parent.equals(workspace))
                 break;
