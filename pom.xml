@@ -114,17 +114,19 @@ SOFTWARE.
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>matrix-project</artifactId>
-      <version>1.4</version>
+      <version>[1.18.1,)</version>
     </dependency>
     <!-- For JUnit test results UI compatibility -->
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>junit</artifactId>
+      <version>[1160.vf1f01a_a_ea_b_7f,)</version>
     </dependency>
     <!-- Test -->
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-job</artifactId>
+      <version>[1295.v395eb,)</version>
       <scope>test</scope>
     </dependency>
     <dependency>
