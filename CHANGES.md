@@ -5,3 +5,4 @@
 1. [#31](https://github.com/jenkinsci/tap-plugin/pull/31): Updated the code using IDE linter
 2. Added `CHANGES.md`
 3. Updated `README.md`
+4. [#32](https://github.com/jenkinsci/tap-plugin/pull/32): Update pom.xml (plugins, dependencies, Jenkins version)
