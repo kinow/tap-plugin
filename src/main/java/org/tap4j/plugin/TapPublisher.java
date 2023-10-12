@@ -288,12 +288,11 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
                 if(this.getFailIfNoResults()) {
                     logger.println("Did not find any matching files. Setting build result to FAILURE.");
                     build.setResult(Result.FAILURE);
-                    return;
                 } else {
                     logger.println("Did not find any matching files.");
                     // build can still continue
-                    return;
                 }
+                return;
             }
 
             boolean filesSaved = saveReports(workspace, TapPublisher.getReportsDirectory(build), reports, logger);
@@ -482,7 +481,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
      */
     private FilePath[] checkReports(Run<?, ?> build,
             FilePath[] reports, PrintStream logger) {
-        List<FilePath> filePathList = new ArrayList<FilePath>(reports.length);
+        List<FilePath> filePathList = new ArrayList<>(reports.length);
 
         for (FilePath report : reports) {
             /*
@@ -539,6 +538,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
             load();
         }
 
+        @Nonnull
         @Override
         public String getDisplayName() {
             return "Publish TAP Results";

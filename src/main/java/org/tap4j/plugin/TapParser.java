@@ -192,8 +192,6 @@ public class TapParser {
                 }
             }
         }
-        // final TapResult testResult = new
-        // TapResult(UUID.randomUUID().toString(), build, testSets);
         return new TapResult("TAP Test Results", build, testSets, this.todoIsFailure,
                 this.includeCommentDiagnostics, this.validateNumberOfTests);
     }

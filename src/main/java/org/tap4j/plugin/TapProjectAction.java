@@ -134,7 +134,7 @@ public class TapProjectAction extends AbstractTapProjectAction {
             return;
         }
 
-        final DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel>();
+        final DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel> dataSetBuilder = new DataSetBuilder<>();
 
         populateDataSetBuilder(dataSetBuilder);
         new hudson.util.Graph(-1, getGraphWidth(), getGraphHeight()) {
