@@ -99,6 +99,8 @@ public class TapPublisherTest {
 
     @LocalData
     @Test
+    // getPage uses deprecation to tell users about a possibility to use relative pages (shrugs)
+    @SuppressWarnings("deprecation")
     public void basic() throws Exception {
         FreeStyleBuild build = project.scheduleBuild2(0).get(1000, TimeUnit.SECONDS);
 
@@ -120,12 +122,14 @@ public class TapPublisherTest {
         wc.getPage(build, "tapTestReport/" + getNthResultPathFromAllTestsTable(build, 1)); // red
 
         // Check that we can access link from "Failed Tests" table.
-        wc.getPage(getNthResultPathFromFailedTestsTable(build, 0));
+        wc.getPage(getNthResultPathFromFailedTestsTable(build));
         wc.close();
     }
 
     @LocalData
     @Test
+    // getPage uses deprecation to tell users about a possibility to use relative pages (shrugs)
+    @SuppressWarnings("deprecation")
     public void merged() throws Exception {
 
         project.getPublishersList().add(archiver2);
@@ -153,23 +157,23 @@ public class TapPublisherTest {
         wc.getPage(build, "tapTestReport/" + getNthResultPathFromAllTestsTable(build, 1)); // red
 
         // Check that we can access link from "Failed Tests" table.
-        wc.getPage(getNthResultPathFromFailedTestsTable(build, 0));
+        wc.getPage(getNthResultPathFromFailedTestsTable(build));
         wc.close();
     }
 
     @SuppressWarnings("unchecked")
     private String getNthResultPathFromAllTestsTable(FreeStyleBuild build, int testNumber) {
-        Iterator<TapTestResultResult> it = (Iterator<TapTestResultResult>) ((TapStreamResult) build
+        Iterator<TapTestResultResult> it = (Iterator<TapTestResultResult>) build
                 .getActions(TapTestResultAction.class)
                 .get(0)
-                .getResult()
-        ).getChildren().iterator();
+                .getResult().getChildren().iterator();
 
         int count = 0;
         TapTestResultResult result = null;
         while (count++ <= testNumber) {
             result = it.next();
         }
+        assert result != null;
         return result.getSafeName();
     }
 
@@ -177,13 +181,12 @@ public class TapPublisherTest {
      * This method unfortunately returns <i>absolute</i> URL of the
      * <code>testNumber</code>th link in "Failed Tests" table.
      *
-     * @param build      build object.
-     * @param testNumber row number (zero based).
+     * @param build build object.
      * @return absolute URL.
      */
-    private String getNthResultPathFromFailedTestsTable(FreeStyleBuild build, int testNumber) {
+    private String getNthResultPathFromFailedTestsTable(FreeStyleBuild build) {
 
-        TapStreamResult testObject = (TapStreamResult) build
+        TapStreamResult testObject = build
                 .getActions(TapTestResultAction.class)
                 .get(0)
                 .getResult();
@@ -191,9 +194,10 @@ public class TapPublisherTest {
         int count = 0;
         TestResult result = null;
         Iterator<TestResult> it = testObject.getFailedTests2().iterator();
-        while (count++ <= testNumber) {
+        while (count++ <= 0) {
             result = it.next();
         }
+        assert result != null;
         return result.getRelativePathFrom(testObject);
     }
 
@@ -213,14 +217,14 @@ public class TapPublisherTest {
     }
 
     private void assertTestResultsBasic(FreeStyleBuild build) {
-        assertTestResults(build, 3, 1, 1);
+        assertTestResults(build, 3, 1);
     }
 
     private void assertTestResultsMerged(FreeStyleBuild build) {
-        assertTestResults(build, 5, 2, 1);
+        assertTestResults(build, 5, 2);
     }
 
-    private void assertTestResults(FreeStyleBuild build, int total, int failed, int skipped) {
+    private void assertTestResults(FreeStyleBuild build, int total, int failed) {
         TapTestResultAction testResultAction = build.getAction(TapTestResultAction.class);
         assertNotNull("no TestResultAction", testResultAction);
 
@@ -233,8 +237,8 @@ public class TapPublisherTest {
         assertEquals(String.format("should have %d total tests", total), total, testResultAction.getTotalCount());
         assertEquals(String.format("should have %d total tests", total), total, result.getTotalCount());
 
-        assertEquals(String.format("should have %d skipped test", skipped), skipped, testResultAction.getSkipCount());
-        assertEquals(String.format("should have %d skipped test", skipped), skipped, result.getSkipCount());
+        assertEquals(String.format("should have %d skipped test", 1), 1, testResultAction.getSkipCount());
+        assertEquals(String.format("should have %d skipped test", 1), 1, result.getSkipCount());
     }
 
     @LocalData
