@@ -84,8 +84,8 @@ SOFTWARE.
     <dependencies>
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.387.x</artifactId>
-        <version>2496.vddfca_753db_80</version>
+        <artifactId>bom-2.375.x</artifactId>
+        <version>2198.v39c76fc308ca</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -108,12 +108,13 @@ SOFTWARE.
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
-      <version>1.33</version>
+      <version>2.0</version>
     </dependency>
     <!-- For handling matrix jobs -->
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>matrix-project</artifactId>
+      <version>1.4</version>
     </dependency>
     <!-- For JUnit test results UI compatibility -->
     <dependency>

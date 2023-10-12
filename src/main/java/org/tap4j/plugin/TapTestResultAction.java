@@ -1,18 +1,18 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2012 Bruno P. Kinoshita
- * 
+ * Copyright (c) 2012-2023 Bruno P. Kinoshita
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,10 +31,9 @@ import hudson.model.HealthReportingAction;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.tasks.junit.CaseResult;
-import hudson.tasks.test.Messages;
 import jenkins.model.RunAction2;
 import jenkins.tasks.SimpleBuildStep;
-import org.jvnet.localizer.Localizable;
+import jenkins.util.NonLocalizable;
 import org.kohsuke.stapler.StaplerProxy;
 import org.kohsuke.stapler.export.Exported;
 import org.tap4j.plugin.model.TapStreamResult;
@@ -45,15 +44,14 @@ import java.util.List;
 
 
 /**
- * 
  * @since 0.1
  */
 public class TapTestResultAction
         implements StaplerProxy, SimpleBuildStep.LastBuildAction, HealthReportingAction, RunAction2 {
 
-    public transient Run<?,?> run;
+    public transient Run<?, ?> run;
     @Deprecated
-    public transient AbstractBuild<?,?> owner;
+    public transient AbstractBuild<?, ?> owner;
 
     private TapResult tapResult;
 
@@ -85,7 +83,7 @@ public class TapTestResultAction
     public int getTotalCount() {
         return tapResult.getTotal();
     }
-    
+
     /* (non-Javadoc)
      * @see hudson.tasks.test.AbstractTestResultAction#getSkipCount()
      */
@@ -100,15 +98,15 @@ public class TapTestResultAction
     public List<CaseResult> getFailedTests() {
         return Collections.emptyList();
     }
-    
-    /* 
+
+    /*
      * (non-Javadoc)
      * @see org.kohsuke.stapler.StaplerProxy#getTarget()
      */
     public Object getTarget() {
         return getResult();
     }
-    
+
     public TapStreamResult getResult() {
         return new TapStreamResult(owner, tapResult);
     }
@@ -129,20 +127,20 @@ public class TapTestResultAction
     }
 
     /* (non-Javadoc)
-         * @see hudson.tasks.test.AbstractTestResultAction#getDisplayName()
-         */
+     * @see hudson.tasks.test.AbstractTestResultAction#getDisplayName()
+     */
     @Override
     public String getDisplayName() {
         return "TAP Test Results";
     }
-    
+
     /*
      * (non-Javadoc)
      * @see jenkins.tasks.SimpleBuildStep#getProjectActions()
      */
     @Override
     public Collection<? extends Action> getProjectActions() {
-        Job<?,?> job = run.getParent();
+        Job<?, ?> job = run.getParent();
         if (!Util.filter(job.getActions(), TapProjectAction.class).isEmpty()) {
             return Collections.emptySet();
         }
@@ -157,13 +155,17 @@ public class TapTestResultAction
         int score = (totalCount == 0)
                 ? 100
                 : (int) (100.0 * Math.max(0.0, Math.min(1.0, 1.0 - (scaleFactor * failCount) / totalCount)));
-        Localizable description, displayName = Messages._AbstractTestResultAction_getDisplayName();
+        // TODO: we used to use the hudson.tasks.test.Messages localized entries
+        //       here, https://github.com/jenkinsci/junit-plugin/blob/master/src/main/resources/hudson/tasks/test/Messages.properties,
+        //       but now `mvn` fails in an injected test.
+        String description, displayName = "Test Result";
         if (totalCount == 0) {
-            description = Messages._AbstractTestResultAction_zeroTestDescription(displayName);
+            description = String.format("%s: 0 tests in total", displayName);
         } else {
-            description = Messages._AbstractTestResultAction_TestsDescription(displayName, failCount, totalCount);
+            description = String.format("%s: %d test(s) failing out of a total of %d test(s).",
+                    displayName, failCount, totalCount);
         }
-        return new HealthReport(score, description);
+        return new HealthReport(score, new NonLocalizable(description));
     }
 
     @Override
@@ -178,7 +180,7 @@ public class TapTestResultAction
 
     private void setRunAndOwner(Run<?, ?> r) {
         this.run = r;
-        this.owner = r instanceof AbstractBuild ? (AbstractBuild<?,?>) r : null;
+        this.owner = r instanceof AbstractBuild ? (AbstractBuild<?, ?>) r : null;
     }
 
     void mergeResult(TapResult additionalResult) {

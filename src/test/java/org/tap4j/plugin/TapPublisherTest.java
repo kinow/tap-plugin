@@ -106,24 +106,23 @@ public class TapPublisherTest {
 
         assertTestResultsBasic(build);
 
-        JenkinsRule.WebClient wc = j.new WebClient();
+        try (JenkinsRule.WebClient wc = j.new WebClient()) {
+            // Check that we can access project page.
+            wc.getPage(project);
 
-        // Check that we can access project page.
-        wc.getPage(project);
+            // Check that we can access current build page.
+            wc.getPage(build);
 
-        // Check that we can access current build page.
-        wc.getPage(build);
+            // Check that we can access TAP report page.
+            wc.getPage(build, "tapTestReport");
 
-        // Check that we can access TAP report page.
-        wc.getPage(build, "tapTestReport");
+            // Check that we can access green and red test links from "All Tests" table.
+            wc.getPage(build, "tapTestReport/" + getNthResultPathFromAllTestsTable(build, 0)); // green
+            wc.getPage(build, "tapTestReport/" + getNthResultPathFromAllTestsTable(build, 1)); // red
 
-        // Check that we can access green and red test links from "All Tests" table.
-        wc.getPage(build, "tapTestReport/" + getNthResultPathFromAllTestsTable(build, 0)); // green
-        wc.getPage(build, "tapTestReport/" + getNthResultPathFromAllTestsTable(build, 1)); // red
-
-        // Check that we can access link from "Failed Tests" table.
-        wc.getPage(getNthResultPathFromFailedTestsTable(build));
-        wc.close();
+            // Check that we can access link from "Failed Tests" table.
+            wc.getPage(getNthResultPathFromFailedTestsTable(build));
+        }
     }
 
     @LocalData
@@ -141,24 +140,23 @@ public class TapPublisherTest {
 
         assertTestResultsMerged(build);
 
-        JenkinsRule.WebClient wc = j.new WebClient();
+        try (JenkinsRule.WebClient wc = j.new WebClient()) {
+            // Check that we can access project page.
+            wc.getPage(project);
 
-        // Check that we can access project page.
-        wc.getPage(project);
+            // Check that we can access current build page.
+            wc.getPage(build);
 
-        // Check that we can access current build page.
-        wc.getPage(build);
+            // Check that we can access TAP report page.
+            wc.getPage(build, "tapTestReport");
 
-        // Check that we can access TAP report page.
-        wc.getPage(build, "tapTestReport");
+            // Check that we can access green and red test links from "All Tests" table.
+            wc.getPage(build, "tapTestReport/" + getNthResultPathFromAllTestsTable(build, 0)); // green
+            wc.getPage(build, "tapTestReport/" + getNthResultPathFromAllTestsTable(build, 1)); // red
 
-        // Check that we can access green and red test links from "All Tests" table.
-        wc.getPage(build, "tapTestReport/" + getNthResultPathFromAllTestsTable(build, 0)); // green
-        wc.getPage(build, "tapTestReport/" + getNthResultPathFromAllTestsTable(build, 1)); // red
-
-        // Check that we can access link from "Failed Tests" table.
-        wc.getPage(getNthResultPathFromFailedTestsTable(build));
-        wc.close();
+            // Check that we can access link from "Failed Tests" table.
+            wc.getPage(getNthResultPathFromFailedTestsTable(build));
+        }
     }
 
     @SuppressWarnings("unchecked")
