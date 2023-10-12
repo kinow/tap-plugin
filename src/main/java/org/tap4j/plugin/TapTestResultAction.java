@@ -57,12 +57,7 @@ public class TapTestResultAction
 
     private TapResult tapResult;
 
-
-    /**
-     * @param r
-     * @param tapResult
-     */
-    protected TapTestResultAction(Run r, TapResult tapResult) {
+    protected TapTestResultAction(Run<?, ?> r, TapResult tapResult) {
         setRunAndOwner(r);
 
         this.tapResult = tapResult;

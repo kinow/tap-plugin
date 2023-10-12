@@ -96,7 +96,7 @@ public class TapResult implements ModelObject, Serializable {
     }
 
     public TapResult copyWithExtraTestSets(List<TestSetMap> testSets) {
-        List<TestSetMap> mergedTestSets = new ArrayList<TestSetMap>(getTestSets());
+        List<TestSetMap> mergedTestSets = new ArrayList<>(getTestSets());
         mergedTestSets.addAll(testSets);
 
         return new TapResult(this.getName(), this.getOwner(), mergedTestSets, this.getTodoIsFailure(),
@@ -134,15 +134,14 @@ public class TapResult implements ModelObject, Serializable {
      * @return Test sets that failed to parse
      */
     private List<TestSetMap> filterParseErrorTestSets(List<TestSetMap> testSets) {
-        final List<TestSetMap> filtered = new ArrayList<TestSetMap>();
+        final List<TestSetMap> filtered = new ArrayList<>();
         for (TestSetMap testSet : testSets) {
             if (testSet instanceof ParseErrorTestSetMap) {
                 String rootDir = build.getRootDir()
                         .getAbsolutePath();
                 try {
                     rootDir = new File(build.getRootDir()
-                            .getCanonicalPath()
-                            .toString(), Constants.TAP_DIR_NAME).getAbsolutePath();
+                            .getCanonicalPath(), Constants.TAP_DIR_NAME).getAbsolutePath();
                 } catch (IOException e) {
                     LOGGER.warning(e.getMessage());
                 }
@@ -158,15 +157,14 @@ public class TapResult implements ModelObject, Serializable {
      * @return Test sets that didn't fail to parse
      */
     private List<TestSetMap> filterTestSet(List<TestSetMap> testSets) {
-        final List<TestSetMap> filtered = new ArrayList<TestSetMap>();
+        final List<TestSetMap> filtered = new ArrayList<>();
         for (TestSetMap testSet : testSets) {
             if (!(testSet instanceof ParseErrorTestSetMap)) {
                 String rootDir = build.getRootDir()
                         .getAbsolutePath();
                 try {
                     rootDir = new File(build.getRootDir()
-                            .getCanonicalPath()
-                            .toString(), Constants.TAP_DIR_NAME).getAbsolutePath();
+                            .getCanonicalPath(), Constants.TAP_DIR_NAME).getAbsolutePath();
                 } catch (IOException e) {
                     LOGGER.warning(e.getMessage());
                 }
@@ -365,15 +363,9 @@ public class TapResult implements ModelObject, Serializable {
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-        } finally {
         }
     }
 
-    /**
-     * @param ts
-     * @param key
-     * @return
-     */
     private TapAttachment getAttachment(TestSet ts, String key) {
         for (TestResult tr : ts.getTestResults()) {
             Map<String, Object> diagnostics = tr.getDiagnostic();

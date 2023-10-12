@@ -36,7 +36,7 @@ public class DiagnosticUtil {
 
     private enum RENDER_TYPE {
         TEXT, IMAGE
-    };
+    }
 
     private static final String INNER_TABLE_HEADER = "<tr>\n<td colspan='4' class='yaml'>\n<table width=\"100%\" class=\"yaml\">";
 
@@ -98,13 +98,13 @@ public class DiagnosticUtil {
                 for (int i = 0; i < depth; ++i) {
                     sb.append("<td width='5%' class='hidden'> </td>");
                 }
-                sb.append("<td style=\"width: auto;\">" + key + "</td>");
+                sb.append("<td style=\"width: auto;\">").append(key).append("</td>");
                 if (value instanceof java.util.Map) {
                     sb.append("<td> </td>");
                     createDiagnosticTableRecursively(tapFile, key, (java.util.Map) value, sb,
                             (depth + 1));
                 } else {
-                    sb.append("<td><pre>" + org.apache.commons.lang.StringEscapeUtils.escapeHtml(value.toString()) + "</pre></td>");
+                    sb.append("<td><pre>").append(org.apache.commons.lang.StringEscapeUtils.escapeHtml(value.toString())).append("</pre></td>");
                 }
                 sb.append("</tr>");
             }

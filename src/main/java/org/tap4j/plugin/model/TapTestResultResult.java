@@ -186,32 +186,30 @@ public class TapTestResultResult extends TestResult {
             }
             next = cur.getParent();
         }
-        if (it==next) {
-            return buf.toString();
-        } else {
+        if (it != next) {
             // Keep adding on to the string we've built so far
 
             // Start with the test result action
             TapTestResultAction action = getTestResultActionDiverged();
-            if (action==null) {
+            if (action == null) {
                 //LOGGER.warning("trying to get relative path, but we can't determine the action that owns this result.");
                 return ""; // this won't take us to the right place, but it also won't 404.
             }
-            buf.insert(0,'/');
-            buf.insert(0,action.getUrlName());
+            buf.insert(0, '/');
+            buf.insert(0, action.getUrlName());
 
             // Now the build
-            AbstractBuild<?,?> myBuild = cur.getOwner();
-            if (myBuild ==null) {
+            AbstractBuild<?, ?> myBuild = cur.getOwner();
+            if (myBuild == null) {
                 //LOGGER.warning("trying to get relative path, but we can't determine the build that owns this result.");
                 return ""; // this won't take us to the right place, but it also won't 404. 
             }
             //buf.insert(0,'/');
-            buf.insert(0,myBuild.getUrl());
+            buf.insert(0, myBuild.getUrl());
 
             // If we're inside a stapler request, just delegate to Hudson.Functions to get the relative path!
             StaplerRequest req = Stapler.getCurrentRequest();
-            if (req!=null && myBuild instanceof Item) {
+            if (req != null && myBuild instanceof Item) {
                 buf.insert(0, '/');
                 // Ugly but I don't see how else to convince the compiler that myBuild is an Item
                 Item myBuildAsItem = (Item) myBuild;
@@ -220,7 +218,7 @@ public class TapTestResultResult extends TestResult {
                 // We're not in a stapler request. Okay, give up.
                 //LOGGER.info("trying to get relative path, but it is not my ancestor, and we're not in a stapler request. Trying absolute hudson url...");
                 String hudsonRootUrl = Jenkins.getInstance().getRootUrl();
-                if (hudsonRootUrl==null||hudsonRootUrl.length()==0) {
+                if (hudsonRootUrl == null || hudsonRootUrl.length() == 0) {
                     //LOGGER.warning("Can't find anything like a decent hudson url. Punting, returning empty string."); 
                     return "";
 
@@ -230,8 +228,8 @@ public class TapTestResultResult extends TestResult {
             }
 
             //LOGGER.info("Here's our relative path: " + buf.toString()); 
-            return buf.toString(); 
         }
+        return buf.toString();
 
     }
     

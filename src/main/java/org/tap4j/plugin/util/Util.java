@@ -51,9 +51,9 @@ public final class Util {
         workspace = workspace.replaceAll("\\\\", "\\/");
         relative = relative.replaceAll("\\\\", "\\/");
         if (relative.length() > workspace.length() && relative.contains(workspace)) {
-            String temp = relative.substring(workspace.length(), relative.length());
+            String temp = relative.substring(workspace.length());
             if (temp.startsWith("/") || temp.startsWith("\\"))
-                temp = temp.substring(1, temp.length());
+                temp = temp.substring(1);
             return temp;
         }
         return relative;
@@ -84,10 +84,10 @@ public final class Util {
         Directive directive = testResult.getDirective();
         StatusValues status = testResult.getStatus();
         if (directive != null) {
-            if(directive.getDirectiveValue() == DirectiveValues.TODO && todoIsFailure != null && true == todoIsFailure) {
+            if(directive.getDirectiveValue() == DirectiveValues.TODO && todoIsFailure != null && todoIsFailure) {
                 r = true;
             }
-        } else if (status != null && status == StatusValues.NOT_OK) {
+        } else if (status == StatusValues.NOT_OK) {
             r = true;
         }
         return r;
