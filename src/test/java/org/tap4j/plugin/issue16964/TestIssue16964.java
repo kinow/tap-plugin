@@ -68,6 +68,7 @@ public class TestIssue16964 {
                 false,
                 false,
                 false,
+                false,
                 false);
         project.getPublishersList().add(publisher);
         project.save();

@@ -60,7 +60,8 @@ public class TestIssue16647 {
                 true,
                 true,
                 true,
-                true);
+                true,
+                false);
         project.getPublishersList().add(publisher);
         project.save();
         FreeStyleBuild build = (FreeStyleBuild) project.scheduleBuild2(0).get();

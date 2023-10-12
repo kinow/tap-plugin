@@ -99,6 +99,7 @@ public class TestStripSingleParent {
                 true,  // showOnlyFailures
                 true,  // stripSingleParents
                 false, // flattenTapResult
+                false,
                 false);
 
         project.getPublishersList().add(publisher);
