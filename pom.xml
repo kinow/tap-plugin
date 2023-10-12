@@ -130,6 +130,7 @@ SOFTWARE.
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-cps</artifactId>
+      <version>[2803.v1a_f77ffcc773,)</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
