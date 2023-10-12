@@ -57,7 +57,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
- * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
+ * @author Bruno P. Kinoshita - <a href="https://kinoshita.eti.br">...</a>
  * @since 1.0
  */
 public class TapResult implements ModelObject, Serializable {
@@ -68,9 +68,9 @@ public class TapResult implements ModelObject, Serializable {
 
     private static final String DURATION_KEY = "duration_ms";
 
-    private Run build;
-    private List<TestSetMap> testSets;
-    private List<TestSetMap> parseErrorTestSets;
+    private Run<?, ?> build;
+    private final  List<TestSetMap> testSets;
+    private final  List<TestSetMap> parseErrorTestSets;
     private int failed = 0;
     private int passed = 0;
     private int skipped = 0;
@@ -78,13 +78,13 @@ public class TapResult implements ModelObject, Serializable {
     private int bailOuts = 0;
     private int total = 0;
     private float duration = 0.0f;
-    private String name;
-    private Boolean todoIsFailure;
-    private Boolean includeCommentDiagnostics;
-    private Boolean validateNumberOfTests;
+    private final String name;
+    private final Boolean todoIsFailure;
+    private final Boolean includeCommentDiagnostics;
+    private final Boolean validateNumberOfTests;
     private Boolean showOnlyFailures = Boolean.FALSE;
 
-    public TapResult(String name, Run owner, List<TestSetMap> testSets, Boolean todoIsFailure,
+    public TapResult(String name, Run<?, ?> owner, List<TestSetMap> testSets, Boolean todoIsFailure,
             Boolean includeCommentDiagnostics, Boolean validateNumberOfTests) {
         this.name = name;
         this.build = owner;
@@ -96,7 +96,7 @@ public class TapResult implements ModelObject, Serializable {
     }
 
     public TapResult copyWithExtraTestSets(List<TestSetMap> testSets) {
-        List<TestSetMap> mergedTestSets = new ArrayList<TestSetMap>(getTestSets());
+        List<TestSetMap> mergedTestSets = new ArrayList<>(getTestSets());
         mergedTestSets.addAll(testSets);
 
         return new TapResult(this.getName(), this.getOwner(), mergedTestSets, this.getTodoIsFailure(),
@@ -122,27 +122,26 @@ public class TapResult implements ModelObject, Serializable {
      * @return the includeCommentDiagnostics
      */
     public Boolean getIncludeCommentDiagnostics() {
-        return (includeCommentDiagnostics == null) ? true : includeCommentDiagnostics;
+        return includeCommentDiagnostics == null || includeCommentDiagnostics;
     }
 
     public Boolean getValidateNumberOfTests() {
-        return (validateNumberOfTests == null) ? false : validateNumberOfTests;
+        return validateNumberOfTests != null && validateNumberOfTests;
     }
 
     /**
-     * @param testSets Untiltered test sets
+     * @param testSets Unfiltered test sets
      * @return Test sets that failed to parse
      */
     private List<TestSetMap> filterParseErrorTestSets(List<TestSetMap> testSets) {
-        final List<TestSetMap> filtered = new ArrayList<TestSetMap>();
+        final List<TestSetMap> filtered = new ArrayList<>();
         for (TestSetMap testSet : testSets) {
             if (testSet instanceof ParseErrorTestSetMap) {
                 String rootDir = build.getRootDir()
                         .getAbsolutePath();
                 try {
                     rootDir = new File(build.getRootDir()
-                            .getCanonicalPath()
-                            .toString(), Constants.TAP_DIR_NAME).getAbsolutePath();
+                            .getCanonicalPath(), Constants.TAP_DIR_NAME).getAbsolutePath();
                 } catch (IOException e) {
                     LOGGER.warning(e.getMessage());
                 }
@@ -158,15 +157,14 @@ public class TapResult implements ModelObject, Serializable {
      * @return Test sets that didn't fail to parse
      */
     private List<TestSetMap> filterTestSet(List<TestSetMap> testSets) {
-        final List<TestSetMap> filtered = new ArrayList<TestSetMap>();
+        final List<TestSetMap> filtered = new ArrayList<>();
         for (TestSetMap testSet : testSets) {
-            if (testSet instanceof ParseErrorTestSetMap == false) {
+            if (!(testSet instanceof ParseErrorTestSetMap)) {
                 String rootDir = build.getRootDir()
                         .getAbsolutePath();
                 try {
                     rootDir = new File(build.getRootDir()
-                            .getCanonicalPath()
-                            .toString(), Constants.TAP_DIR_NAME).getAbsolutePath();
+                            .getCanonicalPath(), Constants.TAP_DIR_NAME).getAbsolutePath();
                 } catch (IOException e) {
                     LOGGER.warning(e.getMessage());
                 }
@@ -213,7 +211,7 @@ public class TapResult implements ModelObject, Serializable {
                     if (diagnostic != null && !diagnostic.isEmpty()) {
                         Object duration = diagnostic.get(DURATION_KEY);
                         if (duration != null) {
-                            Float durationMS = Float.parseFloat(duration.toString());
+                            float durationMS = Float.parseFloat(duration.toString());
                             this.duration += durationMS;
                         }
                     }
@@ -224,14 +222,14 @@ public class TapResult implements ModelObject, Serializable {
         }
     }
 
-    public Run getOwner() {
+    public Run<?, ?> getOwner() {
         return this.build;
     }
 
     /**
      * @param owner the owner to set
      */
-    public void setOwner(Run owner) {
+    public void setOwner(Run<?, ?> owner) {
         this.build = owner;
     }
 
@@ -297,7 +295,7 @@ public class TapResult implements ModelObject, Serializable {
      * @return {@code true} if the object is not null and an instance of {@link TestResult}
      */
     public boolean isTestResult(Object tapResult) {
-        return (tapResult != null && tapResult instanceof TestResult);
+        return (tapResult instanceof TestResult);
     }
 
     /**
@@ -305,11 +303,11 @@ public class TapResult implements ModelObject, Serializable {
      * @return {@code true} if the object is not null and an instance of {@link BailOut}
      */
     public boolean isBailOut(Object tapResult) {
-        return (tapResult != null && tapResult instanceof BailOut);
+        return (tapResult instanceof BailOut);
     }
 
     public boolean isComment(Object tapResult) {
-        return (tapResult != null && tapResult instanceof Comment);
+        return (tapResult instanceof Comment);
     }
 
     public String escapeHTML(String html) {
@@ -363,26 +361,18 @@ public class TapResult implements ModelObject, Serializable {
             } else {
                 sos.println("Couldn't read FilePath.");
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
         }
     }
 
-    /**
-     * @param ts
-     * @param key
-     * @return
-     */
     private TapAttachment getAttachment(TestSet ts, String key) {
         for (TestResult tr : ts.getTestResults()) {
             Map<String, Object> diagnostics = tr.getDiagnostic();
             if (diagnostics != null && diagnostics.size() > 0) {
-                TapAttachment attachement = recursivelySearch(diagnostics, null, key);
-                if (attachement != null) {
-                    return attachement;
+                TapAttachment attachment = recursivelySearch(diagnostics, null, key);
+                if (attachment != null) {
+                    return attachment;
                 }
             }
         }
@@ -404,13 +394,13 @@ public class TapResult implements ModelObject, Serializable {
                         Object o = diagnostics.get("File-Content");
                         if (o == null)
                             o = diagnostics.get("File-content");
-                        if (o != null && o instanceof String)
+                        if (o instanceof String)
                             return new TapAttachment(Base64.decodeBase64((String) o), diagnostics);
                     } else if (diagnosticKey.equalsIgnoreCase("file-name") && value.equals(key)) {
                         Object o = diagnostics.get("File-Content");
                         if (o == null)
                             o = diagnostics.get("File-content");
-                        if (o != null && o instanceof String)
+                        if (o instanceof String)
                             return new TapAttachment(Base64.decodeBase64((String) o), diagnostics);
                     }
                 }

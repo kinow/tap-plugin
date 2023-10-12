@@ -30,7 +30,6 @@ import hudson.model.Job;
 /**
  * Base class for TAP Project action.
  * 
- * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
 public class AbstractTapProjectAction implements Action {
@@ -42,11 +41,11 @@ public class AbstractTapProjectAction implements Action {
 
     public AbstractTapProjectAction(Job<?,?> job) {
         this.job = job;
-        project = job instanceof AbstractProject ? (AbstractProject) job : null;
+        project = job instanceof AbstractProject ? (AbstractProject<?, ?>) job : null;
     }
 
     public AbstractTapProjectAction(AbstractProject<?, ?> project) {
-        this((Job) project);
+        this((Job<?, ?>) project);
     }
 
     public static final String URL_NAME = "tapResults";
@@ -72,9 +71,9 @@ public class AbstractTapProjectAction implements Action {
     public String getUrlName() {
         return URL_NAME;
     }
-    
+
     public String getSearchUrl() {
         return URL_NAME;
     }
-    
+
 }

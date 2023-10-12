@@ -47,7 +47,6 @@ import hudson.model.Run;
 /**
  * Executes remote TAP Stream retrieval and execution.
  *
- * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.1
  */
 public class TapParser {
@@ -151,7 +150,7 @@ public class TapParser {
         return false;
     }
 
-    public TapResult parse(FilePath[] results, Run build) {
+    public TapResult parse(FilePath[] results, Run<?, ?> build) {
         this.parserErrors = Boolean.FALSE;
         this.hasFailedTests = Boolean.FALSE;
         final List<TestSetMap> testSets = new LinkedList<>();
@@ -182,10 +181,8 @@ public class TapParser {
                     if (this.outputTapToConsole) {
                         try {
                             log(FileUtils.readFileToString(tapFile));
-                        } catch (RuntimeException re) {
+                        } catch (RuntimeException | IOException re) {
                             log(re);
-                        } catch (IOException e) {
-                            log(e);
                         }
                     }
                 } catch (ParserException pe) {
@@ -195,11 +192,8 @@ public class TapParser {
                 }
             }
         }
-        // final TapResult testResult = new
-        // TapResult(UUID.randomUUID().toString(), build, testSets);
-        final TapResult testResult = new TapResult("TAP Test Results", build, testSets, this.todoIsFailure,
+        return new TapResult("TAP Test Results", build, testSets, this.todoIsFailure,
                 this.includeCommentDiagnostics, this.validateNumberOfTests);
-        return testResult;
     }
 
     private TestSet stripSingleParentsAsRequired(TestSet originalSet) {

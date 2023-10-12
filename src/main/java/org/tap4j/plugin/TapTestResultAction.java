@@ -46,7 +46,6 @@ import java.util.List;
 
 /**
  * 
- * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 0.1
  */
 public class TapTestResultAction
@@ -58,21 +57,7 @@ public class TapTestResultAction
 
     private TapResult tapResult;
 
-
-    /**
-     * @param owner
-     * @param tapResult
-     */
-    @Deprecated
-    protected TapTestResultAction(AbstractBuild<?, ?> owner, TapResult tapResult) {
-        this((Run) owner, tapResult);
-    }
-
-    /**
-     * @param r
-     * @param tapResult
-     */
-    protected TapTestResultAction(Run r, TapResult tapResult) {
+    protected TapTestResultAction(Run<?, ?> r, TapResult tapResult) {
         setRunAndOwner(r);
 
         this.tapResult = tapResult;

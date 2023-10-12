@@ -63,7 +63,6 @@ import jenkins.tasks.SimpleBuildStep;
 /**
  * Publishes TAP results in Jenkins builds.
  *
- * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
 public class TapPublisher extends Recorder implements MatrixAggregatable, SimpleBuildStep {
@@ -103,106 +102,6 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
      */
     private final Boolean skipIfBuildNotOk;
 
-    @Deprecated
-    public TapPublisher(String testResults,
-            Boolean failIfNoResults,
-            Boolean failedTestsMarkBuildAsFailure,
-            Boolean outputTapToConsole,
-            Boolean enableSubtests,
-            Boolean discardOldReports,
-            Boolean todoIsFailure,
-            Boolean includeCommentDiagnostics,
-            Boolean validateNumberOfTests,
-            Boolean planRequired,
-            Boolean verbose) {
-        this(testResults, failIfNoResults, failedTestsMarkBuildAsFailure,
-                outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure,
-                includeCommentDiagnostics, validateNumberOfTests, planRequired, verbose,
-                Boolean.FALSE);
-    }
-
-    @Deprecated
-    public TapPublisher(String testResults,
-            Boolean failIfNoResults,
-            Boolean failedTestsMarkBuildAsFailure,
-            Boolean outputTapToConsole,
-            Boolean enableSubtests,
-            Boolean discardOldReports,
-            Boolean todoIsFailure,
-            Boolean includeCommentDiagnostics,
-            Boolean validateNumberOfTests,
-            Boolean planRequired,
-            Boolean verbose,
-            Boolean showOnlyFailures) {
-        this(testResults, failIfNoResults, failedTestsMarkBuildAsFailure,
-                outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure,
-                includeCommentDiagnostics, validateNumberOfTests, planRequired, verbose,
-                Boolean.FALSE, Boolean.FALSE);
-    }
-
-    @Deprecated
-    public TapPublisher(String testResults,
-            Boolean failIfNoResults,
-            Boolean failedTestsMarkBuildAsFailure,
-            Boolean outputTapToConsole,
-            Boolean enableSubtests,
-            Boolean discardOldReports,
-            Boolean todoIsFailure,
-            Boolean includeCommentDiagnostics,
-            Boolean validateNumberOfTests,
-            Boolean planRequired,
-            Boolean verbose,
-            Boolean showOnlyFailures,
-            Boolean stripSingleParents) {
-        this(testResults, failIfNoResults, failedTestsMarkBuildAsFailure,
-                outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure,
-                includeCommentDiagnostics, validateNumberOfTests, planRequired, verbose,
-                Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
-    }
-
-    @Deprecated
-    public TapPublisher(String testResults,
-            Boolean failIfNoResults,
-            Boolean failedTestsMarkBuildAsFailure,
-            Boolean outputTapToConsole,
-            Boolean enableSubtests,
-            Boolean discardOldReports,
-            Boolean todoIsFailure,
-            Boolean includeCommentDiagnostics,
-            Boolean validateNumberOfTests,
-            Boolean planRequired,
-            Boolean verbose,
-            Boolean showOnlyFailures,
-            Boolean stripSingleParents,
-            Boolean flattenTapResult) {
-        this(testResults, failIfNoResults, failedTestsMarkBuildAsFailure,
-                outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure,
-                includeCommentDiagnostics, validateNumberOfTests, planRequired, verbose,
-                showOnlyFailures, stripSingleParents, flattenTapResult, Boolean.FALSE);
-    }
-
-    @Deprecated
-    public TapPublisher(String testResults,
-            Boolean failIfNoResults,
-            Boolean failedTestsMarkBuildAsFailure,
-            Boolean outputTapToConsole,
-            Boolean enableSubtests,
-            Boolean discardOldReports,
-            Boolean todoIsFailure,
-            Boolean includeCommentDiagnostics,
-            Boolean validateNumberOfTests,
-            Boolean planRequired,
-            Boolean verbose,
-            Boolean showOnlyFailures,
-            Boolean stripSingleParents,
-            Boolean flattenTapResult,
-            Boolean skipIfBuildNotOk) {
-        this(testResults, failIfNoResults, failedTestsMarkBuildAsFailure,
-                outputTapToConsole, enableSubtests, discardOldReports, todoIsFailure,
-                includeCommentDiagnostics, validateNumberOfTests, planRequired, verbose,
-                showOnlyFailures, stripSingleParents, flattenTapResult, Boolean.FALSE, skipIfBuildNotOk);
-    }
-
     @DataBoundConstructor
     public TapPublisher(String testResults,
             Boolean failIfNoResults,
@@ -237,42 +136,6 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         this.flattenTapResult = BooleanUtils.toBooleanDefaultIfNull(flattenTapResult, false);
         this.removeYamlIfCorrupted = BooleanUtils.toBooleanDefaultIfNull(removeYamlIfCorrupted, false);
         this.skipIfBuildNotOk = BooleanUtils.toBooleanDefaultIfNull(skipIfBuildNotOk, false);
-    }
-
-    public Object readResolve() {
-        final String _testResults = this.getTestResults();
-        final Boolean _failIfNoResults = BooleanUtils.toBooleanDefaultIfNull(this.getFailIfNoResults(), false);
-        final Boolean _failedTestsMarkBuildAsFailure = BooleanUtils.toBooleanDefaultIfNull(this.getFailedTestsMarkBuildAsFailure(), false);
-        final Boolean _outputTapToConsole = BooleanUtils.toBooleanDefaultIfNull(this.getOutputTapToConsole(), false);
-        final Boolean _enableSubtests = BooleanUtils.toBooleanDefaultIfNull(this.getEnableSubtests(), true);
-        final Boolean _discardOldReports = BooleanUtils.toBooleanDefaultIfNull(this.getDiscardOldReports(), false);
-        final Boolean _todoIsFailure = BooleanUtils.toBooleanDefaultIfNull(this.getTodoIsFailure(), true);
-        final Boolean _includeCommentDiagnostics = BooleanUtils.toBooleanDefaultIfNull(this.getIncludeCommentDiagnostics(), true);
-        final Boolean _validateNumberOfTests = BooleanUtils.toBooleanDefaultIfNull(this.getValidateNumberOfTests(), false);
-        final Boolean _planRequired = BooleanUtils.toBooleanDefaultIfNull(this.getPlanRequired(), true);
-        final Boolean _verbose = BooleanUtils.toBooleanDefaultIfNull(this.getVerbose(), true);
-        final Boolean _showOnlyFailures = BooleanUtils.toBooleanDefaultIfNull(this.getShowOnlyFailures(), false);
-        final Boolean _stripSingleParents = BooleanUtils.toBooleanDefaultIfNull(this.getStripSingleParents(), false);
-        final Boolean _flattenTapResult = BooleanUtils.toBooleanDefaultIfNull(this.getFlattenTapResult(), false);
-        final Boolean _removeYamlIfCorrupted = BooleanUtils.toBooleanDefaultIfNull(this.getRemoveYamlIfCorrupted(), false);
-
-        return new TapPublisher(
-                _testResults,
-                _failIfNoResults,
-                _failedTestsMarkBuildAsFailure,
-                _outputTapToConsole,
-                _enableSubtests,
-                _discardOldReports,
-                _todoIsFailure,
-                _includeCommentDiagnostics,
-                _validateNumberOfTests,
-                _planRequired,
-                _verbose,
-                _showOnlyFailures,
-                _stripSingleParents,
-                _flattenTapResult,
-                _removeYamlIfCorrupted
-        );
     }
 
     public Boolean getShowOnlyFailures() {
@@ -369,7 +232,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
      * @param build Jenkins build
      * @return virtual directory (FilePath)
      */
-    public static FilePath getReportsDirectory(Run build) {
+    public static FilePath getReportsDirectory(Run<?, ?> build) {
         return new FilePath(new File(build.getRootDir().getAbsolutePath())).child(Constants.TAP_DIR_NAME);
     }
 
@@ -403,7 +266,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         performImpl(run, workspace, listener);
     }
 
-    private boolean performImpl(Run<?, ?> build, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
+    private void performImpl(Run<?, ?> build, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
         final PrintStream logger = listener.getLogger();
         if (isPerformPublisher(build)) {
             logger.println("TAP Reports Processing: START");
@@ -425,18 +288,17 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
                 if(this.getFailIfNoResults()) {
                     logger.println("Did not find any matching files. Setting build result to FAILURE.");
                     build.setResult(Result.FAILURE);
-                    return Boolean.FALSE;
                 } else {
                     logger.println("Did not find any matching files.");
                     // build can still continue
-                    return Boolean.TRUE;
                 }
+                return;
             }
 
             boolean filesSaved = saveReports(workspace, TapPublisher.getReportsDirectory(build), reports, logger);
             if (!filesSaved) {
                 logger.println("Failed to save TAP reports");
-                return Boolean.TRUE;
+                return;
             }
 
             TapResult testResult = null;
@@ -467,8 +329,9 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
                 build.addAction(trAction);
             }
 
+            assert testResult != null;
             if (testResult.getTestSets().size() > 0 || testResult.getParseErrorTestSets().size() > 0) {
-                // create an individual report for all of the results and add it to
+                // create an individual report for all the results and add it to
                 // the build
 
                 TapBuildAction action = build.getAction(TapBuildAction.class);
@@ -506,13 +369,12 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
 
             } else {
                 logger.println("Found matching files but did not find any TAP results.");
-                return Boolean.TRUE;
+                return;
             }
             logger.println("TAP Reports Processing: FINISH");
         } else {
             logger.println("Build result is not better or equal unstable. Skipping TAP publisher.");
         }
-        return Boolean.TRUE;
     }
 
     /**
@@ -539,7 +401,6 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
      * Iterates through the list of test sets and validates its plans and
      * test results.
      *
-     * @param testSets
      * @return <true> if there are any test case that doesn't follow the plan
      */
     private boolean validateNumberOfTests(List<TestSetMap> testSets) {
@@ -556,12 +417,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         return true;
     }
 
-    /**
-     * @param owner
-     * @param logger
-     * @return
-     */
-    private TapResult loadResults(String antPattern, Run owner, PrintStream logger) {
+    private TapResult loadResults(String antPattern, Run<?, ?> owner, PrintStream logger) {
         final FilePath tapDir = TapPublisher.getReportsDirectory(owner);
         FilePath[] results;
         TapResult tr;
@@ -575,19 +431,12 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         } catch (Exception e) {
             e.printStackTrace(logger);
 
-            tr = new TapResult("", owner, Collections.<TestSetMap>emptyList(), getTodoIsFailure(), getIncludeCommentDiagnostics(), getValidateNumberOfTests());
+            tr = new TapResult("", owner, Collections.emptyList(), getTodoIsFailure(), getIncludeCommentDiagnostics(), getValidateNumberOfTests());
             tr.setOwner(owner);
             return tr;
         }
     }
 
-    /**
-     * @param workspace
-     * @param tapDir
-     * @param reports
-     * @param logger
-     * @return
-     */
     private boolean saveReports(FilePath workspace, FilePath tapDir, FilePath[] reports,
             PrintStream logger) {
         logger.println("Saving reports...");
@@ -629,15 +478,10 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
 
     /**
      * Checks that there are new report files.
-     *
-     * @param build
-     * @param reports
-     * @param logger
-     * @return
      */
-    private FilePath[] checkReports(Run build,
+    private FilePath[] checkReports(Run<?, ?> build,
             FilePath[] reports, PrintStream logger) {
-        List<FilePath> filePathList = new ArrayList<FilePath>(reports.length);
+        List<FilePath> filePathList = new ArrayList<>(reports.length);
 
         for (FilePath report : reports) {
             /*
@@ -657,10 +501,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
                 } else {
                     logger.println(report.getName() + " was last modified before " + "this build started. Ignoring it.");
                 }
-            } catch (IOException e) {
-                // just log the exception
-                e.printStackTrace(logger);
-            } catch (InterruptedException e) {
+            } catch (IOException | InterruptedException e) {
                 // just log the exception
                 e.printStackTrace(logger);
             }
@@ -668,13 +509,6 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         return filePathList.toArray(new FilePath[] {});
     }
 
-    /**
-     * @param workspace
-     * @param testResults
-     * @return
-     * @throws InterruptedException
-     * @throws IOException
-     */
     private FilePath[] locateReports(FilePath workspace, String testResults) throws IOException, InterruptedException {
         return workspace.list(testResults);
     }
@@ -704,6 +538,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
             load();
         }
 
+        @Nonnull
         @Override
         public String getDisplayName() {
             return "Publish TAP Results";
@@ -715,7 +550,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
          * @see hudson.tasks.BuildStepDescriptor#isApplicable(java.lang.Class)
          */
         @Override
-        public boolean isApplicable(@SuppressWarnings("rawtypes") Class<? extends AbstractProject> jobType) {
+        public boolean isApplicable(Class<? extends AbstractProject> jobType) {
             return Boolean.TRUE;
         }
 

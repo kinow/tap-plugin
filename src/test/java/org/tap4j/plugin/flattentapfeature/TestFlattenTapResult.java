@@ -180,7 +180,8 @@ public class TestFlattenTapResult {
                 true,  // showOnlyFailures
                 false, // stripSingleParents
                 true, // flattenTapResult
-                false); //skipIfBuildNotOk
+                false, //skipIfBuildNotOk
+                false);
 
         project.getPublishersList().add(publisher);
         project.save();

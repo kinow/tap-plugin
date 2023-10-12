@@ -30,14 +30,13 @@ import java.util.Set;
 /**
  * Used to create YAML view.
  * 
- * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
 public class DiagnosticUtil {
 
     private enum RENDER_TYPE {
         TEXT, IMAGE
-    };
+    }
 
     private static final String INNER_TABLE_HEADER = "<tr>\n<td colspan='4' class='yaml'>\n<table width=\"100%\" class=\"yaml\">";
 
@@ -71,11 +70,11 @@ public class DiagnosticUtil {
                 for (int i = 0; i < depth; ++i) {
                     sb.append("<td width='5%' class='hidden'> </td>");
                 }
-                sb.append("<td style=\"width: auto;\">" + key + "</td>");
+                sb.append("<td style=\"width: auto;\">").append(key).append("</td>");
                 if(key.equals("File-Content")) {
                     String fileName = "attachment";
                     Object o = diagnostic.get("File-Name");
-                    if(o!=null && o instanceof String) {
+                    if(o instanceof String) {
                         fileName = (String)o;
                     }
                     String downloadKey = fileName;
@@ -84,9 +83,9 @@ public class DiagnosticUtil {
                             downloadKey = parentKey;
                         }
                     }
-                    sb.append("<td><a href='downloadAttachment?f="+tapFile+"&key="+downloadKey+"'>"+fileName+"</a></td>");
+                    sb.append("<td><a href='downloadAttachment?f=").append(tapFile).append("&key=").append(downloadKey).append("'>").append(fileName).append("</a></td>");
                 } else {
-                    sb.append("<td><pre>" + org.apache.commons.lang.StringEscapeUtils.escapeHtml(value.toString()) + "</pre></td>");
+                    sb.append("<td><pre>").append(org.apache.commons.lang.StringEscapeUtils.escapeHtml(value.toString())).append("</pre></td>");
                 }
                 sb.append("</tr>");
             }
@@ -99,13 +98,13 @@ public class DiagnosticUtil {
                 for (int i = 0; i < depth; ++i) {
                     sb.append("<td width='5%' class='hidden'> </td>");
                 }
-                sb.append("<td style=\"width: auto;\">" + key + "</td>");
+                sb.append("<td style=\"width: auto;\">").append(key).append("</td>");
                 if (value instanceof java.util.Map) {
                     sb.append("<td> </td>");
                     createDiagnosticTableRecursively(tapFile, key, (java.util.Map) value, sb,
                             (depth + 1));
                 } else {
-                    sb.append("<td><pre>" + org.apache.commons.lang.StringEscapeUtils.escapeHtml(value.toString()) + "</pre></td>");
+                    sb.append("<td><pre>").append(org.apache.commons.lang.StringEscapeUtils.escapeHtml(value.toString())).append("</pre></td>");
                 }
                 sb.append("</tr>");
             }
@@ -114,10 +113,6 @@ public class DiagnosticUtil {
         sb.append(INNER_TABLE_FOOTER);
     }
 
-    /**
-     * @param diagnostic
-     * @return
-     */
     private static RENDER_TYPE getMapEntriesRenderType(
             Map<String, Object> diagnostic) {
         RENDER_TYPE renderType = RENDER_TYPE.TEXT;

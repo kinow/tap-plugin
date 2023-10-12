@@ -32,13 +32,11 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.labels.CategoryToolTipGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.StackedAreaRenderer;
 import org.jfree.chart.title.LegendTitle;
-import org.jfree.chart.urls.CategoryURLGenerator;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
@@ -134,13 +132,13 @@ public class GraphHelper
 
               switch (row) {
                   case 0:
-                      return String.valueOf(report.getFailed()) + " Failure(s)";
+                      return report.getFailed() + " Failure(s)";
                   case 1:
-                     return String.valueOf(report.getPassed()) + " Pass";
+                     return report.getPassed() + " Pass";
                   case 2:
-                     return String.valueOf(report.getSkipped()) + " Skip(s)";
+                     return report.getSkipped() + " Skip(s)";
                   case 3:
-                     return String.valueOf(report.getToDo()) + " ToDo(s)";
+                     return report.getToDo() + " ToDo(s)";
                   default:
                      return "";
               }
@@ -171,7 +169,7 @@ public class GraphHelper
      * @param dataset
      *            data set to be displayed on the graph
      * @param statusMap
-     *            a map with build as key and the test methods execution status
+     *            a map with build as key and the test method's execution status
      *            (result) as the value
      * @param methodUrl
      *            URL to get to the method from a build test result page
@@ -221,7 +219,7 @@ public class GraphHelper
         {
 
             private static final long serialVersionUID = 961671076462240008L;
-            Map<String, Paint> statusPaintMap = new HashMap<String, Paint>();
+            final Map<String, Paint> statusPaintMap = new HashMap<>();
 
             {
                 statusPaintMap.put("PASS", ColorPalette.BLUE);
@@ -251,37 +249,27 @@ public class GraphHelper
             }
         };
 
-        br.setBaseToolTipGenerator(new CategoryToolTipGenerator()
-        {
-            public String generateToolTip( CategoryDataset dataset, int row,
-                    int column )
+        br.setBaseToolTipGenerator((dataset1, row, column) -> {
+            NumberOnlyBuildLabel label = (NumberOnlyBuildLabel) dataset1
+                    .getColumnKey(column);
+            if ("UNKNOWN".equals(statusMap.get(label)))
             {
-                NumberOnlyBuildLabel label = (NumberOnlyBuildLabel) dataset
-                        .getColumnKey(column);
-                if ("UNKNOWN".equals(statusMap.get(label)))
-                {
-                    return "unknown";
-                }
-                // values are in seconds
-                return dataset.getValue(row, column) + " secs";
+                return "unknown";
             }
+            // values are in seconds
+            return dataset1.getValue(row, column) + " secs";
         });
 
-        br.setBaseItemURLGenerator(new CategoryURLGenerator()
-        {
-            public String generateURL( CategoryDataset dataset, int series,
-                    int category )
+        br.setBaseItemURLGenerator((dataset12, series, category) -> {
+            NumberOnlyBuildLabel label = (NumberOnlyBuildLabel) dataset12
+                    .getColumnKey(category);
+            if ("UNKNOWN".equals(statusMap.get(label)))
             {
-                NumberOnlyBuildLabel label = (NumberOnlyBuildLabel) dataset
-                        .getColumnKey(category);
-                if ("UNKNOWN".equals(statusMap.get(label)))
-                {
-                    // no link when method result doesn't exist
-                    return null;
-                }
-                // return label.build.getUpUrl() + label.build.getNumber() + "/" + PluginImpl.URL + "/" + methodUrl;
-                return label.build.getUpUrl() + label.getRun().getNumber() + "/tap/" + methodUrl;
+                // no link when method result doesn't exist
+                return null;
             }
+            // return label.build.getUpUrl() + label.build.getNumber() + "/" + PluginImpl.URL + "/" + methodUrl;
+            return label.build.getUpUrl() + label.getRun().getNumber() + "/tap/" + methodUrl;
         });
 
         br.setItemMargin(0.0);
