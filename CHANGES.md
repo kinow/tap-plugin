@@ -6,3 +6,4 @@
 2. Added `CHANGES.md`
 3. Updated `README.md`
 4. [#32](https://github.com/jenkinsci/tap-plugin/pull/32): Update pom.xml (plugins, dependencies, Jenkins version)
+5. Bump io.jenkins.tools.bom.bom-2.414.x to bom-2.426.x 2598.v49e2b_e68d413 #33

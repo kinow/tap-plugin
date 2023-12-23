@@ -35,6 +35,7 @@ import org.tap4j.model.TestSet;
 import org.tap4j.plugin.TapResult;
 import org.tap4j.util.StatusValues;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,7 +49,7 @@ import java.util.List;
 public class TapStreamResult extends TabulatedResult {
 
     private static final long serialVersionUID = 8337146933697574082L;
-    private final Run<?, ?> owner;
+    private final transient Run<?, ?> owner;
     private List<TestResult> children = new ArrayList<>();
     private TapResult tapResult;
 
@@ -68,6 +69,7 @@ public class TapStreamResult extends TabulatedResult {
     /* (non-Javadoc)
      * @see hudson.tasks.test.TestObject#getOwner()
      */
+    @Nullable
     @Override
     public Run<?, ?> getRun() {
         return owner;

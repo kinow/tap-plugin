@@ -59,12 +59,13 @@ public class TapAttachment {
         int size = -1;
         String fileType = "";
         String fileName = "tapAttachment";
-        for (String key : diagnostics.keySet()) {
-            if (diagnostics.get(key) instanceof Map<?, ?> == Boolean.FALSE) {
+        for (Map.Entry<String, Object> entry : diagnostics.entrySet()) {
+            final String key = entry.getKey();
+            final Object value = entry.getValue();
+            if (value instanceof Map<?, ?> == Boolean.FALSE) {
                 if (key.equalsIgnoreCase("file-size")) {
                     try {
-                        size = (int) Long.parseLong(diagnostics.get(key)
-                                .toString());
+                        size = (int) Long.parseLong(diagnostics.get(key).toString());
                     } catch (NumberFormatException nfe) {
                         // Do nothing
                     }

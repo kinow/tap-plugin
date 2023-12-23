@@ -47,11 +47,13 @@ import org.tap4j.plugin.util.Constants;
 import org.tap4j.plugin.util.DiagnosticUtil;
 import org.tap4j.plugin.util.Util;
 
+import javax.annotation.Nullable;
 import javax.servlet.ServletOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -68,7 +70,7 @@ public class TapResult implements ModelObject, Serializable {
 
     private static final String DURATION_KEY = "duration_ms";
 
-    private Run<?, ?> build;
+    private transient Run<?, ?> build;
     private final  List<TestSetMap> testSets;
     private final  List<TestSetMap> parseErrorTestSets;
     private int failed = 0;
@@ -134,11 +136,13 @@ public class TapResult implements ModelObject, Serializable {
      * @return Test sets that failed to parse
      */
     private List<TestSetMap> filterParseErrorTestSets(List<TestSetMap> testSets) {
+        if (this.build == null) {
+            return Collections.emptyList();
+        }
         final List<TestSetMap> filtered = new ArrayList<>();
         for (TestSetMap testSet : testSets) {
             if (testSet instanceof ParseErrorTestSetMap) {
-                String rootDir = build.getRootDir()
-                        .getAbsolutePath();
+                String rootDir = build.getRootDir().getAbsolutePath();
                 try {
                     rootDir = new File(build.getRootDir()
                             .getCanonicalPath(), Constants.TAP_DIR_NAME).getAbsolutePath();
@@ -157,11 +161,13 @@ public class TapResult implements ModelObject, Serializable {
      * @return Test sets that didn't fail to parse
      */
     private List<TestSetMap> filterTestSet(List<TestSetMap> testSets) {
+        if (this.build == null) {
+            return Collections.emptyList();
+        }
         final List<TestSetMap> filtered = new ArrayList<>();
         for (TestSetMap testSet : testSets) {
             if (!(testSet instanceof ParseErrorTestSetMap)) {
-                String rootDir = build.getRootDir()
-                        .getAbsolutePath();
+                String rootDir = build.getRootDir().getAbsolutePath();
                 try {
                     rootDir = new File(build.getRootDir()
                             .getCanonicalPath(), Constants.TAP_DIR_NAME).getAbsolutePath();
@@ -222,6 +228,7 @@ public class TapResult implements ModelObject, Serializable {
         }
     }
 
+    @Nullable
     public Run<?, ?> getOwner() {
         return this.build;
     }
@@ -333,33 +340,39 @@ public class TapResult implements ModelObject, Serializable {
     }
 
     public void doDownloadAttachment(StaplerRequest request, StaplerResponse response) {
-        String f = request.getParameter("f");
-        String key = request.getParameter("key");
+        final String f = request.getParameter("f");
+        final String key = request.getParameter("key");
         try {
-            FilePath parent = new FilePath(new File(build.getRootDir(), Constants.TAP_DIR_NAME));
-            FilePath tapDir = parent.child(TestObject.safe(f));
-            ServletOutputStream sos = response.getOutputStream();
-            if (tapDir.exists()) {
-                String tapStream = tapDir.readToString();
-                TapConsumer consumer = TapConsumerFactory.makeTap13YamlConsumer();
-                TestSet ts = consumer.load(tapStream);
+            final ServletOutputStream sos = response.getOutputStream();
 
-                TapAttachment attachment = getAttachment(ts, key);
-                if (attachment != null) {
-                    response.setContentType("application/force-download");
-                    // response.setContentLength((int)tapDir.length());
-                    response.setContentLength(attachment.getSize());
-                    response.setHeader("Content-Transfer-Encoding", "binary");
-                    response.setHeader("Content-Disposition",
-                            "attachment; filename=\"" + attachment.getFileName() + "\"");// fileName);
-
-                    sos.write(attachment.getContent());
-                    sos.print('\n');
-                } else {
-                    sos.println("Couldn't locate attachment in YAMLish: " + f);
-                }
+            if (build == null) {
+                sos.println("No build located in Jenkins. Cannot download attachment.");
             } else {
-                sos.println("Couldn't read FilePath.");
+                FilePath parent = new FilePath(new File(build.getRootDir(), Constants.TAP_DIR_NAME));
+                FilePath tapDir = parent.child(TestObject.safe(f));
+
+                if (tapDir.exists()) {
+                    String tapStream = tapDir.readToString();
+                    TapConsumer consumer = TapConsumerFactory.makeTap13YamlConsumer();
+                    TestSet ts = consumer.load(tapStream);
+
+                    TapAttachment attachment = getAttachment(ts, key);
+                    if (attachment != null) {
+                        response.setContentType("application/force-download");
+                        // response.setContentLength((int)tapDir.length());
+                        response.setContentLength(attachment.getSize());
+                        response.setHeader("Content-Transfer-Encoding", "binary");
+                        response.setHeader("Content-Disposition",
+                                "attachment; filename=\"" + attachment.getFileName() + "\"");// fileName);
+
+                        sos.write(attachment.getContent());
+                        sos.print('\n');
+                    } else {
+                        sos.println("Couldn't locate attachment in YAMLish: " + f);
+                    }
+                } else {
+                    sos.println("Couldn't read FilePath.");
+                }
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -381,8 +394,9 @@ public class TapResult implements ModelObject, Serializable {
 
     @SuppressWarnings("unchecked")
     private TapAttachment recursivelySearch(Map<String, Object> diagnostics, String parentKey, String key) {
-        for (String diagnosticKey : diagnostics.keySet()) {
-            Object value = diagnostics.get(diagnosticKey);
+        for (Map.Entry<String, Object> entry : diagnostics.entrySet()) {
+            final String diagnosticKey = entry.getKey();
+            final Object value = entry.getValue();
             if (value != null) {
                 if (value instanceof Map<?, ?>) {
                     TapAttachment attachment = recursivelySearch((Map<String, Object>) value, diagnosticKey, key);
