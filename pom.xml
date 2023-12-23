@@ -30,7 +30,7 @@ SOFTWARE.
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.74</version>
+    <version>4.76</version>
     <relativePath/>
   </parent>
 
@@ -60,7 +60,7 @@ SOFTWARE.
   <properties>
     <revision>2.4.0</revision>
     <changelist>-SNAPSHOT</changelist>
-    <jenkins.version>2.414.2</jenkins.version>
+    <jenkins.version>2.426.1</jenkins.version>
     <gitHubRepo>jenkinsci/tap-plugin</gitHubRepo>
     <tap4j.version>4.4.2</tap4j.version>
   </properties>
@@ -84,8 +84,8 @@ SOFTWARE.
     <dependencies>
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.414.x</artifactId>
-        <version>2496.vddfca_753db_80</version>
+        <artifactId>bom-2.426.x</artifactId>
+        <version>2598.v49e2b_e68d413</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -114,25 +114,21 @@ SOFTWARE.
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>matrix-project</artifactId>
-      <version>[1.18.1,)</version>
     </dependency>
     <!-- For JUnit test results UI compatibility -->
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>junit</artifactId>
-      <version>[1160.vf1f01a_a_ea_b_7f,)</version>
     </dependency>
     <!-- Test -->
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-job</artifactId>
-      <version>[1295.v395eb,)</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-cps</artifactId>
-      <version>[2803.v1a_f77ffcc773,)</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
