@@ -144,6 +144,10 @@ public class GraphHelper
               }
           }
 
+          @Override
+          public boolean equals(Object obj) {
+              return super.equals(obj);
+          }
       };
 
       plot.setRenderer(ar);
@@ -246,6 +250,16 @@ public class GraphHelper
                 Paint paint = statusPaintMap.get(statusMap.get(label));
                 // when the status of test method is unknown, use gray color
                 return paint == null ? Color.gray : paint;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                return super.equals(obj);
+            }
+
+            @Override
+            public int hashCode() {
+                return super.hashCode();
             }
         };
 

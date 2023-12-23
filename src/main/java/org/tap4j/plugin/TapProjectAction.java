@@ -211,15 +211,10 @@ public class TapProjectAction extends AbstractTapProjectAction {
      * @return true, if new image does NOT need to be generated, false otherwise
      */
     private boolean newGraphNotNeeded( final StaplerRequest req, StaplerResponse rsp ) {
-        Calendar t = this.job.getLastCompletedBuild().getTimestamp();
-        Integer prevNumBuilds = requestMap.get(req.getRequestURI());
-        int numBuilds = 0;
-        RunList<?> builds = this.job.getBuilds();
-        for (Run<?, ?> ignored : builds) {
-            numBuilds += 1;
-        }
+        final Calendar t = this.job.getLastCompletedBuild().getTimestamp();
+        final int prevNumBuilds = requestMap.getOrDefault(req.getRequestURI(), 0);
+        final int numBuilds = (int) this.job.getBuilds().stream().count();
 
-        prevNumBuilds = prevNumBuilds == null ? 0 : prevNumBuilds;
         if (prevNumBuilds != numBuilds) {
             requestMap.put(req.getRequestURI(), numBuilds);
         }

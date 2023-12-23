@@ -42,6 +42,7 @@ import org.tap4j.plugin.util.Util;
 import org.tap4j.util.DirectiveValues;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -61,7 +62,7 @@ public class TapTestResultResult extends TestResult {
     private static final long serialVersionUID = -4499261655602135921L;
     private static final Logger LOGGER = Logger.getLogger(TapTestResultResult.class.getName());
     
-    private final Run<?, ?> owner;
+    private final transient Run<?, ?> owner;
     private final org.tap4j.model.TestResult tapTestResult;
     private final TestSetMap testSetMap;
     private final Boolean todoIsFailure;
@@ -88,6 +89,7 @@ public class TapTestResultResult extends TestResult {
     /* (non-Javadoc)
      * @see hudson.tasks.test.TestObject#getOwner()
      */
+    @Nullable
     @Override
     public Run<?, ?> getRun() {
         return owner;

@@ -27,6 +27,7 @@ import hudson.model.Action;
 import hudson.model.Run;
 import org.kohsuke.stapler.StaplerProxy;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 
 /**
@@ -41,7 +42,7 @@ public class TapBuildAction implements Action, Serializable, StaplerProxy {
     public static final String ICON_NAME = "/plugin/tap/icons/tap-24.png";
     public static final String DISPLAY_NAME = "TAP Extended Test Results";
 
-    private final Run<?, ?> build;
+    private final transient Run<?, ?> build;
 
     private TapResult result;
 
@@ -90,6 +91,7 @@ public class TapBuildAction implements Action, Serializable, StaplerProxy {
     /**
      * @return the build
      */
+    @Nullable
     public Run<?, ?> getBuild() {
         return this.build;
     }
