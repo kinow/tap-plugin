@@ -1,5 +1,8 @@
 # TAP plug-in changelog
 
+## Version 2.5 (2024/??/??)
+
+
 ## Version 2.4 (2023/12/24)
 
 1. [#31](https://github.com/jenkinsci/tap-plugin/pull/31): Updated the code using IDE linter
