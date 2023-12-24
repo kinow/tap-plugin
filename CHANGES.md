@@ -2,6 +2,7 @@
 
 ## Version 2.5 (2024/??/??)
 
+1. Migrated old infra docs to GitHub README.md, will serve plug-in docs from GH Pages 
 
 ## Version 2.4 (2023/12/24)
 
