@@ -2,7 +2,8 @@
 
 ## Version 2.5 (2024/??/??)
 
-1. Migrated old infra docs to GitHub README.md, will serve plug-in docs from GH Pages
+1. Migrated old infra docs to GitHub `README.md`, will serve plug-in docs from GH Pages
+2. [JENKINS-72558](https://issues.jenkins.io/browse/JENKINS-72558): NullPointerException with TAP plugin version 2.4.0 (restored mistakenly removed `readObject`, #36)
 
 ## Version 2.4 (2023/12/24)
 
@@ -21,15 +22,15 @@
 
 ## Version 2.2.2 (2019-02-14)
 
-1. [ JENKINS-55787](https://issues.jenkins.io/browse/JENKINS-55787) - Getting issue details... STATUS
+1. [JENKINS-55787](https://issues.jenkins.io/browse/JENKINS-55787) - Getting issue details... STATUS
 
 ## Version 2.2.1 (2018-02-07)
 
-1. [ JENKINS-48925](https://issues.jenkins.io/browse/JENKINS-48925) - Getting issue details... STATUS
+1. [JENKINS-48925](https://issues.jenkins.io/browse/JENKINS-48925) - Getting issue details... STATUS
 
 ## Version 2.2 (2018-01-26)
 
-1. [ JENKINS-48925](https://issues.jenkins.io/browse/JENKINS-48925) - Getting issue details... STATUS
+1. [JENKINS-48925](https://issues.jenkins.io/browse/JENKINS-48925) - Getting issue details... STATUS
 
 ## Version 2.1 (2017-02-28)
 
