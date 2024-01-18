@@ -57,12 +57,21 @@ public class TestXssTapFile {
     public void testTapFileXss() throws IOException, SAXException, ExecutionException, InterruptedException {
         final FreeStyleProject project = j.createFreeStyleProject();
 
+        // We can add more scenarios where XSS must be prevented in
+        // the TAP stream. Just modify the file below, trying to use
+        // the next N in `alert(N)` so that it is easier to detect
+        // where it is coming from.
         final Shell shell = new Shell("echo \"\n" +
-                "1..1\n" +
-                "ok 1 - OK\n" +
+                "1..4 # <script>alert(1)</script>\n" +
+                "ok 1 - OK <script>alert(2)</script> # <script>alert(3)</script>\n" +
                 "  ---\n" +
-                "  <script>alert(1)</script>extensions:\n" +
+                "  <script>alert(4)</script>extensions:\n" +
                 "      injected\n" +
+                "  ...\n" +
+                "# <script>alert(5)</script>\n" +
+                "not ok 2 - failed! <script>alert(6)</script>\n" +
+                "ok 3 - # SKIP <script>alert(7)</script>\n" +
+                "ok 4 # TODO <script>alert(8)</script>\n" +
                 "\" > payload.tap\n");
         project.getBuildersList().add(shell);
 
