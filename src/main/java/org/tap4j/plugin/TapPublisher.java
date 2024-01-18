@@ -106,21 +106,21 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
 
     @DataBoundConstructor
     public TapPublisher(String testResults,
-            Boolean failIfNoResults,
-            Boolean failedTestsMarkBuildAsFailure,
-            Boolean outputTapToConsole,
-            Boolean enableSubtests,
-            Boolean discardOldReports,
-            Boolean todoIsFailure,
-            Boolean includeCommentDiagnostics,
-            Boolean validateNumberOfTests,
-            Boolean planRequired,
-            Boolean verbose,
-            Boolean showOnlyFailures,
-            Boolean stripSingleParents,
-            Boolean flattenTapResult,
-            Boolean removeYamlIfCorrupted,
-            Boolean skipIfBuildNotOk) {
+                        Boolean failIfNoResults,
+                        Boolean failedTestsMarkBuildAsFailure,
+                        Boolean outputTapToConsole,
+                        Boolean enableSubtests,
+                        Boolean discardOldReports,
+                        Boolean todoIsFailure,
+                        Boolean includeCommentDiagnostics,
+                        Boolean validateNumberOfTests,
+                        Boolean planRequired,
+                        Boolean verbose,
+                        Boolean showOnlyFailures,
+                        Boolean stripSingleParents,
+                        Boolean flattenTapResult,
+                        Boolean removeYamlIfCorrupted,
+                        Boolean skipIfBuildNotOk) {
 
         this.testResults = testResults;
         this.failIfNoResults = BooleanUtils.toBooleanDefaultIfNull(failIfNoResults, false);
@@ -138,6 +138,50 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
         this.flattenTapResult = BooleanUtils.toBooleanDefaultIfNull(flattenTapResult, false);
         this.removeYamlIfCorrupted = BooleanUtils.toBooleanDefaultIfNull(removeYamlIfCorrupted, false);
         this.skipIfBuildNotOk = BooleanUtils.toBooleanDefaultIfNull(skipIfBuildNotOk, false);
+    }
+
+    /**
+     * To prevent serialization issues after fields have been added or removed.
+     * e.g. <a href="https://issues.jenkins.io/browse/JENKINS-72558">https://issues.jenkins.io/browse/JENKINS-72558</a>.
+     *
+     * @return The instance
+     */
+    public Object readResolve() {
+        final String _testResults = this.getTestResults();
+        final Boolean _failIfNoResults = BooleanUtils.toBooleanDefaultIfNull(this.getFailIfNoResults(), false);
+        final Boolean _failedTestsMarkBuildAsFailure = BooleanUtils.toBooleanDefaultIfNull(this.getFailedTestsMarkBuildAsFailure(), false);
+        final Boolean _outputTapToConsole = BooleanUtils.toBooleanDefaultIfNull(this.getOutputTapToConsole(), false);
+        final Boolean _enableSubtests = BooleanUtils.toBooleanDefaultIfNull(this.getEnableSubtests(), true);
+        final Boolean _discardOldReports = BooleanUtils.toBooleanDefaultIfNull(this.getDiscardOldReports(), false);
+        final Boolean _todoIsFailure = BooleanUtils.toBooleanDefaultIfNull(this.getTodoIsFailure(), true);
+        final Boolean _includeCommentDiagnostics = BooleanUtils.toBooleanDefaultIfNull(this.getIncludeCommentDiagnostics(), true);
+        final Boolean _validateNumberOfTests = BooleanUtils.toBooleanDefaultIfNull(this.getValidateNumberOfTests(), false);
+        final Boolean _planRequired = BooleanUtils.toBooleanDefaultIfNull(this.getPlanRequired(), true);
+        final Boolean _verbose = BooleanUtils.toBooleanDefaultIfNull(this.getVerbose(), true);
+        final Boolean _showOnlyFailures = BooleanUtils.toBooleanDefaultIfNull(this.getShowOnlyFailures(), false);
+        final Boolean _stripSingleParents = BooleanUtils.toBooleanDefaultIfNull(this.getStripSingleParents(), false);
+        final Boolean _flattenTapResult = BooleanUtils.toBooleanDefaultIfNull(this.getFlattenTapResult(), false);
+        final Boolean _removeYamlIfCorrupted = BooleanUtils.toBooleanDefaultIfNull(this.getRemoveYamlIfCorrupted(), false);
+        final Boolean _skipIfBuildNotOk = BooleanUtils.toBooleanDefaultIfNull(this.skipIfBuildNotOk, false);
+
+        return new TapPublisher(
+                _testResults,
+                _failIfNoResults,
+                _failedTestsMarkBuildAsFailure,
+                _outputTapToConsole,
+                _enableSubtests,
+                _discardOldReports,
+                _todoIsFailure,
+                _includeCommentDiagnostics,
+                _validateNumberOfTests,
+                _planRequired,
+                _verbose,
+                _showOnlyFailures,
+                _stripSingleParents,
+                _flattenTapResult,
+                _removeYamlIfCorrupted,
+                _skipIfBuildNotOk
+        );
     }
 
     public Boolean getShowOnlyFailures() {
@@ -287,7 +331,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
             }
 
             if (reports.length == 0) {
-                if(this.getFailIfNoResults()) {
+                if (this.getFailIfNoResults()) {
                     logger.println("Did not find any matching files. Setting build result to FAILURE.");
                     build.setResult(Result.FAILURE);
                 } else {
@@ -356,7 +400,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
                     }
                 }
                 if (testResult.getFailed() > 0) {
-                    if(this.getFailedTestsMarkBuildAsFailure()) {
+                    if (this.getFailedTestsMarkBuildAsFailure()) {
                         listener.getLogger().println("There are failed test cases and the job is configured to mark the build as failure. Marking build as FAILURE");
                         build.setResult(Result.FAILURE);
                     } else {
@@ -382,6 +426,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
     /**
      * Return {@code true} if the build is ongoing, if the user did not ask to fail when
      * failed, or otherwise if the build result is not better or equal to unstable.
+     *
      * @param build Run
      * @return whether to perform the publisher or not, based on user provided configuration
      */
@@ -440,7 +485,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
     }
 
     private boolean saveReports(FilePath workspace, FilePath tapDir, FilePath[] reports,
-            PrintStream logger) {
+                                PrintStream logger) {
         logger.println("Saving reports...");
         try {
             tapDir.mkdirs();
@@ -448,7 +493,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
                 FilePath dst = Objects.requireNonNull(getDistDir(workspace, tapDir, report));
                 report.copyTo(dst);
             }
-        } catch (IOException|InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace(logger);
             return false;
         }
@@ -459,13 +504,13 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
      * Used to maintain the directory structure when persisting to the tap-reports dir.
      *
      * @param workspace Jenkins WS
-     * @param tapDir tap reports dir
-     * @param orig original directory
+     * @param tapDir    tap reports dir
+     * @param orig      original directory
      * @return persisted directory virtual structure
      */
     @Nullable
     private FilePath getDistDir(FilePath workspace, FilePath tapDir, FilePath orig) {
-        if(orig == null)
+        if (orig == null)
             return null;
         StringBuilder difference = new StringBuilder();
         FilePath parent = orig.getParent();
@@ -473,10 +518,10 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
             return null;
         }
         do {
-            if(parent.equals(workspace))
+            if (parent.equals(workspace))
                 break;
             difference.insert(0, parent.getName() + File.separatorChar);
-        } while((parent = parent.getParent()) !=null);
+        } while ((parent = parent.getParent()) != null);
         difference.append(orig.getName());
         return tapDir.child(difference.toString());
     }
@@ -485,7 +530,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
      * Checks that there are new report files.
      */
     private FilePath[] checkReports(Run<?, ?> build,
-            FilePath[] reports, PrintStream logger) {
+                                    FilePath[] reports, PrintStream logger) {
         List<FilePath> filePathList = new ArrayList<>(reports.length);
 
         for (FilePath report : reports) {
@@ -511,7 +556,7 @@ public class TapPublisher extends Recorder implements MatrixAggregatable, Simple
                 e.printStackTrace(logger);
             }
         }
-        return filePathList.toArray(new FilePath[] {});
+        return filePathList.toArray(new FilePath[]{});
     }
 
     private FilePath[] locateReports(FilePath workspace, String testResults) throws IOException, InterruptedException {
