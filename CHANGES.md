@@ -1,6 +1,6 @@
 # TAP plug-in changelog
 
-## Version 2.5 (2024/??/??)
+## Version 2.4.1 (2024/01/18)
 
 1. Migrated old infra docs to GitHub `README.md`, will serve plug-in docs from GH Pages
 2. [JENKINS-72558](https://issues.jenkins.io/browse/JENKINS-72558): NullPointerException with TAP plugin version 2.4.0 (restored mistakenly removed `readObject`, #36)
