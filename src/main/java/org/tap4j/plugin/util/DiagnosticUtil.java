@@ -23,6 +23,7 @@
  */
 package org.tap4j.plugin.util;
 
+import hudson.Functions;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import java.util.Arrays;
@@ -89,9 +90,9 @@ public class DiagnosticUtil {
                 final String downloadKey = useParentKey ? parentKey : fileName;
                 Arrays.asList(
                         "<td><a href='downloadAttachment?f=",
-                        StringEscapeUtils.escapeHtml(tapFile),
+                        Functions.htmlAttributeEscape(tapFile),
                         "&key=",
-                        StringEscapeUtils.escapeHtml(downloadKey),
+                        Functions.htmlAttributeEscape(downloadKey),
                         "'>",
                         StringEscapeUtils.escapeHtml(fileName),
                         "</a></td>"
