@@ -1,18 +1,18 @@
-/* 
+/*
  * The MIT License
- * 
+ *
  * Copyright (c) 2010 Bruno P. Kinoshita
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,14 +23,21 @@
  */
 package org.tap4j.plugin.util;
 
+import hudson.Functions;
+import org.apache.commons.lang.StringEscapeUtils;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 /**
- * Used to create YAML view.
- * 
+ * Used to create YAML view. FIXME: Figure out another way to write HTML (send JSON to Stapler/Groovy/etc.?).
+ *
  * @since 1.0
+ * @deprecated To be soon removed by something easier to maintain (return JSON to JS?).
  */
 public class DiagnosticUtil {
 
@@ -42,87 +49,73 @@ public class DiagnosticUtil {
 
     private static final String INNER_TABLE_FOOTER = "</table>\n</td>\n</tr>";
 
+    private static final int MAX_DEPTH = 3;
+
     private DiagnosticUtil() {
         super();
     }
 
     public static String createDiagnosticTable(String tapFile, Map<String, Object> diagnostic) {
         StringBuilder sb = new StringBuilder();
-        createDiagnosticTableRecursively(tapFile, null, diagnostic, sb, 1); // 1 is the first
-                                                                // depth
+        createDiagnosticTableRecursively(tapFile, null, diagnostic, sb, 1);
         return sb.toString();
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static void createDiagnosticTableRecursively(String tapFile, String parentKey, 
-            Map<String, Object> diagnostic, StringBuilder sb, int depth) {
+    private static void createDiagnosticTableRecursively(
+            String tapFile,
+            String parentKey,
+            Map<String, Object> diagnostic,
+            StringBuilder sb,
+            int depth) {
 
         sb.append(INNER_TABLE_HEADER);
 
-        RENDER_TYPE renderType = getMapEntriesRenderType(diagnostic);
+        final RENDER_TYPE renderType = getMapEntriesRenderType(diagnostic);
+        final List<String> parentKeys = Arrays.asList("files", "extensions");
 
-        if(renderType == RENDER_TYPE.IMAGE) {
-            for (Entry<String, Object> entry : diagnostic.entrySet()) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-                sb.append("<tr>");
-    
-                for (int i = 0; i < depth; ++i) {
-                    sb.append("<td width='5%' class='hidden'> </td>");
-                }
-                sb.append("<td style=\"width: auto;\">").append(key).append("</td>");
-                if(key.equals("File-Content")) {
-                    String fileName = "attachment";
-                    Object o = diagnostic.get("File-Name");
-                    if(o instanceof String) {
-                        fileName = (String)o;
-                    }
-                    String downloadKey = fileName;
-                    if(parentKey != null){
-                        if(depth > 3 && !parentKey.trim().equalsIgnoreCase("files") && !parentKey.trim().equalsIgnoreCase("extensions")) {
-                            downloadKey = parentKey;
-                        }
-                    }
-                    sb.append("<td><a href='downloadAttachment?f=").append(tapFile).append("&key=").append(downloadKey).append("'>").append(fileName).append("</a></td>");
-                } else {
-                    sb.append("<td><pre>").append(org.apache.commons.lang.StringEscapeUtils.escapeHtml(value.toString())).append("</pre></td>");
-                }
-                sb.append("</tr>");
+        for (Entry<String, Object> entry : diagnostic.entrySet()) {
+            final String key = entry.getKey();
+            final Object value = entry.getValue();
+
+            sb.append("<tr>");
+
+            sb.append("<td width='5%' class='hidden'> </td>".repeat(Math.max(0, depth)));
+            sb.append("<td style=\"width: auto;\">").append(StringEscapeUtils.escapeHtml(key)).append("</td>");
+
+            if(renderType == RENDER_TYPE.IMAGE && key.equals("File-Content")) {
+                final Object o = diagnostic.get("File-Name");
+                final String fileName = (o instanceof String) ? (String) o : "attachment";
+                final boolean useParentKey = (parentKey != null && depth > MAX_DEPTH && !parentKeys.contains(parentKey.trim().toLowerCase(Locale.ROOT)));
+                final String downloadKey = useParentKey ? parentKey : fileName;
+                Arrays.asList(
+                        "<td><a href='downloadAttachment?f=",
+                        Functions.htmlAttributeEscape(tapFile),
+                        "&key=",
+                        Functions.htmlAttributeEscape(downloadKey),
+                        "'>",
+                        StringEscapeUtils.escapeHtml(fileName),
+                        "</a></td>"
+                ).forEach(sb::append);
+            } else if (renderType == RENDER_TYPE.TEXT && value instanceof java.util.Map) {
+                sb.append("<td> </td>");
+                createDiagnosticTableRecursively(tapFile, key, (java.util.Map) value, sb, (depth + 1));
+            } else {
+                sb.append("<td><pre>").append(org.apache.commons.lang.StringEscapeUtils.escapeHtml(value.toString())).append("</pre></td>");
             }
-        } else {
-            for (Entry<String, Object> entry : diagnostic.entrySet()) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-                sb.append("<tr>");
-    
-                for (int i = 0; i < depth; ++i) {
-                    sb.append("<td width='5%' class='hidden'> </td>");
-                }
-                sb.append("<td style=\"width: auto;\">").append(key).append("</td>");
-                if (value instanceof java.util.Map) {
-                    sb.append("<td> </td>");
-                    createDiagnosticTableRecursively(tapFile, key, (java.util.Map) value, sb,
-                            (depth + 1));
-                } else {
-                    sb.append("<td><pre>").append(org.apache.commons.lang.StringEscapeUtils.escapeHtml(value.toString())).append("</pre></td>");
-                }
-                sb.append("</tr>");
-            }
+            sb.append("</tr>");
         }
 
         sb.append(INNER_TABLE_FOOTER);
     }
 
-    private static RENDER_TYPE getMapEntriesRenderType(
-            Map<String, Object> diagnostic) {
-        RENDER_TYPE renderType = RENDER_TYPE.TEXT;
-        final Set<String> keys = diagnostic.keySet();
-        if (keys.contains("File-Type")
-                && (keys.contains("File-Location") || keys
-                        .contains("File-Content"))) {
-            renderType = RENDER_TYPE.IMAGE;
+    private static RENDER_TYPE getMapEntriesRenderType(Map<String, Object> diagnostic) {
+        if (diagnostic.containsKey("File-Type")) {
+            if (diagnostic.containsKey("File-Location") || diagnostic.containsKey("File-Content")) {
+                return RENDER_TYPE.IMAGE;
+            }
         }
-        return renderType;
+        return RENDER_TYPE.TEXT;
     }
 
 }
