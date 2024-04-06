@@ -1,5 +1,9 @@
 # TAP plug-in changelog
 
+## Version 2.4.2 (2024/04/06)
+
+1. SECURITY-3190: Fix XSS security bug (already published)
+
 ## Version 2.4.1 (2024/01/18)
 
 1. Migrated old infra docs to GitHub `README.md`, will serve plug-in docs from GH Pages
