@@ -1,5 +1,9 @@
 # TAP plug-in changelog
 
+## Version 2.4.3 (202?/??/??)
+
+1. Enable [Jenkins Security Scan](https://www.jenkins.io/doc/developer/security/scan/) (pr #39), thanks @strangelookingnerd
+
 ## Version 2.4.2 (2024/04/06)
 
 1. SECURITY-3190: Fix XSS security bug (already published)
