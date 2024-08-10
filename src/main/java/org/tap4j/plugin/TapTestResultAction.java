@@ -30,7 +30,6 @@ import hudson.model.HealthReport;
 import hudson.model.HealthReportingAction;
 import hudson.model.Job;
 import hudson.model.Run;
-import hudson.tasks.junit.CaseResult;
 import jenkins.model.RunAction2;
 import jenkins.tasks.SimpleBuildStep;
 import jenkins.util.NonLocalizable;
@@ -40,7 +39,6 @@ import org.tap4j.plugin.model.TapStreamResult;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 
 /**
@@ -90,13 +88,6 @@ public class TapTestResultAction
     @Exported(visibility = 2)
     public int getSkipCount() {
         return tapResult.getSkipped();
-    }
-
-    /* (non-Javadoc)
-     * @see hudson.tasks.test.AbstractTestResultAction#getFailedTests()
-     */
-    public List<CaseResult> getFailedTests() {
-        return Collections.emptyList();
     }
 
     /*

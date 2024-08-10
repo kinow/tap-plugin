@@ -1,9 +1,10 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler"
-    xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
-    xmlns:f="/lib/form" xmlns:i="jelly:fmt">
-    <l:layout>
-        <st:include it="${it.project}" page="sidepanel.jelly"/>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
+    <l:layout title="">
+        <j:set var="project" value="${it.project}" />
+        <j:if test="${project != null}">
+            <st:include it="${project}" page="sidepanel.jelly" optional="true" />
+        </j:if>
         <l:main-panel>
              <h1>${%header}</h1>
              <h2>${%description}</h2>
