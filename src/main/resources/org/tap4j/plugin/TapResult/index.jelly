@@ -2,84 +2,87 @@
 <j:jelly
     xmlns:j="jelly:core" 
     xmlns:st="jelly:stapler"
-	xmlns:d="jelly:define" 
-	xmlns:l="/lib/layout" 
-	xmlns:t="/lib/hudson"
-	xmlns:f="/lib/form" 
-	xmlns:i="jelly:fmt" 
+	xmlns:l="/lib/layout"
 	xmlns:tap="/org/tap4j/plugin/tags">
-	<l:layout norefresh="true" css="/plugin/tap/css/tap.css">
-		<st:include it="${it.owner}" page="sidepanel.jelly" />
-		<l:main-panel>
-			
-			<h1>TAP Extended Test Results</h1>
-			
-			<j:choose>
-				<j:when test="${it.isEmptyTestSet()}">
-					<p>Empty test set</p>
-				</j:when>
-				<j:otherwise>
-				    ${it.updateStats()}
-				    <table width='100%'>
-				        <tr>
-				            <td width='5%'>${it.testSets.size()} files</td>
-				            <td>${it.getTotal()} tests, ${it.passed} ok, ${it.failed} not ok, ${it.skipped} skipped, ${it.toDo} ToDo, ${it.bailOuts} Bail Out!</td>
-				        </tr>
-				    </table>
-				    
-				    <j:if test="${it.showOnlyFailures}">
-				    	<p><strong>Note:</strong> Displaying only failures</p>
-				    </j:if>
+	<l:layout title="TAP Extended Test Results" norefresh="true">
+		<l:header>
+			<link rel="stylesheet" href="${rootURL}/plugin/tap/css/tap.css" />
+		</l:header>
+	    <j:set var="build" value="${it.owningRun}" />
+	    <j:if test="${build != null}">
+		    <st:include it="${build}" page="sidepanel.jelly" optional="true" />
 
-					<j:forEach var="map" items="${it.testSets}">
-					   <j:choose>
-					     <j:when test="${map.getTestSet().getPlan().isSkip()}">
-						   <p>File: <span class="underline"><a href='${rootURL}/${it.owner.url}artifact/${map.fileName}/*view*/'>${map.fileName}</a></span> (Skipped)</p>
-						 </j:when>
-						 <j:otherwise>
-					       <p>File: <span class="underline"><a href='${rootURL}/${it.owner.url}artifact/${map.fileName}/*view*/'>${map.fileName}</a></span></p>
-						 </j:otherwise>
-					   </j:choose>
-						 <table class="tap" width="100%">
+			<l:main-panel>
+
+				<h1>TAP Extended Test Results</h1>
+
+				<j:choose>
+					<j:when test="${it.isEmptyTestSet()}">
+						<p>Empty test set</p>
+					</j:when>
+					<j:otherwise>
+						${it.updateStats()}
+						<table width='100%'>
 							<tr>
-								<th> </th>
-								<th>Number</th>
-								<th>Description</th>
-								<th>Directive</th>
+								<td width='5%'>${it.testSets.size()} files</td>
+								<td>${it.getTotal()} tests, ${it.passed} ok, ${it.failed} not ok, ${it.skipped} skipped, ${it.toDo} ToDo, ${it.bailOuts} Bail Out!</td>
 							</tr>
-							<j:forEach var="tapLine" items="${map.testSet.tapLines}">
-								<!-- TAP Test Result information -->
-								<tap:line tapLine="${tapLine}" tapFile="${map.fileName}" showOnlyFailures="${it.showOnlyFailures}" />
-							</j:forEach>
 						</table>
-						<br />
-					</j:forEach>
 
-				</j:otherwise>
-			</j:choose>
-			
-			<h3><a name="parseErrors">Parse errors</a></h3>
-			
-			<j:choose>
-                <j:when test="${it.hasParseErrors() == false}">
-                    <p>No parse errors found</p>
-                </j:when>
-                <j:otherwise>
-                    <table class="tap" width="100%">
-                        <tr>
-                            <th>File name</th>
-                            <th>Cause</th>
-                        </tr>
-                        <j:forEach var="map" items="${it.parseErrorTestSets}">
-                        <tr>
-                            <td><a href='${rootURL}/${it.owner.url}artifact/${map.fileName}/*view*/'>${map.fileName}</a></td>
-                            <td>${map.cause}</td>
-                        </tr>
-                        </j:forEach>
-                     </table>
-                </j:otherwise>
-            </j:choose>
-            
-		</l:main-panel>
+						<j:if test="${it.showOnlyFailures}">
+							<p><strong>Note:</strong> Displaying only failures</p>
+						</j:if>
+
+						<j:forEach var="map" items="${it.testSets}">
+						   <j:choose>
+							 <j:when test="${map.getTestSet().getPlan().isSkip()}">
+							   <p>File: <span class="underline"><a href='${rootURL}/${build.url}artifact/${map.fileName}/*view*/'>${map.fileName}</a></span> (Skipped)</p>
+							 </j:when>
+							 <j:otherwise>
+							   <p>File: <span class="underline"><a href='${rootURL}/${build.url}artifact/${map.fileName}/*view*/'>${map.fileName}</a></span></p>
+							 </j:otherwise>
+						   </j:choose>
+							 <table class="tap" width="100%">
+								<tr>
+									<th> </th>
+									<th>Number</th>
+									<th>Description</th>
+									<th>Directive</th>
+								</tr>
+								<j:forEach var="tapLine" items="${map.testSet.tapLines}">
+									<!-- TAP Test Result information -->
+									<tap:line tapLine="${tapLine}" tapFile="${map.fileName}" showOnlyFailures="${it.showOnlyFailures}" />
+								</j:forEach>
+							</table>
+							<br />
+						</j:forEach>
+
+					</j:otherwise>
+				</j:choose>
+
+				<h3><a name="parseErrors">Parse errors</a></h3>
+
+				<j:choose>
+					<j:when test="${it.hasParseErrors() == false}">
+						<p>No parse errors found</p>
+					</j:when>
+					<j:otherwise>
+						<table class="tap" width="100%">
+							<tr>
+								<th>File name</th>
+								<th>Cause</th>
+							</tr>
+							<j:forEach var="map" items="${it.parseErrorTestSets}">
+							<tr>
+								<td><a href='${rootURL}/${build.url}artifact/${map.fileName}/*view*/'>${map.fileName}</a></td>
+								<td>${map.cause}</td>
+							</tr>
+							</j:forEach>
+						 </table>
+					</j:otherwise>
+				</j:choose>
+
+			</l:main-panel>
+		</j:if>
 	</l:layout>
 </j:jelly>

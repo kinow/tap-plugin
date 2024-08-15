@@ -30,6 +30,9 @@ import hudson.tasks.test.TestObject;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
+import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
@@ -47,6 +50,7 @@ import org.tap4j.plugin.util.Constants;
 import org.tap4j.plugin.util.DiagnosticUtil;
 import org.tap4j.plugin.util.Util;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletOutputStream;
 import java.io.File;
@@ -238,6 +242,16 @@ public class TapResult implements ModelObject, Serializable {
      */
     public void setOwner(Run<?, ?> owner) {
         this.build = owner;
+    }
+
+    @Restricted(NoExternalUse.class) // only used from stapler/jelly
+    @CheckForNull
+    public Run<?,?> getOwningRun() {
+        StaplerRequest req = Stapler.getCurrentRequest();
+        if (req == null) {
+            return null;
+        }
+        return req.findAncestorObject(Run.class);
     }
 
     public List<TestSetMap> getTestSets() {
