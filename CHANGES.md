@@ -1,5 +1,8 @@
 # TAP plug-in changelog
 
+## Version 2.4.4 (202?/??/??)
+
+
 ## Version 2.4.3 (2024/08/15)
 
 1. Enable [Jenkins Security Scan](https://www.jenkins.io/doc/developer/security/scan/) (pr #39), thanks @strangelookingnerd
