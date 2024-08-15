@@ -3,6 +3,7 @@
 ## Version 2.4.3 (202?/??/??)
 
 1. Enable [Jenkins Security Scan](https://www.jenkins.io/doc/developer/security/scan/) (pr #39), thanks @strangelookingnerd
+2. [JENKINS-72561](https://issues.jenkins.io/browse/JENKINS-72561): Fixed error where the TAP Extended Test results page could produce an error panel (related to sidepanel.jelly)
 
 ## Version 2.4.2 (2024/04/06)
 
