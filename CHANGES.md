@@ -1,6 +1,6 @@
 # TAP plug-in changelog
 
-## Version 2.4.3 (202?/??/??)
+## Version 2.4.3 (2024/08/15)
 
 1. Enable [Jenkins Security Scan](https://www.jenkins.io/doc/developer/security/scan/) (pr #39), thanks @strangelookingnerd
 2. [JENKINS-72561](https://issues.jenkins.io/browse/JENKINS-72561): Fixed error where the TAP Extended Test results page could produce an error panel (related to sidepanel.jelly)
