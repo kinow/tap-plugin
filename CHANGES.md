@@ -1,7 +1,8 @@
 # TAP plug-in changelog
 
-## Version 2.4.4 (202?/??/??)
+## Version 2.4.4 (2025/??/??)
 
+- [JENKINS-75332](https://issues.jenkins.io/browse/JENKINS-75332): Fix showOnlyFailures for merged results (thanks @dweber)
 
 ## Version 2.4.3 (2024/08/15)
 
