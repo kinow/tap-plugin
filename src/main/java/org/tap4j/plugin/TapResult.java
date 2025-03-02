@@ -105,8 +105,11 @@ public class TapResult implements ModelObject, Serializable {
         List<TestSetMap> mergedTestSets = new ArrayList<>(getTestSets());
         mergedTestSets.addAll(testSets);
 
-        return new TapResult(this.getName(), this.getOwner(), mergedTestSets, this.getTodoIsFailure(),
-                this.getIncludeCommentDiagnostics(), this.getValidateNumberOfTests());
+        TapResult tapResult = new TapResult(this.getName(), this.getOwner(), mergedTestSets, this.getTodoIsFailure(),
+            this.getIncludeCommentDiagnostics(), this.getValidateNumberOfTests());
+
+        tapResult.setShowOnlyFailures(getShowOnlyFailures());
+        return tapResult;
     }
 
     public Boolean getShowOnlyFailures() {
