@@ -1,8 +1,9 @@
 # TAP plug-in changelog
 
-## Version 2.4.4 (2025/??/??)
+## Version 2.4.4 (2025/03/13)
 
 - [JENKINS-75332](https://issues.jenkins.io/browse/JENKINS-75332): Fix showOnlyFailures for merged results (thanks @dweber)
+- [JENKINS-74247](https://issues.jenkins.io/browse/JENKINS-74247): Extra inline JS script in TapStreamResult/body.jelly (thanks @shlomomdahan)
 
 ## Version 2.4.3 (2024/08/15)
 
