@@ -146,10 +146,10 @@ Subtests and YAMLish are not officially in TAP 13 specification
 
 ## Sponsors
 
-[![](docs/images/logo1.png){width="300"}](http://www.tupilabs.com/)
+[![](docs/images/logo1.png)(http://www.tupilabs.com/)
 
 For commercial support, please get contact us
-via [@tupilabs](https://twitter.com/tupilabs)
+via [@tupilabs.com](https://bsky.app/profile/tupilabs.com) at BlueSky.
 
 ## Resources
 
