@@ -42,7 +42,7 @@
 				</j:when>
 				<j:when test="${it.isComment( tapLine ) and it.includeCommentDiagnostics}">
                     <tr>
-                        <td></td>
+                        <td>&nbsp;</td>
                         <td colspan='3'>
                             # ${it.escapeHTML(tapLine.text)}<br/>
                         </td>
@@ -50,7 +50,7 @@
                 </j:when>
 		    </j:choose>
         </j:when>
-            <j:otherwise></j:otherwise>
+            <j:otherwise>&nbsp;</j:otherwise>
     </j:choose>
 
 </j:jelly>
