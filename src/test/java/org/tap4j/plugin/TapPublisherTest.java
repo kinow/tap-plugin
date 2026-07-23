@@ -32,6 +32,7 @@ import hudson.tasks.test.TestResult;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TouchBuilder;
 import org.jvnet.hudson.test.recipes.LocalData;
@@ -43,8 +44,12 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 
+/**
+ * Tests for the {@link TapPublisher}.
+ */
 public class TapPublisherTest {
 
     @Rule
@@ -97,6 +102,9 @@ public class TapPublisherTest {
         project.getBuildersList().add(new TouchBuilder());
     }
 
+    /**
+     * Verifies that TAP results are published and the TAP report pages are accessible.
+     */
     @LocalData
     @Test
     // getPage uses deprecation to tell users about a possibility to use relative pages (shrugs)
@@ -125,6 +133,9 @@ public class TapPublisherTest {
         }
     }
 
+    /**
+     * Verifies that multiple TAP publishers are merged into a single test result.
+     */
     @LocalData
     @Test
     // getPage uses deprecation to tell users about a possibility to use relative pages (shrugs)
@@ -199,6 +210,9 @@ public class TapPublisherTest {
         return result.getRelativePathFrom(testObject);
     }
 
+    /**
+     * Verifies that TAP results can be published when the build runs on an agent.
+     */
     @LocalData
     @Test
     public void slave() throws Exception {
@@ -226,19 +240,24 @@ public class TapPublisherTest {
         TapTestResultAction testResultAction = build.getAction(TapTestResultAction.class);
         assertNotNull("no TestResultAction", testResultAction);
 
-        TestResult result = testResultAction.getResult();
-        assertNotNull("no TestResult", result);
+        TapStreamResult streamResult = testResultAction.getResult();
+        assertNotNull("no TestResult", streamResult);
 
         assertEquals(String.format("should have %d failing test", failed), failed, testResultAction.getFailCount());
-        assertEquals(String.format("should have %d failing test", failed), failed, result.getFailCount());
+        assertEquals(String.format("should have %d failing test", failed), failed, streamResult.getFailCount());
 
         assertEquals(String.format("should have %d total tests", total), total, testResultAction.getTotalCount());
-        assertEquals(String.format("should have %d total tests", total), total, result.getTotalCount());
+        assertEquals(String.format("should have %d total tests", total), total, streamResult.getTotalCount());
 
         assertEquals(String.format("should have %d skipped test", 1), 1, testResultAction.getSkipCount());
-        assertEquals(String.format("should have %d skipped test", 1), 1, result.getSkipCount());
+        assertEquals(String.format("should have %d skipped test", 1), 1, streamResult.getSkipCount());
+
+        assertSame("parent action should be the owning TapTestResultAction", testResultAction, streamResult.getParentAction());
     }
 
+    /**
+     * Verifies that TAP results remain available after Jenkins is reloaded.
+     */
     @LocalData
     @Test
     public void persistence() throws Exception {
@@ -256,10 +275,52 @@ public class TapPublisherTest {
         project = (FreeStyleProject) j.jenkins.getItem("tap");
     }
 
+
     @Test
     public void emptyDirectory() throws Exception {
         FreeStyleProject freeStyleProject = j.createFreeStyleProject();
         freeStyleProject.getPublishersList().add(archiver1);
         j.assertBuildStatus(Result.FAILURE, freeStyleProject.scheduleBuild2(0).get());
+    }
+
+    /**
+     * Verifies that the TAP report page renders after Jenkins reloads the build.
+     *
+     * <p>This covers the regression where the TAP test result page failed to render
+     * after changes in the Jenkins JUnit plugin.</p>
+     */
+    @LocalData
+    @Issue("JENKINS-76360")
+    @Test
+    public void testReportPageRendersAfterReload() throws Exception {
+        project.scheduleBuild2(0).get(1000, TimeUnit.SECONDS);
+
+        reloadJenkins();
+
+        FreeStyleBuild build = project.getBuildByNumber(1);
+
+        try (JenkinsRule.WebClient wc = j.new WebClient()) {
+            wc.getPage(build, "tapTestReport");
+        }
+    }
+
+    /**
+     * Verifies that the TAP result keeps its parent action after Jenkins reloads.
+     *
+     * <p>The parent action is required by Jenkins test result rendering.</p>
+     */
+    @LocalData
+    @Issue("JENKINS-76360")
+    @Test
+    public void persistenceKeepsParentAction() throws Exception {
+        project.scheduleBuild2(0).get(60, TimeUnit.SECONDS);
+
+        reloadJenkins();
+
+        FreeStyleBuild build = project.getBuildByNumber(1);
+        TapTestResultAction action = build.getAction(TapTestResultAction.class);
+
+        assertNotNull(action);
+        assertSame(action, action.getResult().getParentAction());
     }
 }
